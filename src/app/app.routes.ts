@@ -1,6 +1,7 @@
 import { Routes } from "@angular/router";
-
+import { LandingComponent } from "./landing/landing.component";
 export const routes: Routes = [
+	{ path: "", component: LandingComponent },
 	{
 		path: "auth",
 		loadChildren: () => import("./auth/auth.routes").then((m) => m.AUTH_ROUTES),
@@ -20,6 +21,6 @@ export const routes: Routes = [
 		loadChildren: () =>
 			import("./admin/admin.routes").then((m) => m.ADMIN_ROUTES),
 	},
-	{ path: "", redirectTo: "/auth/login", pathMatch: "full" },
+	// { path: "", redirectTo: "/auth/login", pathMatch: "full" },
 	{ path: "**", redirectTo: "/auth/login" },
 ];
