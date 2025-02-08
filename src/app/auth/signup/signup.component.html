@@ -7,15 +7,16 @@
 <div class="container">
 	<div class="card">
 		<h3>Sign Up</h3>
-		<form>
+		<form [formGroup]="signupForm" (ngSubmit)="submitForm()">
 			<!-- Role Selection -->
 			<div class="form-group">
 				<label for="role">Role</label>
-				<select id="role" required>
+				<select id="role" formControlName="role" required>
 					<option value="">Select your role</option>
 					<option value="patient">Patient</option>
 					<option value="provider">Healthcare Provider</option>
 				</select>
+				<p class="error" *ngIf="isFieldInvalid('role')">Role is required.</p>
 			</div>
 
 			<!-- Full Name -->
@@ -24,8 +25,12 @@
 				<input
 					type="text"
 					id="fullName"
+					formControlName="fullName"
 					placeholder="Enter your full name"
 					required />
+				<p class="error" *ngIf="isFieldInvalid('fullName')">
+					Full name is required.
+				</p>
 			</div>
 
 			<!-- Email -->
@@ -34,22 +39,39 @@
 				<input
 					type="email"
 					id="email"
+					formControlName="email"
 					placeholder="Enter your email"
 					required />
+				<p class="error" *ngIf="isFieldInvalid('email')">
+					Enter a valid email address.
+				</p>
 			</div>
 
 			<!-- Password -->
-			<div class="form-group">
+			<div class="form-group password-field">
 				<label for="password">Password</label>
-				<input
-					type="password"
-					id="password"
-					placeholder="Create a strong password"
-					required />
+				<div class="password-container">
+					<input
+						[type]="showPassword ? 'text' : 'password'"
+						id="password"
+						formControlName="password"
+						placeholder="Create a strong password"
+						required />
+					<img
+						[src]="eyeIcon"
+						alt="Toggle Password Visibility"
+						class="toggle-password-icon"
+						(click)="togglePasswordVisibility()" />
+				</div>
+				<p class="error" *ngIf="isFieldInvalid('password')">
+					Password is required (at least 6 characters).
+				</p>
 			</div>
 
 			<!-- Submit Button -->
-			<button type="submit" class="btn">Sign Up</button>
+			<button type="submit" [disabled]="signupForm.invalid" class="btn">
+				Sign Up
+			</button>
 		</form>
 		<p class="footer">
 			Already have an account? <a routerLink="/auth/login">Login</a>
