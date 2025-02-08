@@ -30,7 +30,7 @@
 					(focus)="onFieldFocus()"
 					required />
 				<p class="error" *ngIf="isFieldInvalid('fullName')">
-					Full name is required.
+					⚠️ Full name is required.
 				</p>
 			</div>
 
@@ -45,7 +45,7 @@
 					(focus)="onFieldFocus()"
 					required />
 				<p class="error" *ngIf="isFieldInvalid('email')">
-					Enter a valid email address.
+					⚠️ Enter a valid email address.
 				</p>
 			</div>
 
@@ -67,7 +67,7 @@
 						(click)="togglePasswordVisibility()" />
 				</div>
 				<p class="error" *ngIf="isFieldInvalid('password')">
-					Password is required (at least 6 characters).
+					⚠️ Password is required (at least 6 characters).
 				</p>
 			</div>
 
