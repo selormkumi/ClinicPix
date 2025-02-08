@@ -1,21 +1,22 @@
 <!-- Header -->
 <div class="header">
-	<h1>ClinicPix Platform</h1>
+	<h1>ClinicPix</h1>
 </div>
 
 <!-- Login Section -->
 <div class="container">
 	<div class="card">
 		<h3>Login</h3>
-		<form>
+		<form [formGroup]="loginForm" (ngSubmit)="submitForm()">
 			<!-- Role Selection -->
 			<div class="form-group">
 				<label for="role">Role</label>
-				<select id="role" required>
+				<select id="role" formControlName="role" required>
 					<option value="">Select your role</option>
 					<option value="patient">Patient</option>
 					<option value="provider">Healthcare Provider</option>
 				</select>
+				<p class="error" *ngIf="isFieldInvalid('role')">Role is required.</p>
 			</div>
 
 			<!-- Email -->
@@ -24,23 +25,43 @@
 				<input
 					type="email"
 					id="email"
+					formControlName="email"
 					placeholder="Enter your email"
 					required />
+				<p class="error" *ngIf="isFieldInvalid('email')">
+					Enter a valid email address.
+				</p>
 			</div>
 
 			<!-- Password -->
-			<div class="form-group">
+			<div class="form-group password-field">
 				<label for="password">Password</label>
-				<input
-					type="password"
-					id="password"
-					placeholder="Enter your password"
-					required />
+				<div class="password-container">
+					<input
+						[type]="showPassword ? 'text' : 'password'"
+						id="password"
+						formControlName="password"
+						placeholder="Enter your password"
+						required />
+					<img
+						[src]="eyeIcon"
+						alt="Toggle Password Visibility"
+						class="toggle-password-icon"
+						(click)="togglePasswordVisibility()" />
+				</div>
+				<p class="error" *ngIf="isFieldInvalid('password')">
+					Password must be at least 6 characters long.
+				</p>
 			</div>
 
 			<!-- Submit Button -->
-			<button (click)="onLogin()" type="submit" class="btn">Login</button>
+			<button type="submit" [disabled]="loginForm.invalid" class="btn">
+				Login
+			</button>
 		</form>
+		<p class="footer">
+			Don't have an account? <a routerLink="/auth/signup">Sign Up</a>
+		</p>
 	</div>
 </div>
 

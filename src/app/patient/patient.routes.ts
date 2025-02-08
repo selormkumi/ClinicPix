@@ -6,7 +6,7 @@ import { ProfileComponent } from "./profile/profile.component";
 import { AuthGuard } from "../shared/guards/auth.guard";
 
 export const PATIENT_ROUTES: Routes = [
-	{ path: "", component: HomeComponent, canActivate: [AuthGuard] },
+	{ path: "home", component: HomeComponent, canActivate: [AuthGuard] },
 	{
 		path: "my-records",
 		component: MyRecordsComponent,
