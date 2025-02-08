@@ -53,6 +53,7 @@ export class SignupComponent {
 				this.signupForm.controls[field].touched)
 		);
 	}
+
 	// Get the correct eye icon based on password visibility
 	getPasswordIcon(): string {
 		return this.showPassword
@@ -62,7 +63,11 @@ export class SignupComponent {
 
 	submitForm() {
 		if (this.signupForm.valid) {
-			console.log("Form Data:", this.signupForm.value);
+			const formData = this.signupForm.value; // Get form data
+			// Save form data to LocalStorage
+			localStorage.setItem("userSignupData", JSON.stringify(formData));
+			console.log("Form Data Saved:", formData);
+			alert("Signup data saved successfully!"); // Alert for user feedback
 		} else {
 			// Mark all controls as touched to show validation errors
 			Object.values(this.signupForm.controls).forEach((control) => {
