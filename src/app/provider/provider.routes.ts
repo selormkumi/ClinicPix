@@ -6,17 +6,34 @@ import { ProfileComponent } from "./profile/profile.component";
 import { AuthGuard } from "../shared/guards/auth.guard";
 
 export const PROVIDER_ROUTES: Routes = [
-	{ path: "", component: DashboardComponent, canActivate: [AuthGuard] },
+	{
+		path: "",
+		component: DashboardComponent,
+		canActivate: [AuthGuard],
+		data: { role: "provider" }, // Restrict to providers
+	},
 	{
 		path: "dashboard",
 		component: DashboardComponent,
 		canActivate: [AuthGuard],
+		data: { role: "provider" },
 	},
-	{ path: "patients", component: PatientsComponent, canActivate: [AuthGuard] },
+	{
+		path: "patients",
+		component: PatientsComponent,
+		canActivate: [AuthGuard],
+		data: { role: "provider" },
+	},
 	{
 		path: "uploaded-images",
 		component: UploadedImagesComponent,
 		canActivate: [AuthGuard],
+		data: { role: "provider" },
 	},
-	{ path: "profile", component: ProfileComponent, canActivate: [AuthGuard] },
+	{
+		path: "profile",
+		component: ProfileComponent,
+		canActivate: [AuthGuard],
+		data: { role: "provider" },
+	},
 ];

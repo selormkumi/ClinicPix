@@ -6,21 +6,34 @@ import { ProfileComponent } from "./profile/profile.component";
 import { AuthGuard } from "../shared/guards/auth.guard";
 
 export const PATIENT_ROUTES: Routes = [
-	{ path: "", component: DashboardComponent, canActivate: [AuthGuard] },
+	{
+		path: "",
+		component: DashboardComponent,
+		canActivate: [AuthGuard],
+		data: { role: "patient" }, // Restrict to patients only
+	},
 	{
 		path: "dashboard",
 		component: DashboardComponent,
-		canActivate: [AuthGuard], // Explicit route for dashboard
+		canActivate: [AuthGuard],
+		data: { role: "patient" },
 	},
 	{
 		path: "my-records",
 		component: MyRecordsComponent,
 		canActivate: [AuthGuard],
+		data: { role: "patient" },
 	},
 	{
 		path: "uploaded-images",
 		component: UploadedImagesComponent,
 		canActivate: [AuthGuard],
+		data: { role: "patient" },
 	},
-	{ path: "profile", component: ProfileComponent, canActivate: [AuthGuard] },
+	{
+		path: "profile",
+		component: ProfileComponent,
+		canActivate: [AuthGuard],
+		data: { role: "patient" },
+	},
 ];

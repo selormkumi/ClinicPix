@@ -51,10 +51,21 @@ export class LoginComponent {
 			);
 
 			if (matchedUser) {
+				// ✅ Store authenticated user in localStorage
+				localStorage.setItem(
+					"user",
+					JSON.stringify({
+						email: matchedUser.email,
+						role: matchedUser.role,
+					})
+				);
+
+				// Redirect based on role
 				if (matchedUser.role === "patient") {
 					alert("Login successful! Redirecting to patient dashboard...");
 					this.router.navigate(["/patient/dashboard"]);
 				} else if (matchedUser.role === "provider") {
+					alert("Login successful! Redirecting to provider dashboard...");
 					this.router.navigate(["/provider/dashboard"]);
 				}
 			} else {
