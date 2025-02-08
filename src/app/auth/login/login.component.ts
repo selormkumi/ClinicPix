@@ -1,5 +1,6 @@
 import { Component } from "@angular/core";
-import { Router } from "@angular/router";
+import { Router, RouterModule } from "@angular/router";
+
 import {
 	FormBuilder,
 	FormGroup,
@@ -13,7 +14,7 @@ import { CommonModule } from "@angular/common";
 	standalone: true,
 	templateUrl: "./login.component.html",
 	styleUrls: ["./login.component.scss"],
-	imports: [CommonModule, ReactiveFormsModule],
+	imports: [CommonModule, ReactiveFormsModule, RouterModule],
 })
 export class LoginComponent {
 	loginForm: FormGroup;
@@ -50,11 +51,11 @@ export class LoginComponent {
 			);
 
 			if (matchedUser) {
-				alert("Login successful!");
 				if (matchedUser.role === "patient") {
-					this.router.navigate(["/patient/home"]);
+					alert("Login successful! Redirecting to patient dashboard...");
+					this.router.navigate(["/patient/dashboard"]);
 				} else if (matchedUser.role === "provider") {
-					this.router.navigate(["/provider/home"]);
+					this.router.navigate(["/provider/dashboard"]);
 				}
 			} else {
 				alert("Invalid credentials. Please try again.");

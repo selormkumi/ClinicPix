@@ -1,5 +1,5 @@
 import { Component } from "@angular/core";
-import { Router } from "@angular/router";
+import { Router, RouterModule } from "@angular/router";
 
 import {
 	FormBuilder,
@@ -14,7 +14,7 @@ import { CommonModule } from "@angular/common";
 	standalone: true,
 	templateUrl: "./signup.component.html",
 	styleUrl: "./signup.component.scss",
-	imports: [CommonModule, ReactiveFormsModule],
+	imports: [CommonModule, ReactiveFormsModule, RouterModule],
 })
 export class SignupComponent {
 	signupForm: FormGroup;
@@ -63,7 +63,6 @@ export class SignupComponent {
 			localStorage.setItem("userData", JSON.stringify(users));
 			console.log("Updated Users List:", users);
 
-			alert("Signup successful! You can now log in.");
 			this.router.navigate(["/auth/login"]);
 		} else {
 			Object.values(this.signupForm.controls).forEach((control) =>
