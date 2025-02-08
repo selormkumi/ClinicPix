@@ -9,7 +9,8 @@ export const PATIENT_ROUTES: Routes = [
 	{ path: "", component: DashboardComponent, canActivate: [AuthGuard] },
 	{
 		path: "dashboard",
-		component: DashboardComponent, // Explicit route for dashboard
+		component: DashboardComponent,
+		canActivate: [AuthGuard], // Explicit route for dashboard
 	},
 	{
 		path: "my-records",

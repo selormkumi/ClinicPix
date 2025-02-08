@@ -10,6 +10,7 @@ export const PROVIDER_ROUTES: Routes = [
 	{
 		path: "dashboard",
 		component: DashboardComponent,
+		canActivate: [AuthGuard],
 	},
 	{ path: "patients", component: PatientsComponent, canActivate: [AuthGuard] },
 	{
