@@ -16,12 +16,8 @@ import {
 	styleUrl: "./signup.component.scss",
 })
 export class SignupComponent {
-	signupForm: FormGroup<{
-		[key in "role" | "fullName" | "email" | "password"]: FormControl<
-			string | null
-		>;
-	}> = new FormGroup({
-		role: new FormControl("", Validators.required),
+	signupForm = new FormGroup({
+		role: new FormControl("", Validators.required), // Role is required
 		fullName: new FormControl("", Validators.required),
 		email: new FormControl("", [Validators.required, Validators.email]),
 		password: new FormControl("", [
@@ -31,6 +27,7 @@ export class SignupComponent {
 	});
 
 	showPassword = false; // Tracks password visibility
+	roleTouched = false; // Tracks if user tried to fill other fields without selecting a role
 
 	// Links to the eye icons (external images)
 	eyeOpenIcon = "https://cdn-icons-png.flaticon.com/512/159/159604.png"; // Open eye
@@ -45,22 +42,6 @@ export class SignupComponent {
 		this.showPassword = !this.showPassword;
 	}
 
-	// Helper method to check form field validity
-	isFieldInvalid(field: "role" | "fullName" | "email" | "password"): boolean {
-		return (
-			this.signupForm.controls[field].invalid &&
-			(this.signupForm.controls[field].dirty ||
-				this.signupForm.controls[field].touched)
-		);
-	}
-
-	// Get the correct eye icon based on password visibility
-	getPasswordIcon(): string {
-		return this.showPassword
-			? "assets/icons/eye-open.png"
-			: "assets/icons/eye-closed.png";
-	}
-
 	submitForm() {
 		if (this.signupForm.valid) {
 			const formData = this.signupForm.value; // Get form data
@@ -73,6 +54,23 @@ export class SignupComponent {
 			Object.values(this.signupForm.controls).forEach((control) => {
 				control.markAsTouched();
 			});
+			console.log("⚠️ Form is incomplete. Please fill all required fields.");
+		}
+	}
+
+	// Helper method to check form field validity
+	isFieldInvalid(field: "role" | "fullName" | "email" | "password"): boolean {
+		return (
+			this.signupForm.controls[field].invalid &&
+			(this.signupForm.controls[field].dirty ||
+				this.signupForm.controls[field].touched)
+		);
+	}
+
+	// Function to check if role is selected when another field is focused
+	onFieldFocus() {
+		if (!this.signupForm.controls["role"].value) {
+			this.roleTouched = true; // Show error message under role
 		}
 	}
 }

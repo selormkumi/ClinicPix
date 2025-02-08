@@ -16,7 +16,7 @@
 					<option value="patient">Patient</option>
 					<option value="provider">Healthcare Provider</option>
 				</select>
-				<p class="error" *ngIf="isFieldInvalid('role')">Role is required.</p>
+				<p class="error" *ngIf="roleTouched">⚠️ Please select a role.</p>
 			</div>
 
 			<!-- Full Name -->
@@ -27,6 +27,7 @@
 					id="fullName"
 					formControlName="fullName"
 					placeholder="Enter your full name"
+					(focus)="onFieldFocus()"
 					required />
 				<p class="error" *ngIf="isFieldInvalid('fullName')">
 					Full name is required.
@@ -41,6 +42,7 @@
 					id="email"
 					formControlName="email"
 					placeholder="Enter your email"
+					(focus)="onFieldFocus()"
 					required />
 				<p class="error" *ngIf="isFieldInvalid('email')">
 					Enter a valid email address.
@@ -56,6 +58,7 @@
 						id="password"
 						formControlName="password"
 						placeholder="Create a strong password"
+						(focus)="onFieldFocus()"
 						required />
 					<img
 						[src]="eyeIcon"
