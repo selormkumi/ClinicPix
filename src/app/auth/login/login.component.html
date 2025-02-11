@@ -8,17 +8,6 @@
 	<div class="card">
 		<h3>Login</h3>
 		<form [formGroup]="loginForm" (ngSubmit)="submitForm()">
-			<!-- Role Selection -->
-			<div class="form-group">
-				<label for="role">Role</label>
-				<select id="role" formControlName="role" required>
-					<option value="">Select your role</option>
-					<option value="patient">Patient</option>
-					<option value="provider">Healthcare Provider</option>
-				</select>
-				<p class="error" *ngIf="isFieldInvalid('role')">Role is required.</p>
-			</div>
-
 			<!-- Email -->
 			<div class="form-group">
 				<label for="email">Email</label>
