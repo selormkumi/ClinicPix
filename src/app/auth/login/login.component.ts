@@ -73,7 +73,6 @@ export class LoginComponent {
 					const redirectRoute = roleRoutes[userRole];
 
 					if (redirectRoute) {
-						alert(`Login successful! Redirecting to ${userRole} dashboard...`);
 						this.router.navigate([redirectRoute]);
 					} else {
 						alert("Your role does not have an assigned dashboard.");
