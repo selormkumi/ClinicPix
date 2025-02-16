@@ -1,1 +1,290 @@
-<p>dashboard works!</p>
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Healthcare Provider Dashboard</title>
+		<link
+			href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+			rel="stylesheet" />
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+		<style>
+			body {
+				font-family: "Roboto", sans-serif;
+				background-color: #f9f9f9;
+				margin: 0;
+				padding: 0;
+			}
+
+			.sidebar {
+				width: 250px;
+				height: 100vh;
+				background-color: #2c3e50;
+				color: white;
+				position: fixed;
+				top: 0;
+				left: 0;
+				display: flex;
+				flex-direction: column;
+				padding: 20px;
+			}
+
+			.sidebar h2 {
+				margin-bottom: 20px;
+				font-size: 1.5rem;
+				text-align: center;
+			}
+
+			.sidebar a {
+				color: white;
+				text-decoration: none;
+				margin: 10px 0;
+				padding: 10px;
+				border-radius: 5px;
+				transition: background-color 0.3s ease;
+			}
+
+			.sidebar a:hover {
+				background-color: #1a252f;
+			}
+
+			.main-content {
+				margin-left: 250px;
+				padding: 20px;
+			}
+
+			.header {
+				background-color: #3498db;
+				color: white;
+				padding: 15px;
+				border-radius: 5px;
+				margin-bottom: 20px;
+			}
+
+			.table thead th {
+				background-color: #3498db;
+				color: white;
+			}
+
+			.btn-primary {
+				background-color: #3498db;
+				border: none;
+			}
+
+			.btn-primary:hover {
+				background-color: #2980b9;
+			}
+
+			.card {
+				margin-bottom: 20px;
+				border-radius: 10px;
+				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+			}
+
+			.card h5 {
+				margin-bottom: 15px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<!-- Sidebar -->
+		<div class="sidebar">
+			<h2>Provider Dashboard</h2>
+			<a href="#home">Home</a>
+			<a href="#patients">Patients</a>
+			<a href="#uploaded">Uploaded Images</a>
+			<a href="#shared">Shared Images</a>
+			<a href="#profile">Profile</a>
+			<a href="#">Logout</a>
+		</div>
+
+		<!-- Main Content -->
+		<div class="main-content">
+			<!-- Header -->
+			<div class="header">
+				<h3>Welcome, [Provider Name]</h3>
+				<p>Manage your patients and medical image sharing efficiently.</p>
+			</div>
+
+			<!-- Home Section -->
+			<div id="home" class="card">
+				<div class="card-body">
+					<h5>Dashboard Overview</h5>
+					<p>Welcome to your healthcare provider dashboard. Here you can:</p>
+					<ul>
+						<li>
+							View and manage your patients' information and uploaded images.
+						</li>
+						<li>Share images securely with your patients.</li>
+						<li>Update your profile and contact information.</li>
+					</ul>
+				</div>
+			</div>
+
+			<!-- Patients Section -->
+			<div id="patients" class="card">
+				<div class="card-body">
+					<h5>Patients</h5>
+					<table class="table table-striped">
+						<thead>
+							<tr>
+								<th>Patient Name</th>
+								<th>Email</th>
+								<th>Phone</th>
+								<th>Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>John Doe</td>
+								<!-- <td>john.doe@example.com</td> -->
+								<td>(123) 456-7890</td>
+								<td>
+									<button class="btn btn-primary btn-sm">View Details</button>
+									<button class="btn btn-secondary btn-sm">Send Message</button>
+								</td>
+							</tr>
+							<tr>
+								<td>Jane Smith</td>
+								<!-- <td>jane.smith@example.com</td> -->
+								<td>(987) 654-3210</td>
+								<td>
+									<button class="btn btn-primary btn-sm">View Details</button>
+									<button class="btn btn-secondary btn-sm">Send Message</button>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+			<!-- Uploaded Images Section -->
+			<div id="uploaded" class="card">
+				<div class="card-body">
+					<h5>Uploaded Images</h5>
+					<button class="btn btn-success mb-3">Upload New Image</button>
+					<table class="table table-striped">
+						<thead>
+							<tr>
+								<th>Image Name</th>
+								<th>Uploaded By</th>
+								<th>Uploaded On</th>
+								<th>Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>CT_Scan_2025.jpg</td>
+								<td>John Doe</td>
+								<td>2025-01-15</td>
+								<td>
+									<button class="btn btn-primary btn-sm">View</button>
+									<button class="btn btn-secondary btn-sm">Edit</button>
+									<button class="btn btn-danger btn-sm">Delete</button>
+								</td>
+							</tr>
+							<tr>
+								<td>MRI_Brain_2025.jpg</td>
+								<td>Jane Smith</td>
+								<td>2025-01-10</td>
+								<td>
+									<button class="btn btn-primary btn-sm">View</button>
+									<button class="btn btn-secondary btn-sm">Edit</button>
+									<button class="btn btn-danger btn-sm">Delete</button>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+			<!-- Shared Images Section -->
+			<div id="shared" class="card">
+				<div class="card-body">
+					<h5>Shared Images</h5>
+					<table class="table table-striped">
+						<thead>
+							<tr>
+								<th>Image Name</th>
+								<th>Shared With</th>
+								<th>Shared On</th>
+								<th>Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>CT_Scan_2025.jpg</td>
+								<td>John Doe</td>
+								<td>2025-01-20</td>
+								<td>
+									<button class="btn btn-primary btn-sm">View</button>
+									<button class="btn btn-secondary btn-sm">Download</button>
+									<button class="btn btn-danger btn-sm">Revoke Access</button>
+								</td>
+							</tr>
+							<tr>
+								<td>Ultrasound_Heart.jpg</td>
+								<td>Jane Smith</td>
+								<td>2025-01-18</td>
+								<td>
+									<button class="btn btn-primary btn-sm">View</button>
+									<button class="btn btn-secondary btn-sm">Download</button>
+									<button class="btn btn-danger btn-sm">Revoke Access</button>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+			<!-- Profile Section -->
+			<div id="profile" class="card">
+				<div class="card-body">
+					<h5>Profile</h5>
+					<form>
+						<div class="mb-3">
+							<label for="name" class="form-label">Full Name</label>
+							<input
+								type="text"
+								class="form-control"
+								id="name"
+								value="[Provider Name]" />
+						</div>
+						<div class="mb-3">
+							<label for="email" class="form-label">Email Address</label>
+							<input
+								type="email"
+								class="form-control"
+								id="email"
+								value="[Provider Email]" />
+						</div>
+						<div class="mb-3">
+							<label for="phone" class="form-label">Phone Number</label>
+							<input
+								type="text"
+								class="form-control"
+								id="phone"
+								value="[Provider Phone]" />
+						</div>
+						<div class="mb-3">
+							<label for="specialty" class="form-label">Specialty</label>
+							<input
+								type="text"
+								class="form-control"
+								id="specialty"
+								value="[Provider Specialty]" />
+						</div>
+						<button type="submit" class="btn btn-primary">
+							Update Profile
+						</button>
+					</form>
+				</div>
+			</div>
+		</div>
+
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	</body>
+</html>
