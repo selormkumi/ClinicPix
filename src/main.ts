@@ -5,5 +5,5 @@ import { routes } from "./app/app.routes";
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 bootstrapApplication(AppComponent, {
-	providers: [provideRouter(routes), provideAnimationsAsync()],
+	providers: [provideRouter(routes), provideAnimationsAsync(), provideAnimationsAsync()],
 });
