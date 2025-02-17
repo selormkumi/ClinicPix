@@ -55,10 +55,12 @@ export class LoginComponent {
 				// Check if the role is either 'patient' or 'provider'
 				if (userRole === "patient" || userRole === "provider") {
 					// Store authenticated user in localStorage
+
 					localStorage.setItem(
 						"user",
 						JSON.stringify({
 							email: matchedUser.email,
+							fullName: matchedUser.fullName,
 							role: matchedUser.role,
 							userId: matchedUser.id || null,
 						})

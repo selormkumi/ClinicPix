@@ -6,14 +6,14 @@
 		<a routerLink="/patient/my-records">My Records</a>
 		<a routerLink="/patient/uploaded-images">Uploaded Images</a>
 		<a routerLink="/patient/profile">Profile</a>
-		<a href="#">Logout</a>
+		<a href="#" (click)="logout()">Logout</a>
 	</div>
 
 	<!-- Main Content -->
 	<div class="main-content">
 		<!-- Header -->
 		<div class="header">
-			<h3>Welcome, [Patient Name]</h3>
+			<h3>Welcome, {{ currentUserFullName }}</h3>
 			<p>Manage your medical images securely and efficiently.</p>
 		</div>
 
