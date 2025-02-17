@@ -8,7 +8,7 @@ import { AuthenticationService } from "../../shared/services/authentication.serv
 	templateUrl: "./my-records.component.html",
 	styleUrl: "./my-records.component.scss",
 })
-export class MyRecordsComponent {
+export class MyRecordsComponent implements OnInit {
 	currentUserFullName: string | null = null;
 
 	constructor(
