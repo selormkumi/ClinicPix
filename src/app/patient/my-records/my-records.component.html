@@ -56,7 +56,7 @@
 
 		<!-- Image Viewer -->
 		<div *ngIf="selectedImage" class="modal-overlay">
-			<div class="modal-content">
+			<div class="modal-content view-modal-content">
 				<span class="close-button" (click)="closeViewer()">&times;</span>
 				<img [src]="selectedImage" class="img-fluid" alt="Selected Image" />
 			</div>
@@ -64,7 +64,7 @@
 
 		<!-- Share Link Modal -->
 		<div *ngIf="sharedLink" class="modal-overlay">
-			<div class="modal-content">
+			<div class="modal-content share-modal-content">
 				<h5>Share Image</h5>
 				<p>Copy this link and share it. It expires in 10 minutes.</p>
 				<input type="text" class="form-control" [value]="sharedLink" readonly />
