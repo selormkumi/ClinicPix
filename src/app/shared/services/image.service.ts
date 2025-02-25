@@ -22,4 +22,13 @@ export class ImageService {
 	getImageRecords() {
 		return this.imageRecords;
 	}
+
+	generateShareableLink(record: any): string {
+		const expirationTime = new Date();
+		expirationTime.setMinutes(expirationTime.getMinutes() + 10); // Link expires in 10 minutes
+		const uniqueToken = Math.random().toString(36).substr(2, 9);
+		return `https://yourapp.com/shared/${uniqueToken}?image=${encodeURIComponent(
+			record.url
+		)}&expires=${expirationTime.getTime()}`;
+	}
 }

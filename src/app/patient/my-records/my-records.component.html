@@ -61,5 +61,24 @@
 				<img [src]="selectedImage" class="img-fluid" alt="Selected Image" />
 			</div>
 		</div>
+
+		<!-- Share Link Modal -->
+		<div *ngIf="sharedLink" class="modal-overlay">
+			<div class="modal-content">
+				<h5>Share Image</h5>
+				<p>Copy this link and share it. It expires in 10 minutes.</p>
+				<input type="text" class="form-control" [value]="sharedLink" readonly />
+
+				<!-- Buttons container -->
+				<div class="modal-buttons">
+					<button class="btn btn-primary" (click)="copyToClipboard()">
+						Copy Link
+					</button>
+					<button class="btn btn-danger" (click)="closeShareModal()">
+						Close
+					</button>
+				</div>
+			</div>
+		</div>
 	</div>
 </body>

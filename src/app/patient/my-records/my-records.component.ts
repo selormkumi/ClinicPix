@@ -13,6 +13,7 @@ export class MyRecordsComponent implements OnInit {
 	currentUserFullName: string | null = null;
 	imageRecords: any[] = [];
 	selectedImage: string | null = null;
+	sharedLink: string | null = null;
 
 	constructor(
 		private authService: AuthenticationService,
@@ -32,15 +33,28 @@ export class MyRecordsComponent implements OnInit {
 	loadImageRecords() {
 		this.imageRecords = this.imageService.getImageRecords();
 	}
+
 	viewImage(record: any): void {
 		this.selectedImage = record.url; // Assuming each record has a 'url' property
 	}
 	closeViewer(): void {
 		this.selectedImage = null;
 	}
+
 	shareImage(record: any): void {
-		// Implement sharing logic
-		console.log("Sharing:", record.name);
+		this.sharedLink = this.imageService.generateShareableLink(record);
+	}
+
+	copyToClipboard(): void {
+		if (this.sharedLink) {
+			navigator.clipboard.writeText(this.sharedLink).then(() => {
+				alert("Link copied to clipboard!");
+			});
+		}
+	}
+
+	closeShareModal(): void {
+		this.sharedLink = null;
 	}
 
 	//  The `logout` function logs the user out and redirects them to the login page.
