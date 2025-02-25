@@ -31,28 +31,34 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr>
-							<td>X-ray_2025.jpg</td>
-							<td>2025-01-15</td>
-							<td>X-ray, Chest</td>
+						<tr *ngFor="let record of imageRecords">
+							<td>{{ record.name }}</td>
+							<td>{{ record.uploadedOn }}</td>
+							<td>{{ record.tags }}</td>
 							<td>
-								<button class="btn btn-primary btn-sm">View</button>
-								<button class="btn btn-secondary btn-sm">Share</button>
-								<button class="btn btn-success btn-sm">Download</button>
-							</td>
-						</tr>
-						<tr>
-							<td>MRI_Brain_2025.jpg</td>
-							<td>2025-01-10</td>
-							<td>MRI, Brain</td>
-							<td>
-								<button class="btn btn-primary btn-sm">View</button>
-								<button class="btn btn-secondary btn-sm">Share</button>
-								<button class="btn btn-success btn-sm">Download</button>
+								<button
+									class="btn btn-primary btn-sm"
+									(click)="viewImage(record)">
+									View</button
+								>&nbsp;
+								<button
+									class="btn btn-secondary btn-sm"
+									(click)="shareImage(record)">
+									Share
+								</button>
+								<!-- <button class="btn btn-success btn-sm" (click)="downloadImage(record)">Download</button> -->
 							</td>
 						</tr>
 					</tbody>
 				</table>
+			</div>
+		</div>
+
+		<!-- Image Viewer -->
+		<div *ngIf="selectedImage" class="modal-overlay">
+			<div class="modal-content">
+				<span class="close-button" (click)="closeViewer()">&times;</span>
+				<img [src]="selectedImage" class="img-fluid" alt="Selected Image" />
 			</div>
 		</div>
 	</div>

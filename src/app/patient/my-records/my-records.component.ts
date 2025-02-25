@@ -1,19 +1,23 @@
 import { Component, OnInit } from "@angular/core";
 import { Router, RouterModule } from "@angular/router";
 import { AuthenticationService } from "../../shared/services/authentication.service";
-
+import { ImageService } from "../../shared/services/image.service";
+import { CommonModule } from "@angular/common";
 @Component({
 	selector: "app-my-records",
-	imports: [RouterModule],
+	imports: [RouterModule, CommonModule],
 	templateUrl: "./my-records.component.html",
 	styleUrl: "./my-records.component.scss",
 })
 export class MyRecordsComponent implements OnInit {
 	currentUserFullName: string | null = null;
+	imageRecords: any[] = [];
+	selectedImage: string | null = null;
 
 	constructor(
 		private authService: AuthenticationService,
-		private router: Router
+		private router: Router,
+		private imageService: ImageService
 	) {}
 
 	ngOnInit() {
@@ -22,11 +26,24 @@ export class MyRecordsComponent implements OnInit {
 			const user = JSON.parse(currentUser);
 			this.currentUserFullName = user.fullName;
 		}
+		this.loadImageRecords();
 	}
 
-	/**
-	 * The `logout` function logs the user out and redirects them to the login page.
-	 */
+	loadImageRecords() {
+		this.imageRecords = this.imageService.getImageRecords();
+	}
+	viewImage(record: any): void {
+		this.selectedImage = record.url; // Assuming each record has a 'url' property
+	}
+	closeViewer(): void {
+		this.selectedImage = null;
+	}
+	shareImage(record: any): void {
+		// Implement sharing logic
+		console.log("Sharing:", record.name);
+	}
+
+	//  The `logout` function logs the user out and redirects them to the login page.
 	logout() {
 		this.authService.logout();
 		this.router.navigate(["/login"]); // Redirect to login after logout
