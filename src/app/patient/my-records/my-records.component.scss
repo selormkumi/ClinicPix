@@ -157,3 +157,26 @@ body {
 	padding: 5px 10px;
 	border-radius: 3px;
 }
+
+/* Search & Filter Container */
+.filter-container {
+	display: flex;
+	gap: 10px;
+	margin-bottom: 15px;
+}
+
+/* Search Input */
+.search-input {
+	flex: 2;
+	padding: 8px;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+}
+
+/* Filter Dropdown */
+.filter-dropdown {
+	flex: 1;
+	padding: 8px;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+}

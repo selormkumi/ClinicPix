@@ -17,6 +17,24 @@
 			<p>Manage your medical images securely and efficiently.</p>
 		</div>
 
+		<!-- Search & Filter Section -->
+		<div class="filter-container">
+			<input
+				type="text"
+				class="form-control search-input"
+				placeholder="Search by image name or tags..."
+				[(ngModel)]="searchQuery"
+				(input)="filterRecords()" />
+
+			<select
+				class="form-control filter-dropdown"
+				[(ngModel)]="selectedTag"
+				(change)="filterRecords()">
+				<option value="">All Tags</option>
+				<option *ngFor="let tag of uniqueTags" [value]="tag">{{ tag }}</option>
+			</select>
+		</div>
+
 		<!-- My Images Section -->
 		<div class="card">
 			<div class="card-body">
@@ -31,7 +49,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr *ngFor="let record of imageRecords">
+						<tr *ngFor="let record of filteredRecords">
 							<td>{{ record.name }}</td>
 							<td>{{ record.uploadedOn }}</td>
 							<td>{{ record.tags }}</td>
@@ -44,9 +62,13 @@
 								<button
 									class="btn btn-secondary btn-sm"
 									(click)="shareImage(record)">
-									Share
+									Share</button
+								>&nbsp;
+								<button
+									class="btn btn-success btn-sm"
+									(click)="downloadImage(record)">
+									Download
 								</button>
-								<!-- <button class="btn btn-success btn-sm" (click)="downloadImage(record)">Download</button> -->
 							</td>
 						</tr>
 					</tbody>
@@ -63,15 +85,28 @@
 		</div>
 
 		<!-- Share Link Modal -->
-		<div *ngIf="sharedLink" class="modal-overlay">
+		<div *ngIf="sharedLink" class="modal-overlay share-modal">
 			<div class="modal-content share-modal-content">
 				<h5>Share Image</h5>
-				<p>Copy this link and share it. It expires in 10 minutes.</p>
-				<input type="text" class="form-control" [value]="sharedLink" readonly />
+				<p *ngIf="!linkExpired">
+					Copy this link and share it. It expires in 10 minutes.
+				</p>
+				<p *ngIf="linkExpired" class="text-danger">
+					This link has expired. Generate a new one.
+				</p>
 
-				<!-- Buttons container -->
+				<input
+					type="text"
+					class="form-control"
+					[value]="sharedLink"
+					readonly
+					*ngIf="!linkExpired" />
+
 				<div class="modal-buttons">
-					<button class="btn btn-primary" (click)="copyToClipboard()">
+					<button
+						class="btn btn-primary"
+						(click)="copyToClipboard()"
+						*ngIf="!linkExpired">
 						Copy Link
 					</button>
 					<button class="btn btn-danger" (click)="closeShareModal()">
