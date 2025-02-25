@@ -1,5 +1,7 @@
-import { Component } from "@angular/core";
-import { RouterModule } from "@angular/router";
+import { Component, OnInit } from "@angular/core";
+import { RouterModule, Router } from "@angular/router";
+import { FormsModule } from "@angular/forms";
+import { AuthenticationService } from "../../shared/services/authentication.service";
 @Component({
 	selector: "app-profile",
 	imports: [RouterModule, FormsModule],
