@@ -21,37 +21,43 @@
 	<div id="uploaded" class="card">
 		<div class="card-body">
 			<h5>Uploaded Images</h5>
-			<button class="btn btn-success mb-3">Upload New Image</button>
+
+			<!-- Drag & Drop Zone -->
+			<div class="drop-zone" (dragover)="handleDragOver($event)" (drop)="handleDrop($event)">
+				<b>Drag & drop an image file here</b>
+			</div>
+
+			<!-- Hidden File Input -->
+			<input type="file" #fileInput (change)="uploadImage($event)" style="display: none;" />
+
+			<!-- Upload Controls -->
+			<div class="upload-controls">
+				<button class="btn btn-success" (click)="triggerFileInput()">Select File</button>&nbsp;
+				<input type="text" [(ngModel)]="newFileName" placeholder="Enter file name"/>&nbsp;
+				<input type="text" [(ngModel)]="newFileTags" placeholder="Enter tag(s)" />
+			</div>
+
 			<table class="table table-striped">
 				<thead>
 					<tr>
 						<th>Image Name</th>
 						<th>Uploaded By</th>
 						<th>Uploaded On</th>
+						<th>Tags</th>
 						<th>Actions</th>
 					</tr>
 				</thead>
 				<tbody>
-					<tr>
-						<td>CT_Scan_2025.jpg</td>
-						<td>John Doe</td>
-						<td>2025-01-15</td>
+					<tr *ngFor="let image of uploadedImages">
+						<td>{{ image.name }}</td>
+						<td>{{ image.uploadedBy }}</td>
+						<td>{{ image.uploadedOn }}</td>
+						<td>{{ image.tags.join(", ") }}</td>
 						<td>
-							<button class="btn btn-primary btn-sm">View</button>&nbsp;
-							<button class="btn btn-secondary btn-sm">Edit</button>&nbsp;
-							<button class="btn btn-warning btn-sm">Share</button>&nbsp;
-							<button class="btn btn-danger btn-sm">Delete</button>&nbsp;
-						</td>
-					</tr>
-					<tr>
-						<td>MRI_Brain_2025.jpg</td>
-						<td>Jane Smith</td>
-						<td>2025-01-10</td>
-						<td>
-							<button class="btn btn-primary btn-sm">View</button>&nbsp;
-							<button class="btn btn-secondary btn-sm">Edit</button>&nbsp;
-							<button class="btn btn-warning btn-sm">Share</button>&nbsp;
-							<button class="btn btn-danger btn-sm">Delete</button>&nbsp;
+							<button class="btn btn-primary btn-sm" (click)="viewImage(image.name)">View</button>&nbsp;
+							<button class="btn btn-secondary btn-sm" (click)="editImage(image.name)">Edit</button>&nbsp;
+							<button class="btn btn-warning btn-sm" (click)="shareImage(image.name)">Share</button>&nbsp;
+							<button class="btn btn-danger btn-sm" (click)="deleteImage(image.name)">Delete</button>&nbsp;
 						</td>
 					</tr>
 				</tbody>
