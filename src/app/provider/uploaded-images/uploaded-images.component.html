@@ -22,19 +22,25 @@
 		<div class="card-body">
 			<h5>Uploaded Images</h5>
 
-			<!-- Drag & Drop Zone -->
-			<div class="drop-zone" (dragover)="handleDragOver($event)" (drop)="handleDrop($event)">
-				<b>Drag & drop an image file here</b>
-			</div>
+		<!-- Drag & Drop Zone -->
+		<div class="drop-zone" (dragover)="handleDragOver($event)" (dragleave)="handleDragLeave()" (drop)="handleDrop($event)">
+			<i class="fas fa-cloud-upload-alt" style="font-size: 40px; color: #007bff;"></i>
+			<p *ngIf="!pendingFile"><b>Drag & drop an image file here</b></p>
+			<p *ngIf="pendingFile" class="selected-file"><b>Selected: {{ pendingFile.name }}</b></p>
+			<button class="btn btn-success" (click)="triggerFileInput()">Select File</button>
+			<input type="file" #fileInput (change)="uploadImage($event)" style="display: none;" />
+			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+		</div>
+
 
 			<!-- Hidden File Input -->
 			<input type="file" #fileInput (change)="uploadImage($event)" style="display: none;" />
 
 			<!-- Upload Controls -->
 			<div class="upload-controls">
-				<button class="btn btn-success" (click)="triggerFileInput()">Select File</button>&nbsp;
 				<input type="text" [(ngModel)]="newFileName" placeholder="Enter file name"/>&nbsp;
 				<input type="text" [(ngModel)]="newFileTags" placeholder="Enter tag(s)" />
+				<button class="btn btn-primary upload-btn" (click)="confirmUpload()" [disabled]="!pendingFile">Upload</button>
 			</div>
 
 			<table class="table table-striped">
