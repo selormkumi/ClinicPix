@@ -1,0 +1,61 @@
+<!-- Sidebar -->
+<div class="sidebar">
+	<h2>Provider Dashboard</h2>
+	<a routerLink="/provider/dashboard">Home</a>
+	<a routerLink="/provider/patients">Patients</a>
+	<a routerLink="/provider/uploaded-images">Uploaded Images</a>
+	<a routerLink="/provider/shared-images">Shared Images</a>
+	<a routerLink="/provider/profile">Profile</a>
+	<a href="#" (click)="logout()">Logout</a>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+	<!-- Header -->
+	<div class="header">
+		<h3>Welcome, {{ currentUserFullName }}</h3>
+		<p>Manage your patients and medical image sharing efficiently.</p>
+	</div>
+
+	<!-- Profile Section -->
+	<div id="profile" class="card">
+		<div class="card-body">
+			<h5>Profile</h5>
+			<form>
+				<div class="mb-3">
+					<label for="name" class="form-label">Full Name</label>
+					<input
+						type="text"
+						class="form-control"
+						id="name"
+						value="[Provider Name]" />
+				</div>
+				<div class="mb-3">
+					<label for="email" class="form-label">Email Address</label>
+					<input
+						type="email"
+						class="form-control"
+						id="email"
+						value="[Provider Email]" />
+				</div>
+				<div class="mb-3">
+					<label for="phone" class="form-label">Phone Number</label>
+					<input
+						type="text"
+						class="form-control"
+						id="phone"
+						value="[Provider Phone]" />
+				</div>
+				<div class="mb-3">
+					<label for="specialty" class="form-label">Specialty</label>
+					<input
+						type="text"
+						class="form-control"
+						id="specialty"
+						value="[Provider Specialty]" />
+				</div>
+				<button type="submit" class="btn btn-primary">Update Profile</button>
+			</form>
+		</div>
+	</div>
+</div>
