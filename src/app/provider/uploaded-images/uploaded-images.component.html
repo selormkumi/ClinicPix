@@ -1,1 +1,59 @@
-<p>uploaded-images works!</p>
+<!-- Sidebar -->
+<div class="sidebar">
+	<h2>Provider Dashboard</h2>
+	<a routerLink="/provider/dashboard">Home</a>
+	<a routerLink="/provider/patients">Patients</a>
+	<a routerLink="/provider/uploaded-images">Uploaded Images</a>
+	<a routerLink="/provider/shared-images">Shared Images</a>
+	<a routerLink="/provider/profile">Profile</a>
+	<a href="#" (click)="logout()">Logout</a>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+	<!-- Header -->
+	<div class="header">
+		<h3>Welcome, {{ currentUserFullName }}</h3>
+		<p>Manage your patients and medical image sharing efficiently.</p>
+	</div>
+
+	<!-- Uploaded Images Section -->
+	<div id="uploaded" class="card">
+		<div class="card-body">
+			<h5>Uploaded Images</h5>
+			<button class="btn btn-success mb-3">Upload New Image</button>
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th>Image Name</th>
+						<th>Uploaded By</th>
+						<th>Uploaded On</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>CT_Scan_2025.jpg</td>
+						<td>John Doe</td>
+						<td>2025-01-15</td>
+						<td>
+							<button class="btn btn-primary btn-sm">View</button>
+							<button class="btn btn-secondary btn-sm">Edit</button>
+							<button class="btn btn-danger btn-sm">Delete</button>
+						</td>
+					</tr>
+					<tr>
+						<td>MRI_Brain_2025.jpg</td>
+						<td>Jane Smith</td>
+						<td>2025-01-10</td>
+						<td>
+							<button class="btn btn-primary btn-sm">View</button>
+							<button class="btn btn-secondary btn-sm">Edit</button>
+							<button class="btn btn-danger btn-sm">Delete</button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>

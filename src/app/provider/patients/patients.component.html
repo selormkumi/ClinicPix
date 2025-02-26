@@ -1,1 +1,56 @@
-<p>patients works!</p>
+<!-- Sidebar -->
+<div class="sidebar">
+	<h2>Provider Dashboard</h2>
+	<a routerLink="/provider/dashboard">Home</a>
+	<a routerLink="/provider/patients">Patients</a>
+	<a routerLink="/provider/uploaded-images">Uploaded Images</a>
+	<a routerLink="/provider/shared-images">Shared Images</a>
+	<a routerLink="/provider/profile">Profile</a>
+	<a href="#" (click)="logout()">Logout</a>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+	<!-- Header -->
+	<div class="header">
+		<h3>Welcome, {{ currentUserFullName }}</h3>
+		<p>Manage your patients and medical image sharing efficiently.</p>
+	</div>
+
+	<!-- Patients Section -->
+	<div id="patients" class="card">
+		<div class="card-body">
+			<h5>Patients</h5>
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th>Patient Name</th>
+						<th>Email</th>
+						<th>Phone</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>John Doe</td>
+						<!-- <td>john.doe@example.com</td> -->
+						<td>(123) 456-7890</td>
+						<td>
+							<button class="btn btn-primary btn-sm">View Details</button>
+							<button class="btn btn-secondary btn-sm">Send Message</button>
+						</td>
+					</tr>
+					<tr>
+						<td>Jane Smith</td>
+						<!-- <td>jane.smith@example.com</td> -->
+						<td>(987) 654-3210</td>
+						<td>
+							<button class="btn btn-primary btn-sm">View Details</button>
+							<button class="btn btn-secondary btn-sm">Send Message</button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
