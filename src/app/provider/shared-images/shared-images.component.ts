@@ -12,7 +12,7 @@ import { ImageModalComponent } from "../../shared/image-modal/image-modal.compon
 	styleUrl: "./shared-images.component.scss",
 })
 export class SharedImagesComponent {
-	currentUserFullName: string | null = null;
+	currentUserName: string | null = null;
 
 	sharedImages = [
 		{
@@ -39,7 +39,7 @@ export class SharedImagesComponent {
 		const currentUser = localStorage.getItem("user");
 		if (currentUser) {
 			const user = JSON.parse(currentUser);
-			this.currentUserFullName = user.fullName;
+			this.currentUserName = user.userName;
 		}
 	}
 

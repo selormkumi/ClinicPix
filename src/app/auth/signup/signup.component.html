@@ -21,15 +21,15 @@
 
 			<!-- Full Name -->
 			<div class="form-group">
-				<label for="fullName">Full Name</label>
+				<label for="userName">User Name</label>
 				<input
 					type="text"
-					id="fullName"
-					formControlName="fullName"
-					placeholder="Enter your full name"
+					id="userName"
+					formControlName="userName"
+					placeholder="Enter your user name"
 					(focus)="onFieldFocus()"
 					required />
-				<p class="error" *ngIf="isFieldInvalid('fullName')">
+				<p class="error" *ngIf="isFieldInvalid('userName')">
 					⚠️ Full name is required.
 				</p>
 			</div>

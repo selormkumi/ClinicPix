@@ -60,7 +60,7 @@ export class LoginComponent {
 						"user",
 						JSON.stringify({
 							email: matchedUser.email,
-							fullName: matchedUser.fullName,
+							userName: matchedUser.userName,
 							role: matchedUser.role,
 							userId: matchedUser.id || null,
 						})

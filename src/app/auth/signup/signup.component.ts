@@ -21,7 +21,7 @@ export class SignupComponent {
 	constructor(private fb: FormBuilder, private router: Router) {
 		this.signupForm = this.fb.group({
 			role: ["", Validators.required],
-			fullName: ["", [Validators.required, Validators.minLength(3)]],
+			userName: ["", [Validators.required, Validators.minLength(3)]],
 			email: ["", [Validators.required, Validators.email]],
 			password: ["", [Validators.required, Validators.minLength(6)]],
 		});
@@ -55,7 +55,7 @@ export class SignupComponent {
 			// Store new user
 			users.push({
 				role: formData.role.trim().toLowerCase(),
-				fullName: formData.fullName.trim(),
+				userName: formData.userName.trim(),
 				email: formData.email.trim().toLowerCase(),
 				password: formData.password.trim(),
 			});

@@ -8,7 +8,7 @@ import { AuthenticationService } from "../../shared/services/authentication.serv
 	styleUrl: "./dashboard.component.scss",
 })
 export class DashboardComponent {
-	currentUserFullName: string | null = null;
+	currentUserName: string | null = null;
 	constructor(
 		private authService: AuthenticationService,
 		private router: Router
@@ -17,7 +17,7 @@ export class DashboardComponent {
 		const currentUser = localStorage.getItem("user");
 		if (currentUser) {
 			const user = JSON.parse(currentUser);
-			this.currentUserFullName = user.fullName;
+			this.currentUserName = user.userName;
 		}
 	}
 	logout() {

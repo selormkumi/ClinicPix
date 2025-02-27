@@ -12,7 +12,7 @@ import { FormsModule } from "@angular/forms";
 	styleUrl: "./my-records.component.scss",
 })
 export class MyRecordsComponent implements OnInit {
-	currentUserFullName: string | null = null;
+	currentUserName: string | null = null;
 	imageRecords: any[] = [];
 	filteredRecords: any[] = [];
 	uniqueTags: string[] = [];
@@ -43,7 +43,7 @@ export class MyRecordsComponent implements OnInit {
 		const currentUser = localStorage.getItem("user");
 		if (currentUser) {
 			const user = JSON.parse(currentUser);
-			this.currentUserFullName = user.fullName;
+			this.currentUserName = user.userName;
 		}
 		this.filteredRecords = [...this.patientImages];
 		this.uniqueTags = Array.from(

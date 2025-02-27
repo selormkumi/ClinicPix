@@ -13,7 +13,7 @@ import { ImageModalComponent } from "../../shared/image-modal/image-modal.compon
 	styleUrl: "./uploaded-images.component.scss",
 })
 export class UploadedImagesComponent {
-	currentUserFullName: string | null = null;
+	currentUserName: string | null = null;
 	selectedImage: any | null = null;
 	isEditing: boolean = false; // Tracks if the user is in edit mode
 
@@ -48,7 +48,7 @@ export class UploadedImagesComponent {
 		const currentUser = localStorage.getItem("user");
 		if (currentUser) {
 			const user = JSON.parse(currentUser);
-			this.currentUserFullName = user.fullName;
+			this.currentUserName = user.userName;
 		}
 	}
 
@@ -108,7 +108,7 @@ export class UploadedImagesComponent {
 		if (this.pendingFile) {
 			const newImage = {
 				name: this.newFileName.trim() || this.pendingFile.name,
-				uploadedBy: this.currentUserFullName || "Unknown",
+				uploadedBy: this.currentUserName || "Unknown",
 				uploadedOn: new Date().toISOString().split("T")[0],
 				tags: this.newFileTags.split(",").map((tag) => tag.trim()),
 			};
