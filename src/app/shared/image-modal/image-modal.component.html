@@ -1,0 +1,32 @@
+<div class="modal-overlay">
+	<div class="modal-content">
+		<h2>{{ isEditing ? "Edit Image" : "View Image" }}</h2>
+
+		<!-- Image Preview -->
+		<div *ngIf="image">
+			<img
+				*ngIf="image.name.endsWith('.jpg') || image.name.endsWith('.png')"
+				[src]="'assets/uploads/' + image.name"
+				[alt]="image.name"
+				class="image-preview" />
+			<p *ngIf="!image.name.endsWith('.jpg') && !image.name.endsWith('.png')">
+				Preview not available
+			</p>
+		</div>
+
+		<!-- Edit Fields -->
+		<div *ngIf="isEditing">
+			<label>File Name:</label>
+			<input type="text" [(ngModel)]="editedImageName" />
+
+			<label>Tags:</label>
+			<input type="text" [(ngModel)]="editedTags" />
+		</div>
+
+		<!-- Buttons -->
+		<div class="modal-buttons">
+			<button (click)="close()">Close</button>
+			<button *ngIf="isEditing" (click)="save()">Save Changes</button>
+		</div>
+	</div>
+</div>
