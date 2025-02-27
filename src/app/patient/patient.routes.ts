@@ -23,7 +23,6 @@ export const PATIENT_ROUTES: Routes = [
 		canActivate: [AuthGuard],
 		data: { role: "patient" },
 	},
-
 	{
 		path: "profile",
 		component: ProfileComponent,

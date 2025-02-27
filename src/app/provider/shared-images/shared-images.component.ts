@@ -2,12 +2,12 @@ import { Component } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { Router, RouterModule } from "@angular/router";
-import { ImageModalComponent } from "../../shared/image-modal/image-modal.component";
 import { AuthenticationService } from "../../shared/services/authentication.service";
+import { ImageModalComponent } from "../../shared/image-modal/image-modal.component";
 @Component({
-	standalone: true,
 	selector: "app-shared-images",
-	imports: [RouterModule, CommonModule, FormsModule, ImageModalComponent],
+	standalone: true,
+	imports: [CommonModule, RouterModule, FormsModule, ImageModalComponent],
 	templateUrl: "./shared-images.component.html",
 	styleUrl: "./shared-images.component.scss",
 })
@@ -49,6 +49,9 @@ export class SharedImagesComponent {
 
 	closeModal() {
 		this.selectedImage = null;
+	}
+	revokeAccess(image: any) {
+		alert(`Access to ${image.name} has been revoked.`);
 	}
 
 	logout() {
