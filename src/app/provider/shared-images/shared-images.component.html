@@ -1,60 +1,57 @@
-<body>
-	<!-- Sidebar -->
-	<div class="sidebar">
-		<h2>Provider Dashboard</h2>
-		<a routerLink="/provider/dashboard">Home</a>
-		<a routerLink="/provider/patients">Patients</a>
-		<a routerLink="/provider/uploaded-images">Uploaded Images</a>
-		<a routerLink="/provider/shared-images">Shared Images</a>
-		<a routerLink="/provider/profile">Profile</a>
-		<a href="#" (click)="logout()">Logout</a>
+<!-- Sidebar -->
+<div class="sidebar">
+	<h2>Patient Dashboard</h2>
+	<a routerLink="/patient/dashboard">Home</a>
+	<a routerLink="/patient/my-records">My Records</a>
+	<a routerLink="/patient/shared-images">Shared Images</a>
+	<a routerLink="/patient/profile">Profile</a>
+	<a href="#" (click)="logout()">Logout</a>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+	<!-- Header -->
+	<div class="header">
+		<h3>Welcome, {{ currentUserFullName }}</h3>
+		<p>Manage your medical images securely and efficiently.</p>
 	</div>
 
-	<!-- Main Content -->
-	<div class="main-content">
-		<!-- Header -->
-		<div class="header">
-			<h3>Welcome, {{ currentUserFullName }}</h3>
-			<p>Manage your patients and medical image sharing efficiently.</p>
-		</div>
-
-		<!-- Shared Images Section -->
-		<div id="shared" class="card">
-			<div class="card-body">
-				<h5>Shared Images</h5>
-				<table class="table table-striped">
-					<thead>
-						<tr>
-							<th>Image Name</th>
-							<th>Shared With</th>
-							<th>Shared On</th>
-							<th>Actions</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td>CT_Scan_2025.jpg</td>
-							<td>John Doe</td>
-							<td>2025-01-20</td>
-							<td>
-								<button class="btn btn-primary btn-sm">View</button>&nbsp;
-								<button class="btn btn-danger btn-sm">Revoke Access</button
-								>&nbsp;
-							</td>
-						</tr>
-						<tr>
-							<td>Ultrasound_Heart.jpg</td>
-							<td>Jane Smith</td>
-							<td>2025-01-18</td>
-							<td>
-								<button class="btn btn-primary btn-sm">View</button>&nbsp;
-								<button class="btn btn-danger btn-sm">Revoke Access</button
-								>&nbsp;
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
+	<!-- Shared Images Section -->
+	<div class="card">
+		<div class="card-body">
+			<h5>Shared Images</h5>
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th>Image Name</th>
+						<th>Shared By</th>
+						<th>Shared On</th>
+						<th>Tags</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr *ngFor="let image of sharedImages">
+						<td>{{ image.name }}</td>
+						<td>{{ image.sharedBy }}</td>
+						<td>{{ image.sharedOn }}</td>
+						<td>{{ image.tags.join(", ") }}</td>
+						<td>
+							<button class="btn btn-primary btn-sm" (click)="viewImage(image)">
+								View
+							</button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
 		</div>
 	</div>
-</body>
+</div>
+
+<!-- Image Modal -->
+<app-image-modal
+	*ngIf="selectedImage"
+	[image]="selectedImage"
+	[isEditing]="false"
+	(closeModal)="closeModal()">
+</app-image-modal>

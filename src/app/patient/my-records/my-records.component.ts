@@ -1,7 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { Router, RouterModule } from "@angular/router";
 import { AuthenticationService } from "../../shared/services/authentication.service";
-
 import { ImageModalComponent } from "../../shared/image-modal/image-modal.component";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";

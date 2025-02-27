@@ -1,7 +1,6 @@
 import { Routes } from "@angular/router";
 import { DashboardComponent } from "./dashboard/dashboard.component";
 import { MyRecordsComponent } from "./my-records/my-records.component";
-import { SharedImagesComponent } from "./shared-images/shared-images.component";
 import { ProfileComponent } from "./profile/profile.component";
 import { AuthGuard } from "../shared/guards/auth.guard";
 
@@ -24,12 +23,7 @@ export const PATIENT_ROUTES: Routes = [
 		canActivate: [AuthGuard],
 		data: { role: "patient" },
 	},
-	{
-		path: "shared-images",
-		component: SharedImagesComponent,
-		canActivate: [AuthGuard],
-		data: { role: "patient" },
-	},
+
 	{
 		path: "profile",
 		component: ProfileComponent,
