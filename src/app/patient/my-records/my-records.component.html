@@ -43,25 +43,27 @@
 					<thead>
 						<tr>
 							<th>Image Name</th>
+							<th>Uploaded By</th>
 							<th>Uploaded On</th>
 							<th>Tags</th>
 							<th>Actions</th>
 						</tr>
 					</thead>
 					<tbody>
-						<tr *ngFor="let record of filteredRecords">
-							<td>{{ record.name }}</td>
-							<td>{{ record.uploadedOn }}</td>
-							<td>{{ record.tags }}</td>
+						<tr *ngFor="let image of patientImages">
+							<td>{{ image.name }}</td>
+							<td>{{ image.uploadedBy }}</td>
+							<td>{{ image.uploadedOn }}</td>
+							<td>{{ image.tags.join(", ") }}</td>
 							<td>
 								<button
 									class="btn btn-primary btn-sm"
-									(click)="viewImage(record)">
+									(click)="viewImage(image)">
 									View</button
 								>&nbsp;
 								<button
-									class="btn btn-success btn-sm"
-									(click)="downloadImage(record)">
+									class="btn btn-danger btn-sm"
+									(click)="downloadImage(image)">
 									Download
 								</button>
 							</td>
@@ -70,47 +72,11 @@
 				</table>
 			</div>
 		</div>
-
-		<!-- Image Viewer -->
-		<div *ngIf="selectedImage" class="modal-overlay">
-			<div class="modal-content view-modal-content">
-				<span class="close-button" (click)="closeViewer()">&times;</span>
-				<img [src]="selectedImage" class="img-fluid" alt="Selected Image" />
-			</div>
-		</div>
-
-		<!-- Share Link Modal -->
-		<div *ngIf="sharedLink" class="modal-overlay share-modal">
-			<div class="modal-content share-modal-content">
-				<h5>Share Image</h5>
-				<p *ngIf="!linkExpired">
-					Copy this link and share it. It expires in 10 minutes.
-				</p>
-				<p *ngIf="linkExpired" class="text-danger">
-					This link has expired. Generate a new one.
-				</p>
-
-				<input
-					type="text"
-					class="form-control"
-					[value]="sharedLink"
-					readonly
-					*ngIf="!linkExpired" />
-
-				<input type="text" class="form-control" placeholder="Enter email" x />
-
-				<div class="modal-buttons">
-					<button
-						class="btn btn-primary"
-						(click)="copyToClipboard()"
-						*ngIf="!linkExpired">
-						Send
-					</button>
-					<button class="btn btn-danger" (click)="closeShareModal()">
-						Close
-					</button>
-				</div>
-			</div>
-		</div>
+		<app-image-modal
+			*ngIf="selectedImage"
+			[image]="selectedImage"
+			[isEditing]="isEditing"
+			(closeModal)="closeModal()">
+		</app-image-modal>
 	</div>
 </body>
