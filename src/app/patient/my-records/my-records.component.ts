@@ -1,7 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { Router, RouterModule } from "@angular/router";
 import { AuthenticationService } from "../../shared/services/authentication.service";
-import { ImageService } from "../../shared/services/image.service";
+
 import { ImageModalComponent } from "../../shared/image-modal/image-modal.component";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
@@ -37,8 +37,7 @@ export class MyRecordsComponent implements OnInit {
 	];
 	constructor(
 		private authService: AuthenticationService,
-		private router: Router,
-		private imageService: ImageService
+		private router: Router
 	) {}
 
 	ngOnInit() {
@@ -47,7 +46,10 @@ export class MyRecordsComponent implements OnInit {
 			const user = JSON.parse(currentUser);
 			this.currentUserFullName = user.fullName;
 		}
-		this.loadImageRecords();
+		this.filteredRecords = [...this.patientImages];
+		this.uniqueTags = Array.from(
+			new Set(this.patientImages.flatMap((record) => record.tags))
+		);
 	}
 
 	viewImage(image: any) {
@@ -59,20 +61,21 @@ export class MyRecordsComponent implements OnInit {
 		this.selectedImage = null;
 	}
 	loadImageRecords(): void {
-		this.imageRecords = this.imageService.getImageRecords();
-		this.filteredRecords = [...this.imageRecords];
+		this.filteredRecords = [...this.patientImages];
 
 		// Extract unique tags for filtering
 		this.uniqueTags = Array.from(
-			new Set(this.imageRecords.flatMap((record) => record.tags.split(", ")))
+			new Set(this.patientImages.flatMap((record) => record.tags))
 		);
 	}
 
 	filterRecords(): void {
-		this.filteredRecords = this.imageRecords.filter((record) => {
+		this.filteredRecords = this.patientImages.filter((record) => {
 			const matchesSearch =
 				record.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-				record.tags.toLowerCase().includes(this.searchQuery.toLowerCase());
+				record.tags.some((tag) =>
+					tag.toLowerCase().includes(this.searchQuery.toLowerCase())
+				);
 
 			const matchesTag = this.selectedTag
 				? record.tags.includes(this.selectedTag)

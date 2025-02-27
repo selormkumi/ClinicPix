@@ -4,7 +4,6 @@
 		<h2>Patient Dashboard</h2>
 		<a routerLink="/patient/dashboard">Home</a>
 		<a routerLink="/patient/my-records">My Records</a>
-		<!-- <a routerLink="/patient/shared-images">Shared Images</a> -->
 		<a routerLink="/patient/profile">Profile</a>
 		<a href="#" (click)="logout()">Logout</a>
 	</div>
@@ -22,14 +21,11 @@
 			<input
 				type="text"
 				class="form-control search-input"
-				placeholder="Search by image name or tags..."
+				placeholder="Search by name or tag..."
 				[(ngModel)]="searchQuery"
 				(input)="filterRecords()" />
 
-			<select
-				class="form-control filter-dropdown"
-				[(ngModel)]="selectedTag"
-				(change)="filterRecords()">
+			<select [(ngModel)]="selectedTag" (change)="filterRecords()">
 				<option value="">All Tags</option>
 				<option *ngFor="let tag of uniqueTags" [value]="tag">{{ tag }}</option>
 			</select>
@@ -50,7 +46,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr *ngFor="let image of patientImages">
+						<tr *ngFor="let image of filteredRecords">
 							<td>{{ image.name }}</td>
 							<td>{{ image.uploadedBy }}</td>
 							<td>{{ image.uploadedOn }}</td>
