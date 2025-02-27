@@ -22,25 +22,55 @@
 		<div class="card-body">
 			<h5>Uploaded Images</h5>
 
-		<!-- Drag & Drop Zone -->
-		<div class="drop-zone" (dragover)="handleDragOver($event)" (dragleave)="handleDragLeave()" (drop)="handleDrop($event)">
-			<i class="fas fa-cloud-upload-alt" style="font-size: 40px; color: #007bff;"></i>
-			<p *ngIf="!pendingFile"><b>Drag & drop an image file here</b></p>
-			<p *ngIf="pendingFile" class="selected-file"><b>Selected: {{ pendingFile.name }}</b></p>
-			<button class="btn btn-success" (click)="triggerFileInput()">Select File</button>
-			<input type="file" #fileInput (change)="uploadImage($event)" style="display: none;" />
-			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-		</div>
-
+			<!-- Drag & Drop Zone -->
+			<div
+				class="drop-zone"
+				(dragover)="handleDragOver($event)"
+				(dragleave)="handleDragLeave()"
+				(drop)="handleDrop($event)">
+				<i
+					class="fas fa-cloud-upload-alt"
+					style="font-size: 40px; color: #007bff"></i>
+				<p *ngIf="!pendingFile"><b>Drag & drop an image file here</b></p>
+				<p *ngIf="pendingFile" class="selected-file">
+					<b>Selected: {{ pendingFile.name }}</b>
+				</p>
+				<button class="btn btn-success" (click)="triggerFileInput()">
+					Select File
+				</button>
+				<input
+					type="file"
+					#fileInput
+					(change)="uploadImage($event)"
+					style="display: none" />
+				<link
+					rel="stylesheet"
+					href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+			</div>
 
 			<!-- Hidden File Input -->
-			<input type="file" #fileInput (change)="uploadImage($event)" style="display: none;" />
+			<input
+				type="file"
+				#fileInput
+				(change)="uploadImage($event)"
+				style="display: none" />
 
 			<!-- Upload Controls -->
 			<div class="upload-controls">
-				<input type="text" [(ngModel)]="newFileName" placeholder="Enter file name"/>&nbsp;
-				<input type="text" [(ngModel)]="newFileTags" placeholder="Enter tag(s)" />
-				<button class="btn btn-primary upload-btn" (click)="confirmUpload()" [disabled]="!pendingFile">Upload</button>
+				<input
+					type="text"
+					[(ngModel)]="newFileName"
+					placeholder="Enter file name" />&nbsp;
+				<input
+					type="text"
+					[(ngModel)]="newFileTags"
+					placeholder="Enter tag(s)" />
+				<button
+					class="btn btn-primary upload-btn"
+					(click)="confirmUpload()"
+					[disabled]="!pendingFile">
+					Upload
+				</button>
 			</div>
 
 			<table class="table table-striped">
@@ -60,14 +90,35 @@
 						<td>{{ image.uploadedOn }}</td>
 						<td>{{ image.tags.join(", ") }}</td>
 						<td>
-							<button class="btn btn-primary btn-sm" (click)="viewImage(image.name)">View</button>&nbsp;
-							<button class="btn btn-secondary btn-sm" (click)="editImage(image.name)">Edit</button>&nbsp;
-							<button class="btn btn-warning btn-sm" (click)="shareImage(image.name)">Share</button>&nbsp;
-							<button class="btn btn-danger btn-sm" (click)="deleteImage(image.name)">Delete</button>&nbsp;
+							<button class="btn btn-primary btn-sm" (click)="viewImage(image)">
+								View</button
+							>&nbsp;
+							<button
+								class="btn btn-secondary btn-sm"
+								(click)="editImage(image)">
+								Edit</button
+							>&nbsp;
+							<button
+								class="btn btn-warning btn-sm"
+								(click)="shareImage(image.name)">
+								Share</button
+							>&nbsp;
+							<button
+								class="btn btn-danger btn-sm"
+								(click)="deleteImage(image.name)">
+								Delete</button
+							>&nbsp;
 						</td>
 					</tr>
 				</tbody>
 			</table>
+			<app-image-modal
+				*ngIf="selectedImage"
+				[image]="selectedImage"
+				[isEditing]="isEditing"
+				(closeModal)="closeModal()"
+				(saveChanges)="saveChanges($event)">
+			</app-image-modal>
 		</div>
 	</div>
 </div>

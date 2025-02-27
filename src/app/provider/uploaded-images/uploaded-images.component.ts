@@ -3,20 +3,33 @@ import { Router, RouterModule } from "@angular/router";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { AuthenticationService } from "../../shared/services/authentication.service";
+import { ImageModalComponent } from "../../shared/image-modal/image-modal.component";
 
 @Component({
 	selector: "app-uploaded-images",
 	standalone: true,
-	imports: [CommonModule, RouterModule, FormsModule],
+	imports: [CommonModule, RouterModule, FormsModule, ImageModalComponent],
 	templateUrl: "./uploaded-images.component.html",
 	styleUrl: "./uploaded-images.component.scss",
 })
 export class UploadedImagesComponent {
 	currentUserFullName: string | null = null;
+	selectedImage: any | null = null;
+	isEditing: boolean = false; // Tracks if the user is in edit mode
 
 	uploadedImages = [
-		{ name: "CT_Scan_2025.jpg", uploadedBy: "John Doe", uploadedOn: "2025-01-15", tags: ["CT", "Scan"] },
-		{ name: "MRI_Brain_2025.jpg", uploadedBy: "Jane Smith", uploadedOn: "2025-01-10", tags: ["MRI", "Brain"] },
+		{
+			name: "CT_Scan_2025.jpg",
+			uploadedBy: "John Doe",
+			uploadedOn: "2025-01-15",
+			tags: ["CT", "Scan"],
+		},
+		{
+			name: "MRI_Brain_2025.jpg",
+			uploadedBy: "Jane Smith",
+			uploadedOn: "2025-01-10",
+			tags: ["MRI", "Brain"],
+		},
 	];
 
 	newFileName: string = "";
@@ -26,7 +39,10 @@ export class UploadedImagesComponent {
 
 	@ViewChild("fileInput") fileInput!: ElementRef<HTMLInputElement>;
 
-	constructor(private authService: AuthenticationService, private router: Router) {}
+	constructor(
+		private authService: AuthenticationService,
+		private router: Router
+	) {}
 
 	ngOnInit() {
 		const currentUser = localStorage.getItem("user");
@@ -41,21 +57,38 @@ export class UploadedImagesComponent {
 		this.router.navigate(["/login"]);
 	}
 
-	viewImage(imageName: string) {
-		alert(`Viewing: ${imageName}`);
+	viewImage(image: any) {
+		this.selectedImage = image; // Store the full image object
+		this.isEditing = false;
 	}
 
-	editImage(imageName: string) {
-		alert(`Editing: ${imageName}`);
+	editImage(image: any) {
+		this.selectedImage = { ...image }; // Clone the image object for editing
+		this.isEditing = true;
 	}
-
+	saveChanges(updatedImage: any) {
+		if (this.selectedImage) {
+			const index = this.uploadedImages.findIndex(
+				(img) => img.name === this.selectedImage.name
+			);
+			if (index !== -1) {
+				this.uploadedImages[index] = { ...this.selectedImage, ...updatedImage };
+			}
+		}
+		this.selectedImage = null;
+	}
+	closeModal() {
+		this.selectedImage = null;
+	}
 	shareImage(imageName: string) {
 		alert(`Sharing: ${imageName}`);
 	}
 
 	deleteImage(imageName: string) {
 		if (confirm(`Are you sure you want to delete ${imageName}?`)) {
-			this.uploadedImages = this.uploadedImages.filter((img) => img.name !== imageName);
+			this.uploadedImages = this.uploadedImages.filter(
+				(img) => img.name !== imageName
+			);
 		}
 	}
 
