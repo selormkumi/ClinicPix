@@ -44,13 +44,7 @@ export class UploadedImagesComponent {
 		private router: Router
 	) {}
 
-	ngOnInit() {
-		const currentUser = localStorage.getItem("user");
-		if (currentUser) {
-			const user = JSON.parse(currentUser);
-			this.currentUserName = user.userName;
-		}
-	}
+	ngOnInit() {}
 
 	logout() {
 		this.authService.logout();
