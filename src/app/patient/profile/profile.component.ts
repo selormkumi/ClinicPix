@@ -9,7 +9,6 @@ import { AuthenticationService } from "../../shared/services/authentication.serv
 	styleUrl: "./profile.component.scss",
 })
 export class ProfileComponent implements OnInit {
-	currentUserName: string | null = null;
 	patient: any = {
 		name: "",
 		email: "",
@@ -24,11 +23,6 @@ export class ProfileComponent implements OnInit {
 	) {}
 
 	ngOnInit() {
-		const currentUser = localStorage.getItem("user");
-		if (currentUser) {
-			const user = JSON.parse(currentUser);
-			this.currentUserName = user.userName;
-		}
 		this.loadProfile();
 	}
 	loadProfile(): void {
