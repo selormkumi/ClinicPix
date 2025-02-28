@@ -12,8 +12,6 @@ import { ImageModalComponent } from "../../shared/image-modal/image-modal.compon
 	styleUrl: "./shared-images.component.scss",
 })
 export class SharedImagesComponent {
-	currentUserName: string | null = null;
-
 	sharedImages = [
 		{
 			name: "CT_Scan_2025.jpg",
@@ -35,13 +33,7 @@ export class SharedImagesComponent {
 		private authService: AuthenticationService,
 		private router: Router
 	) {}
-	ngOnInit() {
-		const currentUser = localStorage.getItem("user");
-		if (currentUser) {
-			const user = JSON.parse(currentUser);
-			this.currentUserName = user.userName;
-		}
-	}
+	ngOnInit() {}
 
 	viewImage(image: any) {
 		this.selectedImage = image;
