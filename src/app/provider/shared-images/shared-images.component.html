@@ -16,6 +16,18 @@
 		<div class="card">
 			<div class="card-body">
 				<h5>Shared Images</h5>
+
+				<!-- Search Input -->
+				<div class="search-container" style="margin-bottom: 20px">
+					<input
+						type="text"
+						class="form-control"
+						placeholder="Search Shared Images..."
+						[(ngModel)]="searchTerm"
+						(input)="onSearch()" />
+				</div>
+
+				<!-- Shared Images Table -->
 				<table class="table table-striped">
 					<thead>
 						<tr>
@@ -27,7 +39,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr *ngFor="let image of sharedImages">
+						<tr *ngFor="let image of filteredImages">
 							<td>{{ image.name }}</td>
 							<td>{{ image.sharedBy }}</td>
 							<td>{{ image.sharedOn }}</td>
