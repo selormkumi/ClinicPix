@@ -1,13 +1,12 @@
 import { Component } from "@angular/core";
 import { Router, RouterModule } from "@angular/router";
-import { AuthenticationService } from "../../shared/services/authentication.service";
+
 import {
 	FormBuilder,
 	FormGroup,
 	Validators,
 	ReactiveFormsModule,
 } from "@angular/forms";
-
 import { CommonModule } from "@angular/common";
 
 @Component({
@@ -19,13 +18,8 @@ import { CommonModule } from "@angular/common";
 })
 export class LoginComponent {
 	loginForm: FormGroup;
-	loading: boolean = false; // ✅ Loading indicator for better UX
 
-	constructor(
-		private router: Router,
-		private fb: FormBuilder,
-		private authService: AuthenticationService
-	) {
+	constructor(private router: Router, private fb: FormBuilder) {
 		this.loginForm = this.fb.group({
 			email: ["", [Validators.required, Validators.email]],
 			password: ["", [Validators.required, Validators.minLength(6)]],
@@ -39,52 +33,59 @@ export class LoginComponent {
 			: false;
 	}
 
-	/**
-	 * Handles login logic by calling the backend authentication API.
-	 */
-
 	submitForm() {
 		if (this.loginForm.valid) {
-			this.loading = true; // ✅ Show loading indicato
 			const formData = this.loginForm.value;
 
-			// Call Backend Login API
-			this.authService.login(formData).subscribe(
-				(response) => {
-					console.log("✅ Login Successful:", response);
+			let storedUserData = localStorage.getItem("userData");
+			let users = storedUserData ? JSON.parse(storedUserData) : [];
 
-					// ✅ Store JWT token in localStorage
-					this.authService.storeToken(response.token);
+			// Find user based solely on email and password
+			const matchedUser = users.find(
+				(user: any) =>
+					user.email.trim().toLowerCase() ===
+						formData.email.trim().toLowerCase() &&
+					user.password.trim() === formData.password.trim()
+			);
 
-					// ✅ Store user details (excluding password)
+			if (matchedUser) {
+				// Get the user's role in lowercase
+				const userRole = matchedUser.role.trim().toLowerCase();
+
+				// Check if the role is either 'patient' or 'provider'
+				if (userRole === "patient" || userRole === "provider") {
+					// Store authenticated user in localStorage
+
 					localStorage.setItem(
 						"user",
 						JSON.stringify({
-							email: response.user.email,
-							userName: response.user.userName,
-							role: response.user.role,
-							userId: response.user.id || null,
+							email: matchedUser.email,
+							fullName: matchedUser.fullName,
+							role: matchedUser.role,
+							userId: matchedUser.id || null,
 						})
 					);
 
-					// ✅ Redirect based on role
-					this.redirectBasedOnRole(response.user.role);
-					this.loading = false; // ✅ Hide loading indicator
-				},
+					// Role-based redirection mapping for patient and provider
+					const roleRoutes: { [key: string]: string } = {
+						patient: "/patient/dashboard",
+						provider: "/provider/dashboard",
+					};
 
-				(error) => {
-					console.error("❌ Login Error:", error);
-					let errorMessage = "Invalid email or password. Please try again.";
-					if (error.status === 500) {
-						errorMessage = "Server error. Please try again later.";
-					} else if (error.status === 0) {
-						errorMessage = "Network error. Check your connection.";
+					const redirectRoute = roleRoutes[userRole];
+
+					if (redirectRoute) {
+						this.router.navigate([redirectRoute]);
+					} else {
+						alert("Your role does not have an assigned dashboard.");
 					}
-
-					alert(errorMessage);
-					this.loading = false; // ✅ Hide loading indicator
+				} else {
+					// The user's role is neither patient nor provider
+					alert("Your role is not authorized for this login.");
 				}
-			);
+			} else {
+				alert("Invalid credentials. Please try again.");
+			}
 		} else {
 			// Mark all controls as touched to show validation errors
 			Object.values(this.loginForm.controls).forEach((control) =>
@@ -94,32 +95,11 @@ export class LoginComponent {
 		}
 	}
 
-	/**
-	 * Redirects the user based on their role.
-	 * @param role - User role from the backend.
-	 */
-
-	private redirectBasedOnRole(role: string) {
-		const roleRoutes: { [key: string]: string } = {
-			patient: "/patient/dashboard",
-			provider: "/provider/dashboard",
-		};
-
-		const redirectRoute = roleRoutes[role.toLowerCase()];
-		if (redirectRoute) {
-			this.router.navigate([redirectRoute]);
-		} else {
-			alert("Your role does not have an assigned dashboard.");
-		}
-	}
-
-	// ✅ Eye Icons for Password Visibility
-
+	// Eye Icons
 	showPassword: boolean = false;
 	eyeOpenIcon = "https://cdn-icons-png.flaticon.com/512/159/159604.png"; // Open eye
 	eyeClosedIcon = "https://cdn-icons-png.flaticon.com/512/565/565655.png"; // Closed eye
 	eyeIcon = this.eyeClosedIcon; // Default to closed eye
-
 	togglePasswordVisibility() {
 		this.showPassword = !this.showPassword;
 		this.eyeIcon = this.showPassword ? this.eyeOpenIcon : this.eyeClosedIcon;
