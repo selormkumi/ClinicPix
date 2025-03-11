@@ -11,6 +11,17 @@
 
 <!-- Main Content -->
 <div class="main-content">
+	<!-- Search Input -->
+	<div class="search-container">
+		<input
+			type="text"
+			class="form-control"
+			placeholder="Search Patients..."
+			[(ngModel)]="searchTerm"
+			(input)="onSearch()" />
+	</div>
+	<br />
+
 	<!-- Patients Section -->
 	<div id="patients" class="card">
 		<div class="card-body">
@@ -25,24 +36,13 @@
 					</tr>
 				</thead>
 				<tbody>
-					<tr>
-						<td>John Doe</td>
-						<td>john.doe&#64;example.com</td>
-						<td>(123) 456-7890</td>
+					<tr *ngFor="let patient of filteredPatients">
+						<td>{{ patient.name }}</td>
+						<td>{{ patient.email }}</td>
+						<td>{{ patient.phone }}</td>
 						<td>
 							<button class="btn btn-primary btn-sm">View Details</button>&nbsp;
-							<button class="btn btn-secondary btn-sm">Send Message</button
-							>&nbsp;
-						</td>
-					</tr>
-					<tr>
-						<td>Jane Smith</td>
-						<td>jane.smith&#64;example.com</td>
-						<td>(987) 654-3210</td>
-						<td>
-							<button class="btn btn-primary btn-sm">View Details</button>&nbsp;
-							<button class="btn btn-secondary btn-sm">Send Message</button
-							>&nbsp;
+							<button class="btn btn-secondary btn-sm">Send Message</button>
 						</td>
 					</tr>
 				</tbody>

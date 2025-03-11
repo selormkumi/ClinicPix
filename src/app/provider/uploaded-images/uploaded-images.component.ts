@@ -32,6 +32,9 @@ export class UploadedImagesComponent {
 		},
 	];
 
+	searchTerm: string = ""; // Bound to the search input field
+	filteredImages: any[] = []; // Array to hold filtered images
+
 	newFileName: string = "";
 	newFileTags: string = "";
 	pendingFile: File | null = null; // Stores the dragged file for confirmation
@@ -49,6 +52,29 @@ export class UploadedImagesComponent {
 		if (currentUser) {
 			const user = JSON.parse(currentUser);
 			this.currentUserName = user.userName;
+		}
+		// Initialize filteredImages with all uploaded images
+		this.filteredImages = this.uploadedImages;
+	}
+
+	// Search function that filters images based on the search term
+	onSearch() {
+		if (this.searchTerm.trim() === "") {
+			this.filteredImages = this.uploadedImages; // If search term is empty, show all images
+		} else {
+			this.filteredImages = this.uploadedImages.filter(
+				(image) =>
+					image.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+					image.uploadedBy
+						.toLowerCase()
+						.includes(this.searchTerm.toLowerCase()) ||
+					image.uploadedOn
+						.toLowerCase()
+						.includes(this.searchTerm.toLowerCase()) ||
+					image.tags.some((tag) =>
+						tag.toLowerCase().includes(this.searchTerm.toLowerCase())
+					)
+			);
 		}
 	}
 
