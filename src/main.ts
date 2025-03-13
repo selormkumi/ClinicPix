@@ -6,25 +6,21 @@ import { provideHttpClient, withInterceptors } from "@angular/common/http";
 import { provideAnimationsAsync } from "@angular/platform-browser/animations/async";
 import { AuthInterceptor } from "./app/shared/interceptors/auth.interceptor";
 import { Amplify } from "aws-amplify";
-import { awsconfig } from "/";
+import { awsconfig } from "./aws-exports";
 
 Amplify.configure({
 	Auth: {
-	  Cognito: {
-		userPoolId: 'ap-south-1_xxxxx',
-		userPoolClientId: '71h7gnxxxxxxxxx'
-	  }
-	}
-  });
+		Cognito: {
+			userPoolId: "ap-south-1_xxxxx",
+			userPoolClientId: "71h7gnxxxxxxxxx",
+		},
+	},
+});
 
 bootstrapApplication(AppComponent, {
-
 	providers: [
 		provideRouter(routes),
 		provideHttpClient(withInterceptors([AuthInterceptor])),
 		provideAnimationsAsync(),
 	],
-
 }).catch((err) => console.error(err));
-
- 
