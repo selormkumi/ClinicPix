@@ -1,0 +1,15 @@
+{
+  "staging": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-clinicpix-staging-c2846-authRole",
+      "UnauthRoleArn": "arn:aws:iam::741448959267:role/amplify-clinicpix-staging-c2846-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::741448959267:role/amplify-clinicpix-staging-c2846-authRole",
+      "Region": "us-east-2",
+      "DeploymentBucketName": "amplify-clinicpix-staging-c2846-deployment",
+      "UnauthRoleName": "amplify-clinicpix-staging-c2846-unauthRole",
+      "StackName": "amplify-clinicpix-staging-c2846",
+      "StackId": "arn:aws:cloudformation:us-east-2:741448959267:stack/amplify-clinicpix-staging-c2846/1643c360-ffc3-11ef-aa24-02d6d5c9829d",
+      "AmplifyAppId": "d3bqf92fjqs0n7"
+    }
+  }
+}
