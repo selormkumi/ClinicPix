@@ -1,0 +1,14 @@
+{
+  "resourceName": "ClinicPixBackend",
+  "policyUUID": "58af2058",
+  "bucketName": "clinicpiximagestore",
+  "storageAccess": "auth",
+  "guestAccess": [],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ",
+    "DELETE"
+  ],
+  "triggerFunction": "S3Triggera7e39bbb",
+  "groupAccess": {}
+}

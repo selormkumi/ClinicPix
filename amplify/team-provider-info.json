@@ -1,0 +1,41 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-clinicpix-dev-3c6c6-authRole",
+      "UnauthRoleArn": "arn:aws:iam::741448959267:role/amplify-clinicpix-dev-3c6c6-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::741448959267:role/amplify-clinicpix-dev-3c6c6-authRole",
+      "Region": "us-east-2",
+      "DeploymentBucketName": "amplify-clinicpix-dev-3c6c6-deployment",
+      "UnauthRoleName": "amplify-clinicpix-dev-3c6c6-unauthRole",
+      "StackName": "amplify-clinicpix-dev-3c6c6",
+      "StackId": "arn:aws:cloudformation:us-east-2:741448959267:stack/amplify-clinicpix-dev-3c6c6/ab6e3120-00ed-11f0-8ebf-021e3db7e5dd",
+      "AmplifyAppId": "d34s10ss64f2bh",
+      "APIGatewayAuthURL": "https://s3.amazonaws.com/amplify-clinicpix-dev-3c6c6-deployment/amplify-cfn-templates/api/APIGatewayAuthStack.json"
+    },
+    "categories": {
+      "auth": {
+        "clinicpix620a7f22": {}
+      },
+      "function": {
+        "clinicpixlambda": {
+          "deploymentBucketName": "amplify-clinicpix-dev-3c6c6-deployment",
+          "s3Key": "amplify-builds/clinicpixlambda-2f385634424e46634478-build.zip"
+        },
+        "pixlambda": {
+          "deploymentBucketName": "amplify-clinicpix-dev-3c6c6-deployment",
+          "s3Key": "amplify-builds/pixlambda-424f30704c625a544563-build.zip"
+        },
+        "S3Triggera7e39bbb": {
+          "deploymentBucketName": "amplify-clinicpix-dev-3c6c6-deployment",
+          "s3Key": "amplify-builds/S3Triggera7e39bbb-616f347a342f51445659-build.zip"
+        }
+      },
+      "storage": {
+        "ClinicPixBackend": {}
+      },
+      "api": {
+        "clinicpixapi": {}
+      }
+    }
+  }
+}
