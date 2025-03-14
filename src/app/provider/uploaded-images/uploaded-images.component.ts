@@ -1,225 +1,173 @@
-import { Component, ViewChild, ElementRef, OnInit } from "@angular/core";
+import { Component, ViewChild, ElementRef } from "@angular/core";
 import { Router, RouterModule } from "@angular/router";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { AuthenticationService } from "../../shared/services/authentication.service";
-import { ImageService, ImageItem } from "../../shared/services/image.service";
 import { ImageModalComponent } from "../../shared/image-modal/image-modal.component";
- 
+
 @Component({
-  selector: "app-uploaded-images",
-  standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, ImageModalComponent],
-  templateUrl: "./uploaded-images.component.html",
-  styleUrl: "./uploaded-images.component.scss",
+	selector: "app-uploaded-images",
+	standalone: true,
+	imports: [CommonModule, RouterModule, FormsModule, ImageModalComponent],
+	templateUrl: "./uploaded-images.component.html",
+	styleUrl: "./uploaded-images.component.scss",
 })
+export class UploadedImagesComponent {
+	currentUserName: string | null = null;
+	selectedImage: any | null = null;
+	isEditing: boolean = false; // Tracks if the user is in edit mode
 
-export class UploadedImagesComponent implements OnInit {
-  currentUserName: string | null = null;
-  selectedImage: ImageItem | null = null;
-  isEditing: boolean = false;
-  isLoading: boolean = false;
-  uploadedImages: ImageItem[] = [];
-  filteredImages: ImageItem[] = [];
-  searchTerm: string = "";
-  newFileName: string = "";
-  newFileTags: string = "";
-  pendingFile: File | null = null;
-  isDragging = false;
-  uploadError: string | null = null;
- 
-  @ViewChild("fileInput") fileInput!: ElementRef<HTMLInputElement>;
-  constructor(
-    private authService: AuthenticationService,
-    private imageService: ImageService,
-    private router: Router
-  ) {}
- 
-  ngOnInit() {
-    // Get current user
+	uploadedImages = [
+		{
+			name: "CT_Scan_2025.jpg",
+			uploadedBy: "John Doe",
+			uploadedOn: "2025-01-15",
+			tags: ["CT", "Scan"],
+		},
+		{
+			name: "MRI_Brain_2025.jpg",
+			uploadedBy: "Jane Smith",
+			uploadedOn: "2025-01-10",
+			tags: ["MRI", "Brain"],
+		},
+	];
 
-    const currentUser = localStorage.getItem("user");
-    if (currentUser) {
-      const user = JSON.parse(currentUser);
-      this.currentUserName = user.userName;
-    }
- 
-    // Subscribe to image service loading state
+	searchTerm: string = ""; // Bound to the search input field
+	filteredImages: any[] = []; // Array to hold filtered images
 
-    this.imageService.loading$.subscribe(loading => {
-      this.isLoading = loading;
-    });
- 
-    // Subscribe to image list changes
+	newFileName: string = "";
+	newFileTags: string = "";
+	pendingFile: File | null = null; // Stores the dragged file for confirmation
+	isDragging = false; // Tracks drag-over state for UI effect
 
-    this.imageService.images$.subscribe(images => {
-      this.uploadedImages = images;
-      this.onSearch(); // Apply any existing search filter
-    });
- 
-    // Load images on init
+	@ViewChild("fileInput") fileInput!: ElementRef<HTMLInputElement>;
 
-    this.loadImages();
-  }
- 
-  async loadImages() {
-    await this.imageService.listImages();
-  }
- 
-  onSearch() {
-    if (this.searchTerm.trim() === "") {
-      this.filteredImages = this.uploadedImages;
-    } else {
-      const searchTermLower = this.searchTerm.toLowerCase();
-      this.filteredImages = this.uploadedImages.filter(
-        (image) =>
-          image.name.toLowerCase().includes(searchTermLower) ||
-          image.uploadedBy.toLowerCase().includes(searchTermLower) ||
-          image.uploadedOn.toLowerCase().includes(searchTermLower) ||
-          image.tags.some((tag) => tag.toLowerCase().includes(searchTermLower))
-      );
-    }
-  }
- 
-  logout() {
-    this.authService.logout();
-    this.router.navigate(["/login"]);
-  }
- 
-  async viewImage(image: ImageItem) {
-    this.selectedImage = image;
-    this.isEditing = false;
-  }
- 
-  async editImage(image: ImageItem) {
-    // Get the latest image details
+	constructor(
+		private authService: AuthenticationService,
+		private router: Router
+	) {}
 
-    const updatedImage = await this.imageService.getImageDetails(image.key);
-    if (updatedImage) {
-      this.selectedImage = updatedImage;
-      this.isEditing = true;
-    }
-  }
- 
-  saveChanges(updatedImage: any) {
-    // Note: For updating metadata, you would need additional 
+	ngOnInit() {
+		const currentUser = localStorage.getItem("user");
+		if (currentUser) {
+			const user = JSON.parse(currentUser);
+			this.currentUserName = user.userName;
+		}
+		// Initialize filteredImages with all uploaded images
+		this.filteredImages = this.uploadedImages;
+	}
 
-    // implementation in the ImageService
-    this.loadImages(); // Refresh the list
-    this.selectedImage = null;
-  }
- 
-  closeModal() {
-    this.selectedImage = null;
-  }
- 
-  shareImage(imageName: string) {
-    // Implement sharing functionality
-    alert(`Sharing: ${imageName}`);
+	// Search function that filters images based on the search term
+	onSearch() {
+		if (this.searchTerm.trim() === "") {
+			this.filteredImages = this.uploadedImages; // If search term is empty, show all images
+		} else {
+			this.filteredImages = this.uploadedImages.filter(
+				(image) =>
+					image.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+					image.uploadedBy
+						.toLowerCase()
+						.includes(this.searchTerm.toLowerCase()) ||
+					image.uploadedOn
+						.toLowerCase()
+						.includes(this.searchTerm.toLowerCase()) ||
+					image.tags.some((tag) =>
+						tag.toLowerCase().includes(this.searchTerm.toLowerCase())
+					)
+			);
+		}
+	}
 
-  }
- 
-  async deleteImage(key: string) {
-    if (confirm(`Are you sure you want to delete this image?`)) {
-      const success = await this.imageService.deleteImage(key);
-      if (!success) {
-        alert('Failed to delete image. Please try again.');
-      }
-    }
-  }
- 
-  triggerFileInput() {
-    this.fileInput.nativeElement.click();
-  }
- 
-  uploadImage(event: Event) {
-    this.uploadError = null;
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      const file = input.files[0];
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        this.uploadError = 'Please select an image file.';
-        return;
-      }
+	logout() {
+		this.authService.logout();
+		this.router.navigate(["/login"]);
+	}
 
-      // Validate file size (5MB limit)
+	viewImage(image: any) {
+		this.selectedImage = image; // Store the full image object
+		this.isEditing = false;
+	}
 
-      if (file.size > 5 * 1024 * 1024) {
-        this.uploadError = 'File size must be less than 5MB.';
-        return;
-      }
+	editImage(image: any) {
+		this.selectedImage = { ...image }; // Clone the image object for editing
+		this.isEditing = true;
+	}
+	saveChanges(updatedImage: any) {
+		if (this.selectedImage) {
+			const index = this.uploadedImages.findIndex(
+				(img) => img.name === this.selectedImage.name
+			);
+			if (index !== -1) {
+				this.uploadedImages[index] = { ...this.selectedImage, ...updatedImage };
+			}
+		}
+		this.selectedImage = null;
+	}
+	closeModal() {
+		this.selectedImage = null;
+	}
+	shareImage(imageName: string) {
+		alert(`Sharing: ${imageName}`);
+	}
 
-      this.pendingFile = file;
-      this.newFileName = this.pendingFile.name;
-    }
-  }
- 
-  async confirmUpload() {
-    this.uploadError = null;
-    if (!this.pendingFile) {
-      this.uploadError = 'Please select a file to upload.';
-      return;
-    }
+	deleteImage(imageName: string) {
+		if (confirm(`Are you sure you want to delete ${imageName}?`)) {
+			this.uploadedImages = this.uploadedImages.filter(
+				(img) => img.name !== imageName
+			);
+		}
+	}
 
-    if (!this.newFileName.trim()) {
-      this.uploadError = 'Please enter a file name.';
-      return;
-    }
+	triggerFileInput() {
+		this.fileInput.nativeElement.click();
+	}
 
-    const success = await this.imageService.uploadImage(
-      this.pendingFile,
-      this.newFileName.trim(),
-      this.newFileTags,
-      this.currentUserName || 'Unknown'
-    );
+	uploadImage(event: Event) {
+		const input = event.target as HTMLInputElement;
+		if (input.files && input.files.length > 0) {
+			this.pendingFile = input.files[0];
+			this.newFileName = this.pendingFile.name; // Prefill the file name field
+		}
+	}
 
-    if (success) {
-      this.resetUploadForm();
-    } else {
-      this.uploadError = 'Failed to upload image. Please try again.';
-    }
-  }
- 
-  handleDragOver(event: DragEvent) {
-    event.preventDefault();
-    this.isDragging = true;
-  }
- 
-  handleDragLeave() {
-    this.isDragging = false;
-  }
- 
-  handleDrop(event: DragEvent) {
-    event.preventDefault();
-    this.isDragging = false;
-    this.uploadError = null;
-    if (event.dataTransfer && event.dataTransfer.files.length > 0) {
-      const file = event.dataTransfer.files[0];
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        this.uploadError = 'Please select an image file.';
-        return;
-      }
+	confirmUpload() {
+		if (this.pendingFile) {
+			const newImage = {
+				name: this.newFileName.trim() || this.pendingFile.name,
+				uploadedBy: this.currentUserName || "Unknown",
+				uploadedOn: new Date().toISOString().split("T")[0],
+				tags: this.newFileTags.split(",").map((tag) => tag.trim()),
+			};
+			this.uploadedImages.push(newImage);
+			this.resetUploadForm();
+		}
+	}
 
-      // Validate file size
-      if (file.size > 5 * 1024 * 1024) {
-        this.uploadError = 'File size must be less than 5MB.';
-        return;
-      }
+	// Drag & Drop Functions
+	handleDragOver(event: DragEvent) {
+		event.preventDefault();
+		this.isDragging = true;
+	}
 
-      this.pendingFile = file;
-      this.newFileName = this.pendingFile.name;
-    }
-  }
- 
-  resetUploadForm() {
-    this.pendingFile = null;
-    this.newFileName = "";
-    this.newFileTags = "";
-    this.uploadError = null;
-    if (this.fileInput) {
-      this.fileInput.nativeElement.value = "";
-    }
-  }
+	handleDragLeave() {
+		this.isDragging = false;
+	}
+
+	handleDrop(event: DragEvent) {
+		event.preventDefault();
+		this.isDragging = false;
+		if (event.dataTransfer && event.dataTransfer.files.length > 0) {
+			this.pendingFile = event.dataTransfer.files[0];
+			this.newFileName = this.pendingFile.name; // Prefill file name field
+		}
+	}
+
+	resetUploadForm() {
+		this.pendingFile = null;
+		this.newFileName = "";
+		this.newFileTags = "";
+		if (this.fileInput) {
+			this.fileInput.nativeElement.value = "";
+		}
+	}
 }
