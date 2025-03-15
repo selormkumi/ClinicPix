@@ -44,6 +44,12 @@ Thumbs.db
 # serverside files
 /serverside/node_modules
 
+
+# amplify
+.amplify
+amplify_outputs*
+amplifyconfiguration*
+
 #amplify-do-not-edit-begin
 amplify/\#current-cloud-backend
 amplify/.config/local-*
