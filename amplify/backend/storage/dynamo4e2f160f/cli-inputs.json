@@ -1,0 +1,16 @@
+{
+  "resourceName": "dynamo4e2f160f",
+  "tableName": "LoginInfo",
+  "partitionKey": {
+    "fieldName": "Email",
+    "fieldType": "string"
+  },
+  "sortKey": {
+    "fieldName": "Role",
+    "fieldType": "string"
+  },
+  "gsi": [],
+  "triggerFunctions": [
+    "dynamo4e2f160fTriggerdc6aa979"
+  ]
+}

@@ -10,6 +10,23 @@
       "StackName": "amplify-clinicpix-main-88fa1",
       "StackId": "arn:aws:cloudformation:us-east-2:741448959267:stack/amplify-clinicpix-main-88fa1/7662d1c0-0129-11f0-ad0f-06cd8a0a4655",
       "AmplifyAppId": "d2ya194j3jg096"
+    },
+    "categories": {
+      "function": {
+        "dynamo4e2f160fTriggerdc6aa979": {
+          "deploymentBucketName": "amplify-clinicpix-main-88fa1-deployment",
+          "s3Key": "amplify-builds/dynamo4e2f160fTriggerdc6aa979-6e596e6d4b394e307a32-build.zip"
+        }
+      },
+      "storage": {
+        "dynamo4e2f160f": {}
+      },
+      "auth": {
+        "clinicpix14e283d6": {}
+      },
+      "api": {
+        "clinicpix": {}
+      }
     }
   }
 }
