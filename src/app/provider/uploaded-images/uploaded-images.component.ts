@@ -1,9 +1,10 @@
-import { Component, ViewChild, ElementRef } from "@angular/core";
+import { Component, ViewChild, ElementRef, OnInit } from "@angular/core";
 import { Router, RouterModule } from "@angular/router";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { AuthenticationService } from "../../shared/services/authentication.service";
 import { ImageModalComponent } from "../../shared/image-modal/image-modal.component";
+import { S3FileService } from "../../shared/services/s3-file.service";
 
 @Component({
 	selector: "app-uploaded-images",
@@ -12,36 +13,23 @@ import { ImageModalComponent } from "../../shared/image-modal/image-modal.compon
 	templateUrl: "./uploaded-images.component.html",
 	styleUrl: "./uploaded-images.component.scss",
 })
-export class UploadedImagesComponent {
+export class UploadedImagesComponent implements OnInit {
 	currentUserName: string | null = null;
 	selectedImage: any | null = null;
-	isEditing: boolean = false; // Tracks if the user is in edit mode
+	isEditing: boolean = false;
 
-	uploadedImages = [
-		{
-			name: "CT_Scan_2025.jpg",
-			uploadedBy: "John Doe",
-			uploadedOn: "2025-01-15",
-			tags: ["CT", "Scan"],
-		},
-		{
-			name: "MRI_Brain_2025.jpg",
-			uploadedBy: "Jane Smith",
-			uploadedOn: "2025-01-10",
-			tags: ["MRI", "Brain"],
-		},
-	];
-
+	uploadedImages: any[] = []; // Stores images fetched from S3
 	newFileName: string = "";
 	newFileTags: string = "";
-	pendingFile: File | null = null; // Stores the dragged file for confirmation
-	isDragging = false; // Tracks drag-over state for UI effect
+	pendingFile: File | null = null;
+	isDragging = false;
 
 	@ViewChild("fileInput") fileInput!: ElementRef<HTMLInputElement>;
 
 	constructor(
 		private authService: AuthenticationService,
-		private router: Router
+		private router: Router,
+		private s3Service: S3FileService
 	) {}
 
 	ngOnInit() {
@@ -50,6 +38,32 @@ export class UploadedImagesComponent {
 			const user = JSON.parse(currentUser);
 			this.currentUserName = user.userName;
 		}
+		this.fetchUploadedImages();
+	}
+
+	// 📌 Fetch images from S3 and correctly map filenames
+	fetchUploadedImages() {
+		this.s3Service.getUploadedFiles().subscribe(
+			(res) => {
+				console.log("DEBUG: Response from S3 ->", res);
+
+				if (res.files && Array.isArray(res.files)) {
+					this.uploadedImages = res.files.map((file: any) => ({
+						name: file.fileName || "Unknown File",
+						uploadedBy: "Unknown",
+						uploadedOn: file.lastModified || "N/A",
+						tags: [],
+					}));
+
+					console.log("✅ Uploaded Images ->", this.uploadedImages);
+				} else {
+					console.error("❌ ERROR: Unexpected API response format", res);
+				}
+			},
+			(error) => {
+				console.error("❌ ERROR: Failed to fetch uploaded files", error);
+			}
+		);
 	}
 
 	logout() {
@@ -57,41 +71,31 @@ export class UploadedImagesComponent {
 		this.router.navigate(["/login"]);
 	}
 
-	viewImage(image: any) {
-		this.selectedImage = image; // Store the full image object
-		this.isEditing = false;
+	// 📌 View Image (Open file in a new tab)
+	viewImage(imageName: string) {
+		this.s3Service.getFileUrl(imageName).subscribe((res) => {
+			window.open(res.viewUrl, "_blank");
+		});
 	}
 
-	editImage(image: any) {
-		this.selectedImage = { ...image }; // Clone the image object for editing
-		this.isEditing = true;
-	}
-	saveChanges(updatedImage: any) {
-		if (this.selectedImage) {
-			const index = this.uploadedImages.findIndex(
-				(img) => img.name === this.selectedImage.name
-			);
-			if (index !== -1) {
-				this.uploadedImages[index] = { ...this.selectedImage, ...updatedImage };
-			}
-		}
-		this.selectedImage = null;
-	}
-	closeModal() {
-		this.selectedImage = null;
-	}
+	// 📌 Share Image (Generate a shareable link)
 	shareImage(imageName: string) {
-		alert(`Sharing: ${imageName}`);
+		this.s3Service.getShareUrl(imageName).subscribe((res) => {
+			alert(`Shareable link: ${res.shareUrl}`);
+		});
 	}
 
+	// 📌 Delete Image
 	deleteImage(imageName: string) {
 		if (confirm(`Are you sure you want to delete ${imageName}?`)) {
-			this.uploadedImages = this.uploadedImages.filter(
-				(img) => img.name !== imageName
-			);
+			this.s3Service.deleteFile(imageName).subscribe(() => {
+				alert("File deleted successfully!");
+				this.fetchUploadedImages();
+			});
 		}
 	}
 
+	// 📌 Upload Image
 	triggerFileInput() {
 		this.fileInput.nativeElement.click();
 	}
@@ -100,24 +104,30 @@ export class UploadedImagesComponent {
 		const input = event.target as HTMLInputElement;
 		if (input.files && input.files.length > 0) {
 			this.pendingFile = input.files[0];
-			this.newFileName = this.pendingFile.name; // Prefill the file name field
+			this.newFileName = this.pendingFile.name;
 		}
 	}
 
 	confirmUpload() {
-		if (this.pendingFile) {
-			const newImage = {
-				name: this.newFileName.trim() || this.pendingFile.name,
-				uploadedBy: this.currentUserName || "Unknown",
-				uploadedOn: new Date().toISOString().split("T")[0],
-				tags: this.newFileTags.split(",").map((tag) => tag.trim()),
-			};
-			this.uploadedImages.push(newImage);
-			this.resetUploadForm();
-		}
+		if (!this.pendingFile) return;
+
+		this.s3Service.uploadFile(this.pendingFile).subscribe((res) => {
+			const uploadUrl = res.uploadUrl;
+
+			// Upload the file to S3
+			fetch(uploadUrl, {
+				method: "PUT",
+				body: this.pendingFile,
+			})
+				.then(() => {
+					alert("File uploaded successfully!");
+					this.fetchUploadedImages();
+				})
+				.catch((err) => console.error("Upload error:", err));
+		});
 	}
 
-	// Drag & Drop Functions
+	// 📌 Drag & Drop Handlers
 	handleDragOver(event: DragEvent) {
 		event.preventDefault();
 		this.isDragging = true;
@@ -132,7 +142,7 @@ export class UploadedImagesComponent {
 		this.isDragging = false;
 		if (event.dataTransfer && event.dataTransfer.files.length > 0) {
 			this.pendingFile = event.dataTransfer.files[0];
-			this.newFileName = this.pendingFile.name; // Prefill file name field
+			this.newFileName = this.pendingFile.name;
 		}
 	}
 
@@ -144,4 +154,25 @@ export class UploadedImagesComponent {
 			this.fileInput.nativeElement.value = "";
 		}
 	}
+
+	// 📌 Close the modal (cancel editing/viewing)
+	closeModal() {
+		this.selectedImage = null;
+		this.isEditing = false;
+	}
+
+	// 📌 Save Changes (Handles renaming and metadata updates)
+	saveChanges(updatedImage: any) {
+		if (this.selectedImage) {
+			const index = this.uploadedImages.findIndex(
+				(img) => img.name === this.selectedImage.name
+			);
+			if (index !== -1) {
+				this.uploadedImages[index] = { ...this.selectedImage, ...updatedImage };
+			}
+		}
+		this.selectedImage = null;
+		this.isEditing = false;
+	}
+
 }

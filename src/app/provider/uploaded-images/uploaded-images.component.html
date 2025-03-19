@@ -67,6 +67,7 @@
 				</button>
 			</div>
 
+			<!-- Table of Uploaded Images -->
 			<table class="table table-striped">
 				<thead>
 					<tr>
@@ -82,34 +83,31 @@
 						<td>{{ image.name }}</td>
 						<td>{{ image.uploadedBy }}</td>
 						<td>{{ image.uploadedOn }}</td>
-						<td>{{ image.tags.join(", ") }}</td>
+						<td>{{ image.tags ? image.tags.join(", ") : 'N/A' }}</td>
 						<td>
-							<button class="btn btn-primary btn-sm" (click)="viewImage(image)">
-								View</button
-							>&nbsp;
-							<button
-								class="btn btn-secondary btn-sm"
-								(click)="editImage(image)">
-								Edit</button
-							>&nbsp;
-							<button
-								class="btn btn-warning btn-sm"
-								(click)="shareImage(image.name)">
-								Share</button
-							>&nbsp;
-							<button
-								class="btn btn-danger btn-sm"
-								(click)="deleteImage(image.name)">
-								Delete</button
-							>&nbsp;
+							<!-- View Button -->
+							<button class="btn btn-primary btn-sm" (click)="viewImage(image.name)">
+								View
+							</button>&nbsp;
+
+							<!-- Share Button -->
+							<button class="btn btn-warning btn-sm" (click)="shareImage(image.name)">
+								Share
+							</button>&nbsp;
+
+							<!-- Delete Button -->
+							<button class="btn btn-danger btn-sm" (click)="deleteImage(image.name)">
+								Delete
+							</button>&nbsp;
 						</td>
 					</tr>
 				</tbody>
 			</table>
+
+			<!-- Image Modal Component -->
 			<app-image-modal
 				*ngIf="selectedImage"
 				[image]="selectedImage"
-				[isEditing]="isEditing"
 				(closeModal)="closeModal()"
 				(saveChanges)="saveChanges($event)">
 			</app-image-modal>
