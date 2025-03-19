@@ -4,20 +4,16 @@ const db = require("../config/dbConfig");
 // ✅ Get all files from S3
 const getFiles = async (req, res) => {
     try {
-        const files = await fileModel.listFiles();
-
-        if (!files || files.length === 0) {
-            console.log("🚨 No files found in S3.");
-            return res.json({ files: [] });
-        }
-
-        console.log("✅ Files Retrieved:", files);
+        const files = await db.query(
+            `SELECT file_name, uploaded_by, uploaded_on, tags FROM files`
+        );
 
         res.json({
-            files: files.map(file => ({
-                fileName: file.fileName, // Correct file name
-                size: file.size,
-                lastModified: file.lastModified
+            files: files.rows.map(file => ({
+                fileName: file.file_name,
+                uploadedBy: file.uploaded_by,
+                uploadedOn: file.uploaded_on,
+                tags: file.tags ? file.tags.split(",") : []  // ✅ Convert stored string into an array
             }))
         });
 
@@ -29,24 +25,29 @@ const getFiles = async (req, res) => {
 
 // ✅ Generate pre-signed URL for uploading
 const uploadFile = async (req, res) => {     
-    const { fileName, fileType, uploadedBy, tags } = req.body;     
+    console.log("✅ DEBUG: Received Upload Request:", req.body); 
+    
+    const { fileName, fileType, uploadedBy, tags } = req.body;  // ✅ Make sure tags are included
 
     if (!fileName || !fileType || !uploadedBy) {         
-        return res.status(400).json({ error: "Missing fileName or fileType" });     
+        console.log("❌ DEBUG: Missing fileName, fileType, or uploadedBy");         
+        return res.status(400).json({ error: "Missing fileName, fileType, or uploadedBy" });     
     }    
 
     try {         
+        // ✅ Generate pre-signed upload URL
         const uploadUrl = await fileModel.generateUploadUrl(fileName, fileType);
 
         // ✅ Store metadata in PostgreSQL
         await db.query(
             `INSERT INTO files (file_name, uploaded_by, uploaded_on, tags) 
-             VALUES ($1, $2, NOW(), $3)`,
-            [fileName, uploadedBy, JSON.stringify(tags)]
+             VALUES ($1, $2, NOW(), $3)`, 
+            [fileName, uploadedBy, tags.length > 0 ? tags.join(",") : null]
         );
 
         res.json({ uploadUrl });    
     } catch (error) {         
+        console.error("❌ ERROR: Failed to generate upload URL:", error); 
         res.status(500).json({ error: error.message }); 
     }
 };
@@ -96,4 +97,20 @@ const deleteFile = async (req, res) => {
     }
 };
 
-module.exports = { getFiles, uploadFile, viewFile, deleteFile };
+const updateFileTags = async (req, res) => {
+    const { fileName, tags } = req.body;
+
+    if (!fileName || !tags) {
+        return res.status(400).json({ error: "Missing fileName or tags" });
+    }
+
+    try {
+        await db.query(`UPDATE files SET tags = $1 WHERE file_name = $2`, [tags, fileName]);
+        res.json({ message: "Tags updated successfully" });
+    } catch (error) {
+        console.error("❌ ERROR: Failed to update tags", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+module.exports = { getFiles, uploadFile, viewFile, deleteFile, updateFileTags };

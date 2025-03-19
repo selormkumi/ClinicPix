@@ -27,16 +27,13 @@
 				<p *ngIf="pendingFile" class="selected-file">
 					<b>Selected: {{ pendingFile.name }}</b>
 				</p>
-				<button class="btn btn-success" (click)="triggerFileInput()">
-					Select File
-				</button>
+				<button class="btn btn-success" (click)="triggerFileInput()">Select File</button>
 				<input type="file" #fileInput (change)="uploadImage($event)" style="display: none" />
-				<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 			</div>
 
-			<!-- Upload Controls -->
+			<!-- Upload Controls (File Name Displayed, Tags Entered) -->
 			<div class="upload-controls">
-				<input type="text" [(ngModel)]="newFileName" placeholder="Enter file name" />&nbsp;
+				<span><b>File Name: </b>{{ pendingFile?.name || "No file selected" }}</span>&nbsp;
 				<input type="text" [(ngModel)]="newFileTags" placeholder="Enter tag(s)" />
 				<button class="btn btn-primary upload-btn" (click)="confirmUpload()" [disabled]="!pendingFile">
 					Upload
@@ -50,7 +47,7 @@
 						<th>Image Name</th>
 						<th>Uploaded By</th>
 						<th>Uploaded On</th>
-						<th>Tags</th>
+						<th>Tag(s)</th>
 						<th>Actions</th>
 					</tr>
 				</thead>
@@ -58,24 +55,24 @@
 					<tr *ngFor="let image of uploadedImages">
 						<td>{{ image.name }}</td>
 						<td>{{ image.uploadedBy }}</td>
-						<td>{{ image.uploadedOn }}</td>
-						<td>{{ image.tags ? image.tags.join(", ") : 'N/A' }}</td>
+						<td>{{ image.uploadedOn | date: 'medium' }}</td>
+						<td>{{ image.tags ? image.tags.join(", ") : "No tags" }}</td>
 						<td>
 							<!-- View Button -->
 							<button class="btn btn-primary btn-sm" (click)="viewImage(image.name)">
-								<i class="fas fa-eye"></i> View
+							  <i class="fas fa-eye"></i> View
 							</button>&nbsp;
-
+						  
 							<!-- Share Button -->
 							<button class="btn btn-warning btn-sm" (click)="openShareModal(image.name)">
-								<i class="fas fa-share-alt"></i> Share
+							  <i class="fas fa-share-alt"></i> Share
 							</button>&nbsp;
-
+						  
 							<!-- Delete Button -->
 							<button class="btn btn-danger btn-sm" (click)="deleteImage(image.name)">
-								<i class="fas fa-trash"></i> Delete
-							</button>&nbsp;
-						</td>
+							  <i class="fas fa-trash"></i> Delete
+							</button>
+						  </td>						  
 					</tr>
 				</tbody>
 			</table>

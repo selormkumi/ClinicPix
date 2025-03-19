@@ -53,15 +53,15 @@ export class UploadedImagesComponent implements OnInit {
 		this.s3Service.getUploadedFiles().subscribe(
 			(res) => {
 				console.log("DEBUG: Response from S3 ->", res);
-
+	
 				if (res.files && Array.isArray(res.files)) {
 					this.uploadedImages = res.files.map((file: any) => ({
 						name: file.fileName || "Unknown File",
-						uploadedBy: this.currentUserName || "Unknown",
-						uploadedOn: file.lastModified || "N/A",
-						tags: [],
+						uploadedBy: file.uploadedBy || "Unknown",
+						uploadedOn: file.uploadedOn || "N/A",
+						tags: file.tags || []  // <-- Assign tags properly
 					}));
-
+	
 					console.log("✅ Uploaded Images ->", this.uploadedImages);
 				} else {
 					console.error("❌ ERROR: Unexpected API response format", res);
@@ -72,6 +72,7 @@ export class UploadedImagesComponent implements OnInit {
 			}
 		);
 	}
+	
 
 	logout() {
 		this.authService.logout();
@@ -136,38 +137,38 @@ export class UploadedImagesComponent implements OnInit {
 	}
 
 	confirmUpload() {
-		if (!this.pendingFile) {
-			alert("No file selected for upload.");
+		if (!this.pendingFile || !this.currentUserName) {
+			alert("You must be logged in and select a file to upload.");
 			return;
 		}
 	
-		if (!this.currentUserName) {
-			alert("You must be logged in to upload a file.");
-			return;
-		}
+		const fileName = this.pendingFile.name;
+		const fileType = this.pendingFile.type;
+		const uploadedBy = this.currentUserName;
+		const tags = this.newFileTags ? this.newFileTags.split(",").map(tag => tag.trim()) : []; // Convert tags to array
 	
-		// ✅ Ensure we retrieve file type safely
-		const contentType = this.pendingFile.type || "application/octet-stream";
-	
-		this.s3Service.uploadFile(this.pendingFile, this.currentUserName).subscribe((res) => {
-			const uploadUrl = res.uploadUrl;
-	
-			fetch(uploadUrl, {
-				method: "PUT",
-				body: this.pendingFile,
-				headers: { "Content-Type": contentType } // ✅ No more null errors
-			})
-			.then(() => {
-				alert("File uploaded successfully!");
-				this.fetchUploadedImages();
-				this.resetUploadForm();
-			})
-			.catch((err) => {
-				console.error("❌ Upload error:", err);
-				alert("Upload failed. Please try again.");
-			});
-		});
-	}	
+		this.s3Service.uploadFile(fileName, fileType, uploadedBy, tags).subscribe(
+			(res) => {
+				if (res.uploadUrl) {
+					fetch(res.uploadUrl, {
+						method: "PUT",
+						body: this.pendingFile,
+						headers: { "Content-Type": fileType },
+					})
+						.then(() => {
+							alert("File uploaded successfully!");
+							this.fetchUploadedImages(); // 🔥 Refresh file list
+							this.resetUploadForm();
+						})
+						.catch((err) => console.error("❌ Upload error:", err));
+				}
+			},
+			(error) => {
+				console.error("❌ ERROR: Failed to upload file", error);
+				alert("Failed to upload file. Please try again.");
+			}
+		);
+	}		
 
 	// 📌 Drag & Drop Handlers
 	handleDragOver(event: DragEvent) {
@@ -237,4 +238,12 @@ export class UploadedImagesComponent implements OnInit {
 				}
 			);
 	}
+
+	updateTags(fileName: string, tags: string) {
+		this.s3Service.updateFileTags(fileName, tags).subscribe(
+			() => console.log(`✅ Tags updated for ${fileName}`),
+			(error) => console.error("❌ ERROR: Failed to update tags", error)
+		);
+	}
+	
 }
