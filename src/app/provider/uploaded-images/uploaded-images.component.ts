@@ -110,22 +110,28 @@ export class UploadedImagesComponent implements OnInit {
 
 	confirmUpload() {
 		if (!this.pendingFile) return;
-
+	
 		this.s3Service.uploadFile(this.pendingFile).subscribe((res) => {
 			const uploadUrl = res.uploadUrl;
-
+	
+			// ✅ Fix: Ensure `this.pendingFile` is not null before accessing `type`
+			const contentType = this.pendingFile ? this.pendingFile.type : "application/octet-stream";
+	
 			// Upload the file to S3
 			fetch(uploadUrl, {
 				method: "PUT",
 				body: this.pendingFile,
+				headers: { "Content-Type": contentType }, // 🔥 Fix Content-Type
 			})
 				.then(() => {
 					alert("File uploaded successfully!");
-					this.fetchUploadedImages();
+					this.fetchUploadedImages(); // 🔥 Refresh file list
+					this.resetUploadForm(); // 🔥 Reset form after upload
 				})
-				.catch((err) => console.error("Upload error:", err));
+				.catch((err) => console.error("❌ Upload error:", err));
 		});
-	}
+	}	
+	
 
 	// 📌 Drag & Drop Handlers
 	handleDragOver(event: DragEvent) {
@@ -150,10 +156,14 @@ export class UploadedImagesComponent implements OnInit {
 		this.pendingFile = null;
 		this.newFileName = "";
 		this.newFileTags = "";
-		if (this.fileInput) {
+	
+		// 🔥 Ensure input field resets properly
+		if (this.fileInput && this.fileInput.nativeElement) {
 			this.fileInput.nativeElement.value = "";
 		}
-	}
+	
+		this.isDragging = false;
+	}		
 
 	// 📌 Close the modal (cancel editing/viewing)
 	closeModal() {
