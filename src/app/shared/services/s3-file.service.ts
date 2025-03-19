@@ -21,11 +21,12 @@ export class S3FileService {
   }
 
   // 📌 Upload a file to S3 using pre-signed URL
-  uploadFile(file: File, uploadedBy: string): Observable<any> {
+  uploadFile(fileName: string, fileType: string, uploadedBy: string, tags: string[]): Observable<any> {
     return this.http.post(`${this.apiUrl}/upload`, {
-        fileName: file.name,
-        fileType: file.type,
-        uploadedBy: uploadedBy // ✅ Send correct provider email
+        fileName,
+        fileType,
+        uploadedBy,
+        tags,  // ✅ Include tags
     });
 }
 
@@ -78,4 +79,9 @@ export class S3FileService {
       patientEmail,
     });
   }
+
+  updateFileTags(fileName: string, tags: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/update-tags`, { fileName, tags });
+}
+
 }
