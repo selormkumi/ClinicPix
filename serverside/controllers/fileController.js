@@ -113,4 +113,58 @@ const updateFileTags = async (req, res) => {
     }
 };
 
-module.exports = { getFiles, uploadFile, viewFile, deleteFile, updateFileTags };
+const shareFile = async (req, res) => {
+    const { fileName, uploadedBy, sharedWith, expiresIn } = req.body;
+
+    if (!fileName || !uploadedBy || !sharedWith || !expiresIn) {
+        return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    try {
+        // Generate signed URL
+        const viewUrl = await fileModel.generateViewUrl(fileName);
+
+        // Insert into database and return the inserted row
+        const result = await db.query(
+            `INSERT INTO shared_files (file_name, uploaded_by, shared_with, expires_at) 
+             VALUES ($1, $2, $3, NOW() + INTERVAL '1 second' * $4) 
+             RETURNING *`,
+            [fileName, uploadedBy, sharedWith, expiresIn]
+        );
+
+        console.log("✅ DEBUG: File shared successfully ->", result.rows[0]);
+
+        res.json({ message: "File shared successfully", viewUrl });
+    } catch (error) {
+        console.error("❌ ERROR: Failed to share file", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const getSharedFiles = async (req, res) => {
+    const { sharedWith } = req.query; // Get patient email
+
+    if (!sharedWith) {
+        console.log("❌ Missing sharedWith parameter");
+        return res.status(400).json({ error: "Missing sharedWith parameter" });
+    }
+
+    try {
+        const sharedFiles = await db.query(
+            `SELECT shared_files.file_name, shared_files.uploaded_by, shared_files.expires_at, files.tags
+             FROM shared_files 
+             JOIN files ON shared_files.file_name = files.file_name
+             WHERE shared_files.shared_with = $1 AND shared_files.expires_at > NOW()`,
+            [sharedWith]
+        );
+
+        console.log("✅ DEBUG: Retrieved Shared Files ->", sharedFiles.rows);
+        
+        res.json({ sharedFiles: sharedFiles.rows });
+    } catch (error) {
+        console.error("❌ ERROR: Failed to fetch shared files", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+module.exports = { getFiles, uploadFile, viewFile, deleteFile, updateFileTags, shareFile, getSharedFiles };

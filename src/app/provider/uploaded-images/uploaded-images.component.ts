@@ -89,23 +89,21 @@ export class UploadedImagesComponent implements OnInit {
 	// 📌 Share an image with a patient
 	shareImage(imageName: string) {
 		const patientEmail = prompt("Enter the patient's email address:");
-
 		if (!patientEmail) return;
-
-		// Call backend API to generate an expirable link and store in DB
-		this.s3Service
-			.shareFile(imageName, this.currentUserName ?? "Unknown", patientEmail, 86400)
-			.subscribe(
-				(res) => {
-					alert(`Image shared successfully with ${patientEmail}`);
-					console.log("Shared Link:", res.viewUrl);
-				},
-				(error) => {
-					console.error("❌ ERROR: Failed to share image", error);
-					alert("Failed to share image. Please try again.");
-				}
-			);
-	}
+	
+		const expiresIn = 86400; // 1 day in seconds
+	
+		this.s3Service.shareFile(imageName, this.currentUserName ?? "Unknown", patientEmail, expiresIn).subscribe(
+			(res) => {
+				alert(`Image shared successfully with ${patientEmail}`);
+				console.log("Shared Link:", res.viewUrl);
+			},
+			(error) => {
+				console.error("❌ ERROR: Failed to share image", error);
+				alert("Failed to share image. Please try again.");
+			}
+		);
+	}	
 
 	// 📌 Delete Image
 	deleteImage(imageName: string) {

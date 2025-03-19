@@ -30,44 +30,56 @@ export class MyRecordsComponent implements OnInit {
 	) {}
 
 	ngOnInit() {
-		// Retrieve logged-in user's email from localStorage
+		console.log("📌 Initializing My Records Component...");
+	
 		const currentUser = localStorage.getItem("user");
 		if (currentUser) {
 			const user = JSON.parse(currentUser);
 			this.currentUserEmail = user.email;
+			console.log("✅ Current Patient Email:", this.currentUserEmail);
+		} else {
+			console.error("❌ ERROR: No user found in localStorage");
 		}
-
-		// Fetch shared records from backend
+	
+		// 🔥 Call the function to fetch shared files
 		this.fetchSharedFiles();
-	}
+	}	
 
 	// 📌 Fetch shared files for the logged-in patient
 	fetchSharedFiles() {
+		console.log("📌 Fetching shared files for:", this.currentUserEmail);
+	
 		this.s3Service.getSharedFiles(this.currentUserEmail).subscribe(
 			(res) => {
-				console.log("✅ Shared Files Retrieved:", res);
-
+				console.log("✅ DEBUG: Shared Files Response:", res);
+	
+				if (!res.sharedFiles || res.sharedFiles.length === 0) {
+					console.log("❌ No shared files received from backend");
+				}
+	
 				this.sharedImages = res.sharedFiles.map((file: any) => ({
 					name: file.file_name,
-					sharedBy: file.uploaded_by, // Provider who shared the file
+					sharedBy: file.uploaded_by,
 					sharedOn: file.shared_on || "N/A",
 					expiresAt: file.expires_at || "N/A",
+					tags: file.tags ? file.tags.split(",") : ["No tags"]
 				}));
-
-				// Copy for filtering
+	
 				this.filteredRecords = [...this.sharedImages];
-
+	
 				console.log("📌 Updated Shared Images List:", this.sharedImages);
 			},
 			(error) => {
 				console.error("❌ ERROR: Failed to fetch shared files", error);
 			}
 		);
-	}
+	}		
 
+	// 📌 View Image (Generate signed URL)
 	viewImage(image: any) {
-		this.selectedImage = image;
-		this.isEditing = false;
+		this.s3Service.getFileUrl(image.name).subscribe((res) => {
+			window.open(res.viewUrl, "_blank");
+		});
 	}
 
 	closeModal() {
@@ -82,7 +94,7 @@ export class MyRecordsComponent implements OnInit {
 				record.sharedBy.toLowerCase().includes(this.searchQuery.toLowerCase());
 
 			const matchesTag = this.selectedTag
-				? record.tags && record.tags.includes(this.selectedTag)
+				? record.tags.includes(this.selectedTag)
 				: true;
 
 			return matchesSearch && matchesTag;
