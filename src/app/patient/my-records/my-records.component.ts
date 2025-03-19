@@ -4,6 +4,8 @@ import { AuthenticationService } from "../../shared/services/authentication.serv
 import { ImageModalComponent } from "../../shared/image-modal/image-modal.component";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
+import { S3FileService } from "../../shared/services/s3-file.service";
+
 @Component({
 	selector: "app-my-records",
 	imports: [RouterModule, CommonModule, FormsModule, ImageModalComponent],
@@ -12,36 +14,54 @@ import { FormsModule } from "@angular/forms";
 	styleUrl: "./my-records.component.scss",
 })
 export class MyRecordsComponent implements OnInit {
-	imageRecords: any[] = [];
+	sharedImages: any[] = [];
 	filteredRecords: any[] = [];
 	uniqueTags: string[] = [];
 	searchQuery: string = "";
 	selectedTag: string = "";
-	selectedImage: string | null = null;
+	selectedImage: any | null = null;
 	isEditing: boolean = false;
-	patientImages = [
-		{
-			name: "XRay_Chest_2025.jpg",
-			uploadedBy: "Dr. Smith",
-			uploadedOn: "2025-02-10",
-			tags: ["X-Ray", "Chest"],
-		},
-		{
-			name: "Blood_Test_Results.pdf",
-			uploadedBy: "Lab",
-			uploadedOn: "2025-02-12",
-			tags: ["Blood Test"],
-		},
-	];
+	currentUserEmail: string = "";
+
 	constructor(
 		private authService: AuthenticationService,
-		private router: Router
+		private router: Router,
+		private s3Service: S3FileService
 	) {}
 
 	ngOnInit() {
-		this.filteredRecords = [...this.patientImages];
-		this.uniqueTags = Array.from(
-			new Set(this.patientImages.flatMap((record) => record.tags))
+		// Retrieve logged-in user's email from localStorage
+		const currentUser = localStorage.getItem("user");
+		if (currentUser) {
+			const user = JSON.parse(currentUser);
+			this.currentUserEmail = user.email;
+		}
+
+		// Fetch shared records from backend
+		this.fetchSharedFiles();
+	}
+
+	// 📌 Fetch shared files for the logged-in patient
+	fetchSharedFiles() {
+		this.s3Service.getSharedFiles(this.currentUserEmail).subscribe(
+			(res) => {
+				console.log("✅ Shared Files Retrieved:", res);
+
+				this.sharedImages = res.sharedFiles.map((file: any) => ({
+					name: file.file_name,
+					sharedBy: file.uploaded_by, // Provider who shared the file
+					sharedOn: file.shared_on || "N/A",
+					expiresAt: file.expires_at || "N/A",
+				}));
+
+				// Copy for filtering
+				this.filteredRecords = [...this.sharedImages];
+
+				console.log("📌 Updated Shared Images List:", this.sharedImages);
+			},
+			(error) => {
+				console.error("❌ ERROR: Failed to fetch shared files", error);
+			}
 		);
 	}
 
@@ -53,40 +73,33 @@ export class MyRecordsComponent implements OnInit {
 	closeModal() {
 		this.selectedImage = null;
 	}
-	loadImageRecords(): void {
-		this.filteredRecords = [...this.patientImages];
 
-		// Extract unique tags for filtering
-		this.uniqueTags = Array.from(
-			new Set(this.patientImages.flatMap((record) => record.tags))
-		);
-	}
-
+	// 📌 Filter records based on search query and tags
 	filterRecords(): void {
-		this.filteredRecords = this.patientImages.filter((record) => {
+		this.filteredRecords = this.sharedImages.filter((record) => {
 			const matchesSearch =
 				record.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-				record.tags.some((tag) =>
-					tag.toLowerCase().includes(this.searchQuery.toLowerCase())
-				);
+				record.sharedBy.toLowerCase().includes(this.searchQuery.toLowerCase());
 
 			const matchesTag = this.selectedTag
-				? record.tags.includes(this.selectedTag)
+				? record.tags && record.tags.includes(this.selectedTag)
 				: true;
 
 			return matchesSearch && matchesTag;
 		});
 	}
 
-	closeViewer(): void {
-		this.selectedImage = null;
-	}
-
+	// 📌 Download the shared image
 	downloadImage(image: any): void {
-		alert(`Downloading ${image.name}`);
+		this.s3Service.getFileUrl(image.name).subscribe((res) => {
+			const link = document.createElement("a");
+			link.href = res.viewUrl;
+			link.download = image.name;
+			link.click();
+		});
 	}
 
-	//  The `logout` function logs the user out and redirects them to the login page.
+	// 📌 Logout the user
 	logout() {
 		this.authService.logout();
 		this.router.navigate(["/login"]); // Redirect to login after logout

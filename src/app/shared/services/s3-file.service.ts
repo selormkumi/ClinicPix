@@ -21,27 +21,13 @@ export class S3FileService {
   }
 
   // 📌 Upload a file to S3 using pre-signed URL
-  uploadFile(file: File): Observable<any> {
-    return new Observable((observer) => {
-      this.getUploadUrl(file.name, file.type).subscribe(
-        (res) => {
-          if (res.uploadUrl) {
-            fetch(res.uploadUrl, {
-              method: "PUT",
-              body: file,
-              headers: { "Content-Type": file.type },
-            })
-              .then(() => {
-                observer.next({ message: "File uploaded successfully!" });
-                observer.complete();
-              })
-              .catch((err) => observer.error(err));
-          }
-        },
-        (error) => observer.error(error)
-      );
+  uploadFile(file: File, uploadedBy: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/upload`, {
+        fileName: file.name,
+        fileType: file.type,
+        uploadedBy: uploadedBy // ✅ Send correct provider email
     });
-  }
+}
 
   // 📌 Get pre-signed URL to view a file
   getFileUrl(fileName: string): Observable<any> {

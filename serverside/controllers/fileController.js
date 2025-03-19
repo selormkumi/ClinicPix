@@ -1,4 +1,5 @@
 const fileModel = require("../models/fileModel");
+const db = require("../config/dbConfig");
 
 // ✅ Get all files from S3
 const getFiles = async (req, res) => {
@@ -28,23 +29,28 @@ const getFiles = async (req, res) => {
 
 // ✅ Generate pre-signed URL for uploading
 const uploadFile = async (req, res) => {     
-    console.log("✅ DEBUG: Received Request Body:", req.body); 
-    
-    const { fileName, fileType } = req.body;     
+    const { fileName, fileType, uploadedBy, tags } = req.body;     
 
-    if (!fileName || !fileType) {         
-        console.log("❌ DEBUG: Missing fileName or fileType");         
+    if (!fileName || !fileType || !uploadedBy) {         
         return res.status(400).json({ error: "Missing fileName or fileType" });     
     }    
 
     try {         
-        const uploadUrl = await fileModel.generateUploadUrl(fileName, fileType);        
+        const uploadUrl = await fileModel.generateUploadUrl(fileName, fileType);
+
+        // ✅ Store metadata in PostgreSQL
+        await db.query(
+            `INSERT INTO files (file_name, uploaded_by, uploaded_on, tags) 
+             VALUES ($1, $2, NOW(), $3)`,
+            [fileName, uploadedBy, JSON.stringify(tags)]
+        );
+
         res.json({ uploadUrl });    
     } catch (error) {         
-        console.error("❌ ERROR: Failed to generate upload URL:", error); 
         res.status(500).json({ error: error.message }); 
     }
 };
+
 
 // ✅ Generate pre-signed URL for viewing a file
 const viewFile = async (req, res) => {
@@ -72,8 +78,18 @@ const deleteFile = async (req, res) => {
     }
 
     try {
-        const result = await fileModel.deleteFile(fileName);
-        res.json(result);
+        // ✅ Step 1: Delete file from S3
+        await fileModel.deleteFile(fileName);
+
+        // ✅ Step 2: Delete file record from PostgreSQL
+        const dbResult = await db.query(`DELETE FROM files WHERE file_name = $1 RETURNING *`, [fileName]);
+
+        if (dbResult.rowCount === 0) {
+            return res.status(404).json({ error: "File not found in database" });
+        }
+
+        res.json({ message: "File deleted successfully from S3 and database" });
+
     } catch (error) {
         console.error("❌ ERROR: Failed to delete file:", error);
         res.status(500).json({ error: error.message });
