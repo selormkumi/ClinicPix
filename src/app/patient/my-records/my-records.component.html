@@ -36,6 +36,7 @@
 							<th>Shared By</th>
 							<th>Shared On</th>
 							<th>Expires At</th>
+							<th>Tags</th>
 							<th>Actions</th>
 						</tr>
 					</thead>
@@ -45,21 +46,19 @@
 							<td>{{ image.sharedBy }}</td>
 							<td>{{ image.sharedOn }}</td>
 							<td>{{ image.expiresAt }}</td>
+							<td>{{ image.tags.join(", ") }}</td>
 							<td>
-								<button
-									class="btn btn-primary btn-sm"
-									(click)="viewImage(image)">
-									View</button
-								>&nbsp;
-								<button
-									class="btn btn-danger btn-sm"
-									(click)="downloadImage(image)">
+								<button class="btn btn-primary btn-sm" (click)="viewImage(image)">
+									View
+								</button>
+								&nbsp;
+								<button class="btn btn-danger btn-sm" (click)="downloadImage(image)">
 									Download
 								</button>
 							</td>
 						</tr>
 						<tr *ngIf="filteredRecords.length === 0">
-							<td colspan="5" class="text-center">No shared images found.</td>
+							<td colspan="6" class="text-center">No shared images found.</td>
 						</tr>
 					</tbody>
 				</table>

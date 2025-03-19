@@ -14,4 +14,9 @@ router.get("/files/view/:fileName", fileController.viewFile);
 // ✅ Delete a file
 router.delete("/files/delete/:fileName", fileController.deleteFile);
 
+// ✅ Add the share file route
+router.post("/files/share", fileController.shareFile);
+
+router.get("/files/shared", fileController.getSharedFiles);
+
 module.exports = router;

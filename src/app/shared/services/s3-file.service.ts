@@ -50,27 +50,21 @@ export class S3FileService {
     return this.http.delete(`${this.apiUrl}/delete/${encodeURIComponent(fileName)}`);
   }
 
-  // 📌 Share file with a patient (backend generates expirable link)
-  shareFile(
-    fileName: string,
-    providerEmail: string,
-    patientEmail: string,
-    expiryDuration: number
-  ): Observable<any> {
-    return this.http.post(`${this.apiUrl}/share`, {
+  // 📌 Share file with a patient
+shareFile(fileName: string, uploadedBy: string, sharedWith: string, expiresIn: number): Observable<any> {
+  return this.http.post(`${this.apiUrl}/share`, {
       fileName,
-      providerEmail,
-      patientEmail,
-      expiryDuration,
-    });
-  }
+      uploadedBy,
+      sharedWith,
+      expiresIn
+  });
+}
 
   // 📌 Retrieve shared files for a logged-in patient
   getSharedFiles(patientEmail: string): Observable<any> {
-    return this.http.get(
-      `${this.apiUrl}/shared-files/${encodeURIComponent(patientEmail)}`
-    );
-  }
+    console.log("📌 Fetching shared files for:", patientEmail);
+    return this.http.get(`${this.apiUrl}/shared?sharedWith=${encodeURIComponent(patientEmail)}`);
+}
 
   // 📌 Revoke a shared file (Provider removes access for a patient)
   revokeSharedFile(fileName: string, patientEmail: string): Observable<any> {
