@@ -6,21 +6,18 @@ import { Observable } from "rxjs";
   providedIn: "root",
 })
 export class S3FileService {
-  private apiUrl = "http://localhost:5001/api/files"; // Update if needed
+  private apiUrl = "http://localhost:5001/api/files"; // Backend API base URL
 
   constructor(private http: HttpClient) {}
 
-  // 📌 Get list of uploaded files
+  // 📌 Get all uploaded files
   getUploadedFiles(): Observable<any> {
     return this.http.get(`${this.apiUrl}`);
   }
 
-  // 📌 Get pre-signed URL to upload a new file
+  // 📌 Get pre-signed URL to upload a file
   getUploadUrl(fileName: string, fileType: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/upload`, {
-      fileName,
-      fileType,
-    });
+    return this.http.post(`${this.apiUrl}/upload`, { fileName, fileType });
   }
 
   // 📌 Upload a file to S3 using pre-signed URL
@@ -53,10 +50,7 @@ export class S3FileService {
 
   // 📌 Rename a file in S3
   renameFile(oldFileName: string, newFileName: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/update`, {
-      oldFileName,
-      newFileName,
-    });
+    return this.http.put(`${this.apiUrl}/update`, { oldFileName, newFileName });
   }
 
   // 📌 Generate a shareable link for a file
@@ -64,8 +58,38 @@ export class S3FileService {
     return this.http.get(`${this.apiUrl}/share/${encodeURIComponent(fileName)}`);
   }
 
-  // 📌 Delete a file
+  // 📌 Delete a file from S3
   deleteFile(fileName: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/delete/${encodeURIComponent(fileName)}`);
+  }
+
+  // 📌 Share file with a patient (backend generates expirable link)
+  shareFile(
+    fileName: string,
+    providerEmail: string,
+    patientEmail: string,
+    expiryDuration: number
+  ): Observable<any> {
+    return this.http.post(`${this.apiUrl}/share`, {
+      fileName,
+      providerEmail,
+      patientEmail,
+      expiryDuration,
+    });
+  }
+
+  // 📌 Retrieve shared files for a logged-in patient
+  getSharedFiles(patientEmail: string): Observable<any> {
+    return this.http.get(
+      `${this.apiUrl}/shared-files/${encodeURIComponent(patientEmail)}`
+    );
+  }
+
+  // 📌 Revoke a shared file (Provider removes access for a patient)
+  revokeSharedFile(fileName: string, patientEmail: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/revoke`, {
+      fileName,
+      patientEmail,
+    });
   }
 }
