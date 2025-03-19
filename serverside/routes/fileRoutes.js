@@ -1,44 +1,17 @@
 const express = require("express");
 const router = express.Router();
-const fileModel = require("../models/fileModel");
 const fileController = require("../controllers/fileController");
- 
-// Define API routes
 
+// ✅ Get all files
 router.get("/files", fileController.getFiles);
-router.post("/files/upload", async (req, res) => {
 
-    console.log("✅ DEBUG: Received Request Body:", req.body); // Debugging
- 
-    const { fileName, fileType } = req.body;
- 
-    if (!fileName || !fileType) {
+// ✅ Upload a new file (get a pre-signed URL)
+router.post("/files/upload", fileController.uploadFile);
 
-        console.log("❌ DEBUG: Missing fileName or fileType");
-
-        return res.status(400).json({ error: "Missing fileName or fileType" });
-
-    }
- 
-    try {
-
-        const uploadUrl = await fileModel.generateUploadUrl(fileName, fileType);
-
-        res.json({ uploadUrl });
-
-    } catch (error) {
-
-        console.error("❌ ERROR: Failed to generate upload URL:", error);
-
-        res.status(500).json({ error: error.message });
-
-    }
-
-});
-
+// ✅ Get pre-signed URL to view a file
 router.get("/files/view/:fileName", fileController.viewFile);
-router.delete("/files/delete/:fileName", fileController.deleteFile);
- 
-module.exports = router;
 
- 
+// ✅ Delete a file
+router.delete("/files/delete/:fileName", fileController.deleteFile);
+
+module.exports = router;

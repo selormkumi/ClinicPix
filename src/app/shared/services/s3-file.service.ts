@@ -1,66 +1,71 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Injectable } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { Observable } from "rxjs";
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class S3FileService {
-  private apiUrl = 'https://your-backend-api.com/api/files'; // Replace with actual backend URL
+  private apiUrl = "http://localhost:5001/api/files"; // Update if needed
 
   constructor(private http: HttpClient) {}
 
-  /**
-   * Uploads a file to S3 via backend.
-   * @param file - The file to be uploaded.
-   * @param metadata - Additional metadata (e.g., tags).
-   */
-  uploadFile(file: File, metadata: any = {}): Observable<any> {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('metadata', JSON.stringify(metadata));
-
-    return this.http.post(`${this.apiUrl}/upload`, formData);
-  }
-
-  /**
-   * Fetches a list of uploaded files from the backend.
-   */
+  // 📌 Get list of uploaded files
   getUploadedFiles(): Observable<any> {
     return this.http.get(`${this.apiUrl}`);
   }
 
-  /**
-   * Retrieves a file URL for viewing from the backend.
-   * @param fileName - The name of the file to retrieve.
-   */
+  // 📌 Get pre-signed URL to upload a new file
+  getUploadUrl(fileName: string, fileType: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/upload`, {
+      fileName,
+      fileType,
+    });
+  }
+
+  // 📌 Upload a file to S3 using pre-signed URL
+  uploadFile(file: File): Observable<any> {
+    return new Observable((observer) => {
+      this.getUploadUrl(file.name, file.type).subscribe(
+        (res) => {
+          if (res.uploadUrl) {
+            fetch(res.uploadUrl, {
+              method: "PUT",
+              body: file,
+              headers: { "Content-Type": file.type },
+            })
+              .then(() => {
+                observer.next({ message: "File uploaded successfully!" });
+                observer.complete();
+              })
+              .catch((err) => observer.error(err));
+          }
+        },
+        (error) => observer.error(error)
+      );
+    });
+  }
+
+  // 📌 Get pre-signed URL to view a file
   getFileUrl(fileName: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/view/${encodeURIComponent(fileName)}`);
   }
 
-  /**
-   * Deletes a file from S3 via backend.
-   * @param fileName - The name of the file to delete.
-   */
+  // 📌 Rename a file in S3
+  renameFile(oldFileName: string, newFileName: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/update`, {
+      oldFileName,
+      newFileName,
+    });
+  }
+
+  // 📌 Generate a shareable link for a file
+  getShareUrl(fileName: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/share/${encodeURIComponent(fileName)}`);
+  }
+
+  // 📌 Delete a file
   deleteFile(fileName: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/delete/${encodeURIComponent(fileName)}`);
-  }
-
-  /**
-   * Updates file name and tags in S3 via backend.
-   * @param oldFileName - The current file name.
-   * @param newFileName - The new file name.
-   * @param tags - New metadata/tags for the file.
-   */
-  updateFileDetails(oldFileName: string, newFileName: string, tags: string[]): Observable<any> {
-    return this.http.put(`${this.apiUrl}/update`, { oldFileName, newFileName, tags });
-  }
-
-  /**
-   * Generates a shareable link for an S3 file.
-   * @param fileName - The name of the file.
-   */
-  getShareableLink(fileName: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/share/${encodeURIComponent(fileName)}`);
   }
 }
