@@ -36,10 +36,17 @@ export class UploadedImagesComponent implements OnInit {
 		const currentUser = localStorage.getItem("user");
 		if (currentUser) {
 			const user = JSON.parse(currentUser);
-			this.currentUserName = user.userName;
+			this.currentUserName = user.email; // ✅ Retrieve email instead of userName
 		}
+	
+		if (!this.currentUserName) {
+			console.error("❌ ERROR: No logged-in user found.");
+		} else {
+			console.log("✅ Logged-in User Email:", this.currentUserName);
+		}
+	
 		this.fetchUploadedImages();
-	}
+	}	
 
 	// 📌 Fetch images from S3 and correctly map filenames
 	fetchUploadedImages() {
@@ -50,7 +57,7 @@ export class UploadedImagesComponent implements OnInit {
 				if (res.files && Array.isArray(res.files)) {
 					this.uploadedImages = res.files.map((file: any) => ({
 						name: file.fileName || "Unknown File",
-						uploadedBy: "Unknown",
+						uploadedBy: this.currentUserName || "Unknown",
 						uploadedOn: file.lastModified || "N/A",
 						tags: [],
 					}));
@@ -78,22 +85,42 @@ export class UploadedImagesComponent implements OnInit {
 		});
 	}
 
-	// 📌 Share Image (Generate a shareable link)
+	// 📌 Share an image with a patient
 	shareImage(imageName: string) {
-		this.s3Service.getShareUrl(imageName).subscribe((res) => {
-			alert(`Shareable link: ${res.shareUrl}`);
-		});
+		const patientEmail = prompt("Enter the patient's email address:");
+
+		if (!patientEmail) return;
+
+		// Call backend API to generate an expirable link and store in DB
+		this.s3Service
+			.shareFile(imageName, this.currentUserName ?? "Unknown", patientEmail, 86400)
+			.subscribe(
+				(res) => {
+					alert(`Image shared successfully with ${patientEmail}`);
+					console.log("Shared Link:", res.viewUrl);
+				},
+				(error) => {
+					console.error("❌ ERROR: Failed to share image", error);
+					alert("Failed to share image. Please try again.");
+				}
+			);
 	}
 
 	// 📌 Delete Image
 	deleteImage(imageName: string) {
 		if (confirm(`Are you sure you want to delete ${imageName}?`)) {
-			this.s3Service.deleteFile(imageName).subscribe(() => {
-				alert("File deleted successfully!");
-				this.fetchUploadedImages();
-			});
+			this.s3Service.deleteFile(imageName).subscribe(
+				(res) => {
+					alert("File deleted successfully!");
+					this.fetchUploadedImages(); // 🔄 Refresh file list after deletion
+				},
+				(error) => {
+					console.error("❌ ERROR: Failed to delete file", error);
+					alert("Failed to delete file. Please try again.");
+				}
+			);
 		}
-	}
+	}	
 
 	// 📌 Upload Image
 	triggerFileInput() {
@@ -109,29 +136,38 @@ export class UploadedImagesComponent implements OnInit {
 	}
 
 	confirmUpload() {
-		if (!this.pendingFile) return;
+		if (!this.pendingFile) {
+			alert("No file selected for upload.");
+			return;
+		}
 	
-		this.s3Service.uploadFile(this.pendingFile).subscribe((res) => {
+		if (!this.currentUserName) {
+			alert("You must be logged in to upload a file.");
+			return;
+		}
+	
+		// ✅ Ensure we retrieve file type safely
+		const contentType = this.pendingFile.type || "application/octet-stream";
+	
+		this.s3Service.uploadFile(this.pendingFile, this.currentUserName).subscribe((res) => {
 			const uploadUrl = res.uploadUrl;
 	
-			// ✅ Fix: Ensure `this.pendingFile` is not null before accessing `type`
-			const contentType = this.pendingFile ? this.pendingFile.type : "application/octet-stream";
-	
-			// Upload the file to S3
 			fetch(uploadUrl, {
 				method: "PUT",
 				body: this.pendingFile,
-				headers: { "Content-Type": contentType }, // 🔥 Fix Content-Type
+				headers: { "Content-Type": contentType } // ✅ No more null errors
 			})
-				.then(() => {
-					alert("File uploaded successfully!");
-					this.fetchUploadedImages(); // 🔥 Refresh file list
-					this.resetUploadForm(); // 🔥 Reset form after upload
-				})
-				.catch((err) => console.error("❌ Upload error:", err));
+			.then(() => {
+				alert("File uploaded successfully!");
+				this.fetchUploadedImages();
+				this.resetUploadForm();
+			})
+			.catch((err) => {
+				console.error("❌ Upload error:", err);
+				alert("Upload failed. Please try again.");
+			});
 		});
 	}	
-	
 
 	// 📌 Drag & Drop Handlers
 	handleDragOver(event: DragEvent) {
@@ -156,14 +192,14 @@ export class UploadedImagesComponent implements OnInit {
 		this.pendingFile = null;
 		this.newFileName = "";
 		this.newFileTags = "";
-	
+
 		// 🔥 Ensure input field resets properly
 		if (this.fileInput && this.fileInput.nativeElement) {
 			this.fileInput.nativeElement.value = "";
 		}
-	
+
 		this.isDragging = false;
-	}		
+	}
 
 	// 📌 Close the modal (cancel editing/viewing)
 	closeModal() {
@@ -185,4 +221,20 @@ export class UploadedImagesComponent implements OnInit {
 		this.isEditing = false;
 	}
 
+	// 📌 Open Share Modal
+	openShareModal(imageName: string) {
+		const patientEmail = prompt("Enter patient's email:");
+		if (!patientEmail) return;
+
+		this.s3Service
+			.shareFile(imageName, this.currentUserName || "", patientEmail, 86400)
+			.subscribe(
+				(response) => {
+					alert(`File shared successfully! Link: ${response.viewUrl}`);
+				},
+				(error) => {
+					console.error("Sharing failed", error);
+				}
+			);
+	}
 }

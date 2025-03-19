@@ -15,7 +15,7 @@
 			<input
 				type="text"
 				class="form-control search-input"
-				placeholder="Search by name or tag..."
+				placeholder="Search by name or provider..."
 				[(ngModel)]="searchQuery"
 				(input)="filterRecords()" />
 
@@ -25,26 +25,26 @@
 			</select>
 		</div>
 
-		<!-- My Images Section -->
+		<!-- Shared Images Section -->
 		<div class="card">
 			<div class="card-body">
-				<h5>My Images</h5>
+				<h5>My Shared Images</h5>
 				<table class="table table-striped">
 					<thead>
 						<tr>
 							<th>Image Name</th>
-							<th>Uploaded By</th>
-							<th>Uploaded On</th>
-							<th>Tags</th>
+							<th>Shared By</th>
+							<th>Shared On</th>
+							<th>Expires At</th>
 							<th>Actions</th>
 						</tr>
 					</thead>
 					<tbody>
 						<tr *ngFor="let image of filteredRecords">
 							<td>{{ image.name }}</td>
-							<td>{{ image.uploadedBy }}</td>
-							<td>{{ image.uploadedOn }}</td>
-							<td>{{ image.tags.join(", ") }}</td>
+							<td>{{ image.sharedBy }}</td>
+							<td>{{ image.sharedOn }}</td>
+							<td>{{ image.expiresAt }}</td>
 							<td>
 								<button
 									class="btn btn-primary btn-sm"
@@ -58,15 +58,20 @@
 								</button>
 							</td>
 						</tr>
+						<tr *ngIf="filteredRecords.length === 0">
+							<td colspan="5" class="text-center">No shared images found.</td>
+						</tr>
 					</tbody>
 				</table>
 			</div>
 		</div>
-		<app-image-modal
-			*ngIf="selectedImage"
-			[image]="selectedImage"
-			[isEditing]="isEditing"
-			(closeModal)="closeModal()">
-		</app-image-modal>
 	</div>
+
+	<!-- Image Modal -->
+	<app-image-modal
+		*ngIf="selectedImage"
+		[image]="selectedImage"
+		[isEditing]="false"
+		(closeModal)="closeModal()">
+	</app-image-modal>
 </body>
