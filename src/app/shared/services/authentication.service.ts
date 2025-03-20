@@ -1,7 +1,8 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
-import { Router } from "@angular/router"; // ✅ Ensure Router is imported
+import { tap } from "rxjs/operators"; // ✅ Import tap
+import { Router } from "@angular/router"; // ✅ Import Router
 
 @Injectable({
 	providedIn: "root",
@@ -13,8 +14,26 @@ export class AuthenticationService {
 
 	// ✅ User Login
 	login(credentials: { email: string; password: string }): Observable<any> {
-		return this.http.post(`${this.apiUrl}/login`, credentials);
-	}
+		return this.http.post(`${this.apiUrl}/login`, credentials).pipe(
+			tap((response: any) => {
+				if (response.token && response.user) {
+					this.storeToken(response.token);
+	
+					// ✅ Ensure `userName` is stored correctly
+					const userName = response.user.userName || "User"; // Fallback
+	
+					localStorage.setItem("user", JSON.stringify({
+						email: response.user.email,
+						userName: userName,  // ✅ Now stored correctly!
+						role: response.user.role,
+						userId: response.user.id
+					}));
+	
+					console.log("🔍 Stored User:", localStorage.getItem("user"));
+				}
+			})
+		);
+	}	
 
 	// ✅ User Signup (No Auto Login)
 	signup(userData: { userName: string; email: string; password: string; role: string }): Observable<any> {
@@ -37,9 +56,17 @@ export class AuthenticationService {
 	}
 
 	// ✅ Get Current User (From Local Storage)
-	getCurrentUser(): { role: string; userId: number } | null {
+	getCurrentUser(): { email: string; role: string; userId: number; userName: string } | null {
 		const user = localStorage.getItem("user");
-		return user ? JSON.parse(user) : null;
+		if (user) {
+			try {
+				return JSON.parse(user);
+			} catch (error) {
+				console.error("❌ ERROR: Failed to parse user data from localStorage", error);
+				return null;
+			}
+		}
+		return null;
 	}
 
 	// ✅ Logout (Ensure Proper Redirection)
