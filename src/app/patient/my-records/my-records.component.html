@@ -46,7 +46,7 @@
 							<td>{{ image.sharedBy }}</td>
 							<td>{{ image.sharedOn }}</td>
 							<td>{{ image.expiresAt }}</td>
-							<td>{{ image.tags.join(", ") }}</td>
+							<td>{{ image.tags }}</td>
 							<td>
 								<button class="btn btn-primary btn-sm" (click)="viewImage(image)">
 									View
@@ -56,7 +56,7 @@
 									Download
 								</button>
 							</td>
-						</tr>
+						</tr>						
 						<tr *ngIf="filteredRecords.length === 0">
 							<td colspan="6" class="text-center">No shared images found.</td>
 						</tr>

@@ -47,24 +47,35 @@ export class MyRecordsComponent implements OnInit {
 
 	// 📌 Fetch shared files for the logged-in patient
 	fetchSharedFiles() {
-		console.log("📌 Fetching shared files for:", this.currentUserEmail);
-	
 		this.s3Service.getSharedFiles(this.currentUserEmail).subscribe(
 			(res) => {
-				console.log("✅ DEBUG: Shared Files Response:", res);
-	
-				if (!res.sharedFiles || res.sharedFiles.length === 0) {
-					console.log("❌ No shared files received from backend");
-				}
+				console.log("✅ Shared Files Retrieved:", res);
 	
 				this.sharedImages = res.sharedFiles.map((file: any) => ({
 					name: file.file_name,
-					sharedBy: file.uploaded_by,
-					sharedOn: file.shared_on || "N/A",
-					expiresAt: file.expires_at || "N/A",
-					tags: file.tags ? file.tags.split(",") : ["No tags"]
+					sharedBy: file.uploaded_by, // Provider who shared the file
+					sharedOn: file.shared_on ? new Date(file.shared_on).toLocaleString('en-US', {
+						month: 'short',
+						day: '2-digit',
+						year: 'numeric',
+						hour: '2-digit',
+						minute: '2-digit',
+						second: '2-digit',
+						hour12: true
+					}) : "N/A",
+					expiresAt: file.expires_at ? new Date(file.expires_at).toLocaleString('en-US', {
+						month: 'short',
+						day: '2-digit',
+						year: 'numeric',
+						hour: '2-digit',
+						minute: '2-digit',
+						second: '2-digit',
+						hour12: true
+					}) : "N/A",
+					tags: file.tags || "No tags"
 				}));
 	
+				// Copy for filtering
 				this.filteredRecords = [...this.sharedImages];
 	
 				console.log("📌 Updated Shared Images List:", this.sharedImages);
@@ -73,7 +84,8 @@ export class MyRecordsComponent implements OnInit {
 				console.error("❌ ERROR: Failed to fetch shared files", error);
 			}
 		);
-	}		
+	}
+				
 
 	// 📌 View Image (Generate signed URL)
 	viewImage(image: any) {
