@@ -14,11 +14,13 @@ import { S3FileService } from "../../shared/services/s3-file.service";
 	styleUrl: "./uploaded-images.component.scss",
 })
 export class UploadedImagesComponent implements OnInit {
+	currentUserId: number = 0;
 	currentUserName: string | null = null;
 	selectedImage: any | null = null;
 	isEditing: boolean = false;
+	isLoading: boolean = false;
 
-	uploadedImages: any[] = []; // Stores images fetched from S3
+	uploadedImages: any[] = [];
 	newFileName: string = "";
 	newFileTags: string = "";
 	pendingFile: File | null = null;
@@ -34,68 +36,88 @@ export class UploadedImagesComponent implements OnInit {
 
 	ngOnInit() {
 		const currentUser = localStorage.getItem("user");
+		console.log("🔍 Stored User:", currentUser);
+
 		if (currentUser) {
 			const user = JSON.parse(currentUser);
-			this.currentUserName = user.email; // ✅ Retrieve email instead of userName
+			this.currentUserId = Number(user.userId) || 0; // Ensure it's a number
+			this.currentUserName = user.username || null;
 		}
-	
-		if (!this.currentUserName) {
-			console.error("❌ ERROR: No logged-in user found.");
-		} else {
-			console.log("✅ Logged-in User Email:", this.currentUserName);
-		}
-	
-		this.fetchUploadedImages();
-	}	
 
-	// 📌 Fetch images from S3 and correctly map filenames
+		console.log("✅ Current User ID:", this.currentUserId);
+		this.fetchUploadedImages();
+	}
+
+	// ✅ Fetch uploaded images
 	fetchUploadedImages() {
+		this.isLoading = true;
+
 		this.s3Service.getUploadedFiles().subscribe(
 			(res) => {
-				console.log("DEBUG: Response from S3 ->", res);
-	
-				if (res.files && Array.isArray(res.files)) {
-					this.uploadedImages = res.files.map((file: any) => ({
-						name: file.fileName || "Unknown File",
-						uploadedBy: file.uploadedBy || "Unknown",
-						uploadedOn: file.uploadedOn || "N/A",
-						tags: file.tags || []  // <-- Assign tags properly
-					}));
-	
-					console.log("✅ Uploaded Images ->", this.uploadedImages);
-				} else {
-					console.error("❌ ERROR: Unexpected API response format", res);
-				}
+				console.log("📌 API Response:", res);
+
+				this.uploadedImages = res.files.map((file: any) => ({
+					name: file.fileName || "Unknown File",
+					uploadedBy: file.uploadedBy || "Unknown",
+					uploaderEmail: file.uploaderEmail || "",
+					uploadedOn: file.uploadedOn || "N/A",
+					tags: Array.isArray(file.tags) ? file.tags : [], 
+				}));
+
+				console.log("📌 Processed Data:", this.uploadedImages);
+				this.isLoading = false;
 			},
 			(error) => {
 				console.error("❌ ERROR: Failed to fetch uploaded files", error);
+				this.isLoading = false;
 			}
 		);
 	}
-	
 
 	logout() {
 		this.authService.logout();
 		this.router.navigate(["/login"]);
 	}
 
-	// 📌 View Image (Open file in a new tab)
+	// ✅ Open Image
 	viewImage(imageName: string) {
 		this.s3Service.getFileUrl(imageName).subscribe((res) => {
 			window.open(res.viewUrl, "_blank");
 		});
 	}
 
-	// 📌 Share an image with a patient
-	shareImage(imageName: string) {
-		const patientEmail = prompt("Enter the patient's email address:");
+	// ✅ Open Share Modal (Uses Email, then Fetches User ID)
+	openShareModal(imageName: string) {
+		const patientEmail = prompt("Enter the patient's email:");
 		if (!patientEmail) return;
-	
-		const expiresIn = 86400; // 1 day in seconds
-	
-		this.s3Service.shareFile(imageName, this.currentUserName ?? "Unknown", patientEmail, expiresIn).subscribe(
+
+		this.s3Service.getUserIdByEmail(patientEmail).subscribe(
 			(res) => {
-				alert(`Image shared successfully with ${patientEmail}`);
+				if (res.userId) {
+					this.shareImage(imageName, Number(res.userId));
+				} else {
+					alert("❌ ERROR: No user found with that email.");
+				}
+			},
+			(error) => {
+				console.error("❌ ERROR: Failed to fetch user ID", error);
+				alert("Failed to find the user. Please try again.");
+			}
+		);
+	}
+
+	// ✅ Share Image with Validated User ID
+	shareImage(imageName: string, patientId: number) {
+		if (!patientId || patientId === 0) {
+			alert("Invalid user ID for sharing.");
+			return;
+		}
+
+		const expiresIn = 86400; // 1 day in seconds
+
+		this.s3Service.shareFile(imageName, this.currentUserId, patientId, expiresIn).subscribe(
+			(res) => {
+				alert(`✅ Image shared successfully with User ID: ${patientId}`);
 				console.log("Shared Link:", res.viewUrl);
 			},
 			(error) => {
@@ -103,15 +125,15 @@ export class UploadedImagesComponent implements OnInit {
 				alert("Failed to share image. Please try again.");
 			}
 		);
-	}	
+	}
 
-	// 📌 Delete Image
+	// ✅ Delete Image
 	deleteImage(imageName: string) {
 		if (confirm(`Are you sure you want to delete ${imageName}?`)) {
 			this.s3Service.deleteFile(imageName).subscribe(
-				(res) => {
-					alert("File deleted successfully!");
-					this.fetchUploadedImages(); // 🔄 Refresh file list after deletion
+				() => {
+					alert("✅ File deleted successfully!");
+					this.fetchUploadedImages();
 				},
 				(error) => {
 					console.error("❌ ERROR: Failed to delete file", error);
@@ -119,9 +141,9 @@ export class UploadedImagesComponent implements OnInit {
 				}
 			);
 		}
-	}	
+	}
 
-	// 📌 Upload Image
+	// ✅ Upload Image
 	triggerFileInput() {
 		this.fileInput.nativeElement.click();
 	}
@@ -135,16 +157,23 @@ export class UploadedImagesComponent implements OnInit {
 	}
 
 	confirmUpload() {
-		if (!this.pendingFile || !this.currentUserName) {
-			alert("You must be logged in and select a file to upload.");
+		console.log("🔍 Current User ID:", this.currentUserId);
+
+		if (!this.pendingFile) {
+			alert("Please select a file to upload.");
 			return;
 		}
-	
+
+		if (!this.currentUserId || this.currentUserId === 0) {
+			alert("You must be logged in to upload files.");
+			return;
+		}
+
 		const fileName = this.pendingFile.name;
 		const fileType = this.pendingFile.type;
-		const uploadedBy = this.currentUserName;
-		const tags = this.newFileTags ? this.newFileTags.split(",").map(tag => tag.trim()) : []; // Convert tags to array
-	
+		const uploadedBy = this.currentUserId;
+		const tags = this.newFileTags ? this.newFileTags.split(",").map(tag => tag.trim()) : [];
+
 		this.s3Service.uploadFile(fileName, fileType, uploadedBy, tags).subscribe(
 			(res) => {
 				if (res.uploadUrl) {
@@ -153,12 +182,15 @@ export class UploadedImagesComponent implements OnInit {
 						body: this.pendingFile,
 						headers: { "Content-Type": fileType },
 					})
-						.then(() => {
-							alert("File uploaded successfully!");
-							this.fetchUploadedImages(); // 🔥 Refresh file list
-							this.resetUploadForm();
-						})
-						.catch((err) => console.error("❌ Upload error:", err));
+					.then(() => {
+						alert("✅ File uploaded successfully!");
+						this.fetchUploadedImages();
+						this.resetUploadForm();
+					})
+					.catch((err) => {
+						console.error("❌ Upload error:", err);
+						alert("Upload failed. Please try again.");
+					});
 				}
 			},
 			(error) => {
@@ -166,9 +198,9 @@ export class UploadedImagesComponent implements OnInit {
 				alert("Failed to upload file. Please try again.");
 			}
 		);
-	}		
+	}	
 
-	// 📌 Drag & Drop Handlers
+	// ✅ Drag & Drop Handlers
 	handleDragOver(event: DragEvent) {
 		event.preventDefault();
 		this.isDragging = true;
@@ -187,12 +219,12 @@ export class UploadedImagesComponent implements OnInit {
 		}
 	}
 
+	// ✅ Reset Upload Form
 	resetUploadForm() {
 		this.pendingFile = null;
 		this.newFileName = "";
 		this.newFileTags = "";
 
-		// 🔥 Ensure input field resets properly
 		if (this.fileInput && this.fileInput.nativeElement) {
 			this.fileInput.nativeElement.value = "";
 		}
@@ -200,13 +232,13 @@ export class UploadedImagesComponent implements OnInit {
 		this.isDragging = false;
 	}
 
-	// 📌 Close the modal (cancel editing/viewing)
+	// ✅ Close Modal
 	closeModal() {
 		this.selectedImage = null;
 		this.isEditing = false;
 	}
 
-	// 📌 Save Changes (Handles renaming and metadata updates)
+	// ✅ Save Changes
 	saveChanges(updatedImage: any) {
 		if (this.selectedImage) {
 			const index = this.uploadedImages.findIndex(
@@ -219,29 +251,4 @@ export class UploadedImagesComponent implements OnInit {
 		this.selectedImage = null;
 		this.isEditing = false;
 	}
-
-	// 📌 Open Share Modal
-	openShareModal(imageName: string) {
-		const patientEmail = prompt("Enter patient's email:");
-		if (!patientEmail) return;
-
-		this.s3Service
-			.shareFile(imageName, this.currentUserName || "", patientEmail, 86400)
-			.subscribe(
-				(response) => {
-					alert(`File shared successfully! Link: ${response.viewUrl}`);
-				},
-				(error) => {
-					console.error("Sharing failed", error);
-				}
-			);
-	}
-
-	updateTags(fileName: string, tags: string) {
-		this.s3Service.updateFileTags(fileName, tags).subscribe(
-			() => console.log(`✅ Tags updated for ${fileName}`),
-			(error) => console.error("❌ ERROR: Failed to update tags", error)
-		);
-	}
-	
 }

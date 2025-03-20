@@ -89,3 +89,19 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+/* Fix tag font size and color */
+.badge-sm {
+    font-size: 14px !important;  /* Normal readable size */
+    color: black !important;      /* Ensure visibility */
+    background-color: #f8f9fa !important; /* Light grey background */
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+/* Fix Upload Button Size */
+.upload-btn {
+    padding: 5px 12px !important;  /* Reduce button size */
+    font-size: 14px !important;
+    height: auto !important;
+}

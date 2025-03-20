@@ -64,7 +64,6 @@ const generateUploadUrl = async (fileName, fileType) => {
 };
 
 // ✅ Generate a pre-signed URL for viewing files
-// ✅ Generate a pre-signed URL for viewing files (Removes "uploads/" prefix)
 const generateViewUrl = async (fileName) => {
     try {
         const sanitizedFileName = fileName.replace(/^uploads\//, ""); // 🔥 Remove "uploads/" if exists

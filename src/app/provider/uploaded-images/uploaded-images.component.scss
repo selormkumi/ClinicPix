@@ -186,3 +186,11 @@ body {
 .upload-btn {
     margin-left: 10px; /* Adds space to the left of the button */
 }
+
+/* Fix input tag field size */
+.small-tag-input {
+    width: auto !important;  /* Prevent full-width */
+    max-width: 200px !important; /* Set reasonable width */
+    padding: 5px 10px !important; /* Reduce padding */
+    font-size: 14px !important;  /* Match input fields */
+}
