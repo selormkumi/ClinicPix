@@ -14,18 +14,20 @@ const getFiles = async (req, res) => {
             `SELECT f.file_name, u.username AS uploaded_by, u.email AS uploader_email, f.uploaded_on, f.tags 
              FROM files f
              JOIN users u ON f.uploaded_by = u.id
-             WHERE f.uploaded_by = $1`, // Ensure only the logged-in provider sees their files
+             WHERE f.uploaded_by = $1`,  // Only get the provider's own files
             [uploadedBy]
         );
 
         res.json({
             files: files.rows.map(file => ({
                 fileName: file.file_name,
+                fileUrl: `https://your-s3-bucket.s3.amazonaws.com/providers/${uploadedBy}/${file.file_name}`,
                 uploadedBy: file.uploaded_by,
                 uploaderEmail: file.uploader_email,
                 uploadedOn: file.uploaded_on,
                 tags: file.tags ? file.tags.split(",") : []
             }))
+            
         });
 
     } catch (error) {
@@ -66,7 +68,8 @@ const uploadFile = async (req, res) => {
         console.log("✅ DEBUG: User found. Proceeding with file upload.");
 
         // ✅ Step 2: Generate pre-signed upload URL
-        const uploadUrl = await fileModel.generateUploadUrl(fileName, fileType);
+        const fileKey = `providers/${uploadedBy}/${fileName}`;
+        const uploadUrl = await fileModel.generateUploadUrl(fileKey, fileType);
 
         // ✅ Step 3: Store metadata in PostgreSQL
         await db.query(
@@ -113,13 +116,27 @@ const viewFile = async (req, res) => {
     }
 
     try {
-        const viewUrl = await fileModel.generateViewUrl(fileName);
+        // ✅ Retrieve the uploadedBy from the database
+        const fileData = await db.query(`SELECT uploaded_by FROM files WHERE file_name = $1`, [fileName]);
+
+        if (fileData.rowCount === 0) {
+            return res.status(404).json({ error: "File not found in database" });
+        }
+
+        const uploadedBy = fileData.rows[0].uploaded_by;  // ✅ Extract provider ID
+        const fileKey = `providers/${uploadedBy}/${fileName}`; // ✅ Correct S3 path
+
+        console.log("🔍 DEBUG: Viewing file at path:", fileKey);
+
+        const viewUrl = await fileModel.generateViewUrl(fileKey);
         res.json({ viewUrl });
+
     } catch (error) {
         console.error("❌ ERROR: Failed to generate view URL:", error);
         res.status(500).json({ error: error.message });
     }
 };
+
 
 // ✅ Delete a file from S3 and database
 const deleteFile = async (req, res) => {
@@ -130,8 +147,20 @@ const deleteFile = async (req, res) => {
     }
 
     try {
+        // ✅ Retrieve uploadedBy from database
+        const fileData = await db.query(`SELECT uploaded_by FROM files WHERE file_name = $1`, [fileName]);
+
+        if (fileData.rowCount === 0) {
+            return res.status(404).json({ error: "File not found in database" });
+        }
+
+        const uploadedBy = fileData.rows[0].uploaded_by;  // ✅ Extract provider ID
+        const fileKey = `providers/${uploadedBy}/${fileName}`; // ✅ Correct S3 path
+
+        console.log("🔍 DEBUG: Deleting file at path:", fileKey);
+
         // ✅ Step 1: Delete file from S3
-        await fileModel.deleteFile(fileName);
+        await fileModel.deleteFile(fileKey);
 
         // ✅ Step 2: Delete file record from PostgreSQL
         const dbResult = await db.query(`DELETE FROM files WHERE file_name = $1 RETURNING *`, [fileName]);
@@ -147,6 +176,7 @@ const deleteFile = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 
 // ✅ Share a file with a patient using user IDs
 const shareFile = async (req, res) => {
