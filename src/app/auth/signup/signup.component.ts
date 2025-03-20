@@ -58,7 +58,7 @@ export class SignupComponent {
 		if (this.signupForm.valid) {
 			const formData = this.signupForm.value;
 
-			// Call Backend Signup API
+			// ✅ Call Backend Signup API
 			this.authService.signup(formData).subscribe(
 				(response) => {
 					alert("✅ Signup successful! Please log in to continue.");
