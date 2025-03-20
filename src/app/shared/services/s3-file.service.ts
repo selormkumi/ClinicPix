@@ -11,9 +11,9 @@ export class S3FileService {
   constructor(private http: HttpClient) {}
 
   // 📌 Get all uploaded files
-  getUploadedFiles(): Observable<any> {
-    return this.http.get(`${this.apiUrl}`);
-  }
+  getUploadedFiles(userId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}?uploadedBy=${userId}`); // Send user ID to backend
+}
 
   // 📌 Get pre-signed URL to upload a file
   getUploadUrl(fileName: string, fileType: string): Observable<any> {

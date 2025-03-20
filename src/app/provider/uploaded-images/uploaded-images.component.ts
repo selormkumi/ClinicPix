@@ -36,7 +36,6 @@ export class UploadedImagesComponent implements OnInit {
 
 	ngOnInit() {
 		const currentUser = localStorage.getItem("user");
-		console.log("🔍 Stored User:", currentUser);
 
 		if (currentUser) {
 			const user = JSON.parse(currentUser);
@@ -52,7 +51,7 @@ export class UploadedImagesComponent implements OnInit {
 	fetchUploadedImages() {
 		this.isLoading = true;
 
-		this.s3Service.getUploadedFiles().subscribe(
+		this.s3Service.getUploadedFiles(this.currentUserId).subscribe(
 			(res) => {
 				console.log("📌 API Response:", res);
 

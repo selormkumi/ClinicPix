@@ -3,11 +3,19 @@ const db = require("../config/dbConfig");
 
 // ✅ Get all files with uploader's username
 const getFiles = async (req, res) => {
+    const { uploadedBy } = req.query; // Get provider ID from request
+
+    if (!uploadedBy) {
+        return res.status(400).json({ error: "Missing uploadedBy parameter" });
+    }
+
     try {
         const files = await db.query(
             `SELECT f.file_name, u.username AS uploaded_by, u.email AS uploader_email, f.uploaded_on, f.tags 
              FROM files f
-             JOIN users u ON f.uploaded_by = u.id`
+             JOIN users u ON f.uploaded_by = u.id
+             WHERE f.uploaded_by = $1`, // Ensure only the logged-in provider sees their files
+            [uploadedBy]
         );
 
         res.json({
