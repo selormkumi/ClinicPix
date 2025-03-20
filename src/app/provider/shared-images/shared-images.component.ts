@@ -15,6 +15,7 @@ import { ImageModalComponent } from "../../shared/image-modal/image-modal.compon
 })
 export class SharedImagesComponent implements OnInit {
 	sharedImages: any[] = []; // Holds shared files from backend
+	currentUserId: number = 0;
 	currentUserEmail: string | null = null;
 	selectedImage: any | null = null;
 
@@ -25,40 +26,55 @@ export class SharedImagesComponent implements OnInit {
 	) {}
 
 	ngOnInit() {
+		console.log("📌 Initializing Shared Images Component...");
 		const currentUser = localStorage.getItem("user");
+
 		if (currentUser) {
 			const user = JSON.parse(currentUser);
-			this.currentUserEmail = user.email; // Get logged-in provider's email
+			this.currentUserId = user.userId ?? 0;
+			this.currentUserEmail = user.email;
 		}
-		this.fetchSharedFiles(); // Fetch shared files on load
+
+		if (!this.currentUserId) {
+			console.error("❌ ERROR: No valid user ID found.");
+			return;
+		}
+
+		console.log("✅ Current Provider ID:", this.currentUserId);
+		this.fetchSharedFiles();
 	}
 
 	// ✅ Fetch files that have been shared by this provider
 	fetchSharedFiles() {
-		if (!this.currentUserEmail) {
-			console.error("❌ ERROR: No provider email found.");
+		if (!this.currentUserId) {
+			console.error("❌ ERROR: No provider ID found.");
 			return;
 		}
 
-		// Ensure correct data type (convert to number when necessary)
-		const sharedById: number = Number(this.currentUserEmail);
-		if (isNaN(sharedById)) {
-			console.error("❌ ERROR: Invalid provider ID (expected a number)");
-			return;
-		}
-
-		this.s3Service.getSharedFiles(sharedById).subscribe(
+		this.s3Service.getSharedFiles(this.currentUserId).subscribe(
 			(res) => {
 				console.log("✅ Shared Files Response:", res);
 
 				this.sharedImages = res.sharedFiles.map((file: any) => ({
 					name: file.file_name, // File name
-					sharedBy: file.uploaded_by, // Provider who shared it
-					sharedWith: file.shared_with, // Patient email or ID
-					expiresAt: file.expires_at, // Expiration date
+					sharedBy: file.uploaded_by, // Provider ID
+					sharedByEmail: file.shared_by_email, // Provider email
+					sharedWith: file.shared_with, // Patient ID
+					sharedWithEmail: file.shared_with_email, // Patient email
+					expiresAt: file.expires_at
+						? new Date(file.expires_at).toLocaleString("en-US", {
+							month: "short",
+							day: "2-digit",
+							year: "numeric",
+							hour: "2-digit",
+							minute: "2-digit",
+							second: "2-digit",
+							hour12: true,
+						})
+						: "N/A", // ✅ Format expiration date
 				}));
 
-				console.log("✅ Shared Files Processed:", this.sharedImages);
+				console.log("📌 Updated Shared Images List:", this.sharedImages);
 			},
 			(error) => {
 				console.error("❌ ERROR: Failed to fetch shared files", error);
@@ -66,7 +82,7 @@ export class SharedImagesComponent implements OnInit {
 		);
 	}
 
-	// ✅ View Image
+	// ✅ View Image (Generate signed URL)
 	viewImage(image: any) {
 		this.selectedImage = image;
 	}
@@ -76,28 +92,28 @@ export class SharedImagesComponent implements OnInit {
 		this.selectedImage = null;
 	}
 
-	// ✅ Revoke Access
+	// ✅ Revoke Access - ✅ FIXED
 	revokeAccess(image: any) {
-		if (!this.currentUserEmail) {
-			console.error("❌ ERROR: No provider email found.");
+		if (!this.currentUserId) {
+			console.error("❌ ERROR: No provider ID found.");
 			return;
 		}
 
 		if (confirm(`Are you sure you want to revoke access to ${image.name}?`)) {
-			// Convert sharedWith to a number if it's a valid numeric ID
 			const sharedWithId: number = Number(image.sharedWith);
 			if (isNaN(sharedWithId)) {
 				console.error("❌ ERROR: Invalid patient ID (expected a number)");
 				return;
 			}
 
-			this.s3Service.revokeSharedFile(image.name, sharedWithId).subscribe(
+			this.s3Service.revokeSharedFile(image.name, this.currentUserId, sharedWithId).subscribe(
 				() => {
-					alert("Access revoked successfully!");
+					alert("✅ Access revoked successfully!");
 					this.fetchSharedFiles(); // Refresh list after revocation
 				},
 				(error) => {
 					console.error("❌ ERROR: Failed to revoke access", error);
+					alert("❌ Failed to revoke access. Please try again.");
 				}
 			);
 		}

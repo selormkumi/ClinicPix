@@ -69,6 +69,7 @@ export class MyRecordsComponent implements OnInit {
 					name: file.file_name,
 					sharedBy: file.shared_by,
 					sharedByEmail: file.shared_by_email, // ✅ Ensure email is included
+					uploadedBy: file.uploaded_by, // ✅ Include uploader ID
 					sharedOn: file.shared_on
 						? new Date(file.shared_on).toLocaleString("en-US", {
 							month: "short",
@@ -113,9 +114,10 @@ export class MyRecordsComponent implements OnInit {
 		this.uniqueTags = Array.from(new Set(allTags));
 	}
 
-	// 📌 View Image (Generate signed URL)
+	// 📌 View Image (Generate signed URL) - ✅ FIXED
 	viewImage(image: any) {
-		this.s3Service.getFileUrl(image.name).subscribe(
+		const uploadedBy = image.uploadedBy || image.sharedBy; // ✅ Ensure correct provider ID
+		this.s3Service.getFileUrl(image.name, uploadedBy).subscribe(
 			(res) => {
 				window.open(res.viewUrl, "_blank");
 			},
@@ -145,9 +147,10 @@ export class MyRecordsComponent implements OnInit {
 		});
 	}
 
-	// 📌 Download the shared image
+	// 📌 Download the shared image - ✅ FIXED
 	downloadImage(image: any): void {
-		this.s3Service.getFileUrl(image.name).subscribe(
+		const uploadedBy = image.uploadedBy || image.sharedBy; // ✅ Ensure correct provider ID
+		this.s3Service.getFileUrl(image.name, uploadedBy).subscribe(
 			(res) => {
 				if (res.viewUrl) {
 					const link = document.createElement("a");
