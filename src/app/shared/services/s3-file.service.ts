@@ -21,23 +21,14 @@ export class S3FileService {
   }
 
   // 📌 Upload a file to S3 using pre-signed URL
-  uploadFile(fileName: string, fileType: string, uploadedBy: string, tags: string[]): Observable<any> {
-    return this.http.post(`${this.apiUrl}/upload`, {
-        fileName,
-        fileType,
-        uploadedBy,
-        tags,  // ✅ Include tags
-    });
+  uploadFile(fileName: string, fileType: string, uploadedBy: number, tags: string[]) {
+    const apiUrl = "http://localhost:5001/api/files/upload";  // ✅ Correct URL
+    return this.http.post<{ uploadUrl: string }>(apiUrl, { fileName, fileType, uploadedBy, tags });
 }
 
   // 📌 Get pre-signed URL to view a file
   getFileUrl(fileName: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/view/${encodeURIComponent(fileName)}`);
-  }
-
-  // 📌 Rename a file in S3
-  renameFile(oldFileName: string, newFileName: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/update`, { oldFileName, newFileName });
   }
 
   // 📌 Generate a shareable link for a file
@@ -50,32 +41,38 @@ export class S3FileService {
     return this.http.delete(`${this.apiUrl}/delete/${encodeURIComponent(fileName)}`);
   }
 
-  // 📌 Share file with a patient
-shareFile(fileName: string, uploadedBy: string, sharedWith: string, expiresIn: number): Observable<any> {
-  return this.http.post(`${this.apiUrl}/share`, {
+  // 📌 Share file using User ID (Provider -> Patient)
+  shareFile(fileName: string, uploadedBy: number, sharedWith: number, expiresIn: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/share`, {
       fileName,
       uploadedBy,
       sharedWith,
       expiresIn
-  });
-}
-
-  // 📌 Retrieve shared files for a logged-in patient
-  getSharedFiles(patientEmail: string): Observable<any> {
-    console.log("📌 Fetching shared files for:", patientEmail);
-    return this.http.get(`${this.apiUrl}/shared?sharedWith=${encodeURIComponent(patientEmail)}`);
-}
-
-  // 📌 Revoke a shared file (Provider removes access for a patient)
-  revokeSharedFile(fileName: string, patientEmail: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/revoke`, {
-      fileName,
-      patientEmail,
     });
   }
 
-  updateFileTags(fileName: string, tags: string): Observable<any> {
+  // 📌 Retrieve shared files for any user (provider or patient)
+  getSharedFiles(userId: number): Observable<any> {
+    console.log("📌 Fetching shared files for User ID:", userId);
+    return this.http.get(`${this.apiUrl}/shared?sharedWith=${encodeURIComponent(userId)}`);
+  }
+
+  // 📌 Revoke a shared file (Provider removes access for a user)
+  revokeSharedFile(fileName: string, userId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/revoke`, {
+      fileName,
+      userId, // ✅ Use User ID instead of patientId
+    });
+  }
+
+  // 📌 Update file tags
+  updateFileTags(fileName: string, tags: string[]): Observable<any> {
     return this.http.put(`${this.apiUrl}/update-tags`, { fileName, tags });
+  }
+
+  // 📌 Get User ID by Email (For Email-Based Sharing)
+  getUserIdByEmail(email: string): Observable<any> {
+    return this.http.get(`http://localhost:5001/api/user-id?email=${encodeURIComponent(email)}`);
 }
 
 }

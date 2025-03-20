@@ -33,21 +33,28 @@ export class SharedImagesComponent implements OnInit {
 		this.fetchSharedFiles(); // Fetch shared files on load
 	}
 
-	// 📌 Fetch files that have been shared by this provider
+	// ✅ Fetch files that have been shared by this provider
 	fetchSharedFiles() {
 		if (!this.currentUserEmail) {
 			console.error("❌ ERROR: No provider email found.");
 			return;
 		}
 
-		this.s3Service.getSharedFiles(this.currentUserEmail).subscribe(
+		// Ensure correct data type (convert to number when necessary)
+		const sharedById: number = Number(this.currentUserEmail);
+		if (isNaN(sharedById)) {
+			console.error("❌ ERROR: Invalid provider ID (expected a number)");
+			return;
+		}
+
+		this.s3Service.getSharedFiles(sharedById).subscribe(
 			(res) => {
 				console.log("✅ Shared Files Response:", res);
 
 				this.sharedImages = res.sharedFiles.map((file: any) => ({
 					name: file.file_name, // File name
 					sharedBy: file.uploaded_by, // Provider who shared it
-					sharedWith: file.shared_with, // Patient email
+					sharedWith: file.shared_with, // Patient email or ID
 					expiresAt: file.expires_at, // Expiration date
 				}));
 
@@ -59,17 +66,17 @@ export class SharedImagesComponent implements OnInit {
 		);
 	}
 
-	// 📌 View Image
+	// ✅ View Image
 	viewImage(image: any) {
 		this.selectedImage = image;
 	}
 
-	// 📌 Close Modal
+	// ✅ Close Modal
 	closeModal() {
 		this.selectedImage = null;
 	}
 
-	// 📌 Revoke Access
+	// ✅ Revoke Access
 	revokeAccess(image: any) {
 		if (!this.currentUserEmail) {
 			console.error("❌ ERROR: No provider email found.");
@@ -77,7 +84,14 @@ export class SharedImagesComponent implements OnInit {
 		}
 
 		if (confirm(`Are you sure you want to revoke access to ${image.name}?`)) {
-			this.s3Service.revokeSharedFile(image.name, image.sharedWith).subscribe(
+			// Convert sharedWith to a number if it's a valid numeric ID
+			const sharedWithId: number = Number(image.sharedWith);
+			if (isNaN(sharedWithId)) {
+				console.error("❌ ERROR: Invalid patient ID (expected a number)");
+				return;
+			}
+
+			this.s3Service.revokeSharedFile(image.name, sharedWithId).subscribe(
 				() => {
 					alert("Access revoked successfully!");
 					this.fetchSharedFiles(); // Refresh list after revocation
@@ -89,7 +103,7 @@ export class SharedImagesComponent implements OnInit {
 		}
 	}
 
-	// 📌 Logout Function
+	// ✅ Logout Function
 	logout() {
 		this.authService.logout();
 		this.router.navigate(["/login"]); // Redirect to login
