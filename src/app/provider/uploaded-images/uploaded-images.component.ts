@@ -80,8 +80,9 @@ export class UploadedImagesComponent implements OnInit {
 
 	// ✅ Open Image
 	viewImage(imageName: string) {
-		this.s3Service.getFileUrl(imageName).subscribe((res) => {
-			window.open(res.viewUrl, "_blank");
+		const uploadedBy = this.currentUserId; // Ensure current provider ID is passed
+		this.s3Service.getFileUrl(imageName, uploadedBy).subscribe((res) => {
+		window.open(res.viewUrl, "_blank");
 		});
 	}
 
@@ -128,17 +129,18 @@ export class UploadedImagesComponent implements OnInit {
 
 	// ✅ Delete Image
 	deleteImage(imageName: string) {
+		const uploadedBy = this.currentUserId; // Ensure current provider ID is passed
 		if (confirm(`Are you sure you want to delete ${imageName}?`)) {
-			this.s3Service.deleteFile(imageName).subscribe(
-				() => {
-					alert("✅ File deleted successfully!");
-					this.fetchUploadedImages();
-				},
-				(error) => {
-					console.error("❌ ERROR: Failed to delete file", error);
-					alert("Failed to delete file. Please try again.");
-				}
-			);
+		this.s3Service.deleteFile(imageName, uploadedBy).subscribe(
+			() => {
+			alert("✅ File deleted successfully!");
+			this.fetchUploadedImages();
+			},
+			(error) => {
+			console.error("❌ ERROR: Failed to delete file", error);
+			alert("Failed to delete file. Please try again.");
+			}
+		);
 		}
 	}
 

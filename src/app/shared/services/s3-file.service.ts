@@ -10,35 +10,35 @@ export class S3FileService {
 
   constructor(private http: HttpClient) {}
 
-  // 📌 Get all uploaded files
+  // 📌 Get all uploaded files for a provider
   getUploadedFiles(userId: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}?uploadedBy=${userId}`); // Send user ID to backend
-}
+    return this.http.get(`${this.apiUrl}?uploadedBy=${userId}`); // Send provider ID to backend
+  }
 
   // 📌 Get pre-signed URL to upload a file
-  getUploadUrl(fileName: string, fileType: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/upload`, { fileName, fileType });
+  getUploadUrl(fileName: string, fileType: string, uploadedBy: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/upload`, { fileName, fileType, uploadedBy });
   }
 
   // 📌 Upload a file to S3 using pre-signed URL
-  uploadFile(fileName: string, fileType: string, uploadedBy: number, tags: string[]) {
+  uploadFile(fileName: string, fileType: string, uploadedBy: number, tags: string[]): Observable<any> {
     const apiUrl = "http://localhost:5001/api/files/upload";  // ✅ Correct URL
     return this.http.post<{ uploadUrl: string }>(apiUrl, { fileName, fileType, uploadedBy, tags });
-}
+  }
 
   // 📌 Get pre-signed URL to view a file
-  getFileUrl(fileName: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/view/${encodeURIComponent(fileName)}`);
+  getFileUrl(fileName: string, uploadedBy: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/view/${encodeURIComponent(fileName)}?uploadedBy=${uploadedBy}`);
   }
 
   // 📌 Generate a shareable link for a file
-  getShareUrl(fileName: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/share/${encodeURIComponent(fileName)}`);
+  getShareUrl(fileName: string, uploadedBy: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/share/${encodeURIComponent(fileName)}?uploadedBy=${uploadedBy}`);
   }
 
   // 📌 Delete a file from S3
-  deleteFile(fileName: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/delete/${encodeURIComponent(fileName)}`);
+  deleteFile(fileName: string, uploadedBy: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/delete/${encodeURIComponent(fileName)}?uploadedBy=${uploadedBy}`);
   }
 
   // 📌 Share file using User ID (Provider -> Patient)
@@ -58,21 +58,21 @@ export class S3FileService {
   }
 
   // 📌 Revoke a shared file (Provider removes access for a user)
-  revokeSharedFile(fileName: string, userId: number): Observable<any> {
+  revokeSharedFile(fileName: string, uploadedBy: number, sharedWith: number): Observable<any> {
     return this.http.post(`${this.apiUrl}/revoke`, {
       fileName,
-      userId, // ✅ Use User ID instead of patientId
+      uploadedBy,
+      sharedWith
     });
   }
 
   // 📌 Update file tags
-  updateFileTags(fileName: string, tags: string[]): Observable<any> {
-    return this.http.put(`${this.apiUrl}/update-tags`, { fileName, tags });
+  updateFileTags(fileName: string, uploadedBy: number, tags: string[]): Observable<any> {
+    return this.http.put(`${this.apiUrl}/update-tags`, { fileName, uploadedBy, tags });
   }
 
   // 📌 Get User ID by Email (For Email-Based Sharing)
   getUserIdByEmail(email: string): Observable<any> {
     return this.http.get(`http://localhost:5001/api/user-id?email=${encodeURIComponent(email)}`);
-}
-
+  }
 }
