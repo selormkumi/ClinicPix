@@ -1,17 +1,19 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const pool = require("../config/dbConfig"); // Ensure your database connection is correct
+const pool = require("../config/dbConfig"); // Ensure database connection
 require("dotenv").config(); // Load environment variables
 
 // ✅ User Signup (Register)
-// ✅ User Signup (Register)
 exports.signup = async (req, res) => {
     try {
-        console.log("🔍 Incoming Signup Request:", req.body); // Debugging log
+        console.log("🔍 Incoming Signup Request:", { 
+            role: req.body.role,
+            userName: req.body.userName,
+            email: req.body.email
+        }); // ✅ Safe logging, no password exposed
 
-        const { userName, email, password, role } = req.body;
+        const { userName, email, role, password } = req.body;
 
-        // Check if all fields are provided
         if (!userName || !email || !password || !role) {
             return res.status(400).json({ message: "All fields are required" });
         }
@@ -27,13 +29,18 @@ exports.signup = async (req, res) => {
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-        // ✅ FIX: Ensure column name `username` matches your PostgreSQL table
+        // ✅ Ensure column name `username` matches your PostgreSQL table
         const newUser = await pool.query(
             "INSERT INTO users (username, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id, username, email, role",
             [userName, email, hashedPassword, role]
         );
 
-        console.log("✅ User successfully registered:", newUser.rows[0]); // Debugging log
+        console.log("✅ User successfully registered:", { 
+            id: newUser.rows[0].id,
+            username: newUser.rows[0].username,
+            email: newUser.rows[0].email,
+            role: newUser.rows[0].role
+        }); // ✅ Safe logging, no password exposed
 
         res.status(201).json({
             message: "✅ User registered successfully",
@@ -49,11 +56,10 @@ exports.signup = async (req, res) => {
 // ✅ User Login
 exports.login = async (req, res) => {
     try {
-        console.log("🔍 Incoming Login Request:", req.body); // Debugging log
+        console.log("🔍 Incoming Login Request:", { email: req.body.email }); // ✅ Safe logging
 
         const { email, password } = req.body;
 
-        // Check if all fields are provided
         if (!email || !password) {
             return res.status(400).json({ message: "Email and password are required" });
         }
@@ -78,17 +84,23 @@ exports.login = async (req, res) => {
         // 🎟 Generate JWT Token
         const token = jwt.sign(
             { id: user.rows[0].id, email: user.rows[0].email, role: user.rows[0].role },
-            process.env.JWT_SECRET || "your_secret_key", // Use environment variable for security
+            process.env.JWT_SECRET || "your_secret_key",
             { expiresIn: "1h" }
         );
 
-        // ✅ Ensure `username` is included in the response
+        console.log("✅ User logged in:", { 
+            id: user.rows[0].id, 
+            username: user.rows[0].username, 
+            email: user.rows[0].email, 
+            role: user.rows[0].role 
+        }); // ✅ Safe logging
+
         res.status(200).json({
             message: "✅ Login successful",
             token,
             user: {
                 id: user.rows[0].id,
-                userName: user.rows[0].username, // ✅ FIXED: Use correct column name `username`
+                userName: user.rows[0].username, // ✅ Ensure correct column name
                 email: user.rows[0].email,
                 role: user.rows[0].role,
             },
@@ -103,19 +115,18 @@ exports.login = async (req, res) => {
 // ✅ Protected Route (Requires JWT)
 exports.protectedRoute = async (req, res) => {
     try {
-        console.log("🔍 Received Headers:", req.headers); // Debugging log
+        console.log("🔍 Received Headers:", req.headers); // ✅ Debugging log
         const token = req.header("Authorization")?.replace("Bearer ", "");
-        console.log("🔍 Extracted Token:", token); // Debugging log
+        console.log("🔍 Extracted Token:", token ? "✅ Token received" : "❌ No token found"); 
 
         if (!token) {
-            console.log("❌ No token provided");
             return res.status(401).json({ message: "Unauthorized - No token provided" });
         }
 
         // Verify the token
         const decoded = jwt.verify(token, process.env.JWT_SECRET || "my_super_secret_key");
 
-        console.log("✅ Decoded Token:", decoded); // Debugging log
+        console.log("✅ Decoded Token:", decoded); // ✅ Safe debugging
 
         res.status(200).json({
             message: "✅ Access granted",
