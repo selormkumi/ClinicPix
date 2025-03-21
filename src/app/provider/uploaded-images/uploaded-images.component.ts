@@ -59,11 +59,23 @@ export class UploadedImagesComponent implements OnInit {
 					name: file.fileName || "Unknown File",
 					uploadedBy: file.uploadedBy || "Unknown",
 					uploaderEmail: file.uploaderEmail || "",
-					uploadedOn: file.uploadedOn || "N/A",
-					tags: Array.isArray(file.tags) ? file.tags : [], 
-				}));
-
-				console.log("📌 Processed Data:", this.uploadedImages);
+					uploadedOn: file.uploadedOn
+					  ? new Date(file.uploadedOn).toLocaleString("en-US", {
+						  timeZone: "America/New_York", // ✅ Convert from UTC to EST/EDT
+						  month: "short",
+						  day: "2-digit",
+						  year: "numeric",
+						  hour: "2-digit",
+						  minute: "2-digit",
+						  second: "2-digit",
+						  hour12: true,
+						})
+					  : "N/A",
+					tags: Array.isArray(file.tags) ? file.tags : [],
+				  }));
+				  
+				  console.log("📌 Processed Uploaded Images:", this.uploadedImages);
+				  
 				this.isLoading = false;
 			},
 			(error) => {
