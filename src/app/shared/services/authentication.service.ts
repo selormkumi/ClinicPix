@@ -79,4 +79,12 @@ export class AuthenticationService {
 			console.log("✅ Redirected to Login Page");
 		});
 	}
+
+	// ✅ OTP Verification Request
+    verifyOtp(data: { email: string; otp: string }): Observable<any> {
+        if (!data.email) {
+            data.email = localStorage.getItem("email") || "";
+        }
+        return this.http.post(`${this.apiUrl}/verify-otp`, data);
+    }	
 }

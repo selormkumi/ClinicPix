@@ -26,7 +26,8 @@ export class DashboardComponent implements OnInit {
 
 				// ✅ Ensure `userName` exists, check common naming variations
 				this.currentUserName =
-					user.userName?.trim() || user.username?.trim() || "User";
+					user.userName?.trim() || user.username?.trim() || user.name?.trim() || "Unknown"; // ✅ Use correct username
+
 
 				console.log("🔍 Loaded User:", user);
 			} catch (error) {
