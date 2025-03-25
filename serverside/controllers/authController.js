@@ -1,8 +1,8 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const pool = require("../config/dbConfig"); // Ensure database connection
-require("dotenv").config(); // Load environment variables
-const nodemailer = require("nodemailer"); // For OTP (if needed)
+const pool = require("../config/dbConfig");
+require("dotenv").config();
+const nodemailer = require("nodemailer");
 
 // ✅ User Signup (Register)
 exports.signup = async (req, res) => {
@@ -98,16 +98,16 @@ exports.login = async (req, res) => {
         const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
             port: process.env.SMTP_PORT,
-            secure: false, // `true` for port 465, `false` for 587
+            secure: false,
             auth: {
-                user: process.env.SMTP_USER, // ✅ Fix: Use SMTP_USER instead of EMAIL_USER
-                pass: process.env.SMTP_PASS, // ✅ Use Gmail App Password
+                user: process.env.SMTP_USER, 
+                pass: process.env.SMTP_PASS,
             },
         });
 
         // ✅ Send OTP email
         await transporter.sendMail({
-            from: process.env.SMTP_USER, // ✅ Fix: Use SMTP_USER
+            from: process.env.SMTP_USER,
             to: email,
             subject: "Your ClinicPix OTP Code",
             text: `Your OTP code is: ${otp}. It expires in 5 minutes.`,
@@ -124,34 +124,7 @@ exports.login = async (req, res) => {
     }
 };
 
-// ✅ Protected Route (Requires JWT)
-exports.protectedRoute = async (req, res) => {
-    try {
-        console.log("🔍 Received Headers:", req.headers); // ✅ Debugging log
-        const token = req.header("Authorization")?.replace("Bearer ", "");
-        console.log("🔍 Extracted Token:", token ? "✅ Token received" : "❌ No token found"); 
-
-        if (!token) {
-            return res.status(401).json({ message: "Unauthorized - No token provided" });
-        }
-
-        // Verify the token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || "my_super_secret_key");
-
-        console.log("✅ Decoded Token:", decoded); // ✅ Safe debugging
-
-        res.status(200).json({
-            message: "✅ Access granted",
-            user: decoded,
-        });
-
-    } catch (err) {
-        console.error("❌ Token Verification Error:", err.message);
-        res.status(401).json({ message: "Invalid or expired token" });
-    }
-};
-
-// ✅ OTP Verification (Email-Based MFA)
+// ✅ OTP Verification
 exports.sendOTP = async (req, res) => {
     try {
         const { email } = req.body;
@@ -179,59 +152,6 @@ exports.sendOTP = async (req, res) => {
         res.json({ message: "✅ OTP sent successfully" });
     } catch (err) {
         console.error("❌ OTP Error:", err);
-        res.status(500).json({ message: "Server error" });
-    }
-};
-
-// ✅ OTP Verification at Login
-exports.verifyOTP = async (req, res) => {
-    try {
-        const { email, otp } = req.body;
-
-        if (!email || !otp) {
-            return res.status(400).json({ message: "Email and OTP are required" });
-        }
-
-        // Fetch user details from the database
-        const userQuery = await pool.query(
-            "SELECT id, role, email, otp_code, otp_expires_at FROM users WHERE email = $1",
-            [email]
-        );
-
-        if (userQuery.rows.length === 0) {
-            return res.status(400).json({ message: "Invalid email or OTP" });
-        }
-
-        const { id, role, otp_code, otp_expires_at } = userQuery.rows[0];
-
-        if (!otp_code || otp !== otp_code) {
-            return res.status(400).json({ message: "Invalid OTP. Please try again." });
-        }
-
-        if (new Date(otp_expires_at) < new Date()) {
-            return res.status(400).json({ message: "OTP expired. Request a new one." });
-        }
-
-        // Generate JWT Token
-        const token = jwt.sign({ id, email, role }, process.env.JWT_SECRET, { expiresIn: "1h" });
-
-        // Clear OTP after successful verification
-        await pool.query("UPDATE users SET otp_code = NULL, otp_expires_at = NULL WHERE email = $1", [email]);
-
-        res.status(200).json({
-            message: "✅ OTP verified successfully",
-            token,
-            user: { 
-                id, 
-                email,
-                userName: userQuery.rows[0].userName || userQuery.rows[0].username || userQuery.rows[0].name || "Unknown",
-                username: userQuery.rows[0].username || "Unknown", // ✅ Fix: Use correct column name
-                role 
-            },
-        });                       
-
-    } catch (err) {
-        console.error("❌ OTP Verification Error:", err);
         res.status(500).json({ message: "Server error" });
     }
 };

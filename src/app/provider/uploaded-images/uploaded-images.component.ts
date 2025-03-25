@@ -13,6 +13,7 @@ import { S3FileService } from "../../shared/services/s3-file.service";
 	templateUrl: "./uploaded-images.component.html",
 	styleUrl: "./uploaded-images.component.scss",
 })
+
 export class UploadedImagesComponent implements OnInit {
 	currentUserId: number = 0;
 	currentUserName: string | null = null;
