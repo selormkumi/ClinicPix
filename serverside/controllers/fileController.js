@@ -38,12 +38,7 @@ const getFiles = async (req, res) => {
 
 // ✅ Generate pre-signed URL for uploading and store metadata
 const uploadFile = async (req, res) => {
-    console.log("✅ DEBUG: Received Upload Request:", req.body);
-
     let { fileName, fileType, uploadedBy, tags } = req.body;
-
-    // Debug: Log uploadedBy value
-    console.log("🔍 DEBUG: uploadedBy value:", uploadedBy, "Type:", typeof uploadedBy);
 
     if (!fileName || !fileType || !uploadedBy) {
         console.log("❌ DEBUG: Missing fileName, fileType, or uploadedBy");
@@ -54,18 +49,12 @@ const uploadFile = async (req, res) => {
         // Ensure uploadedBy is a number
         uploadedBy = Number(uploadedBy);
 
-        // Debug: Log the converted value
-        console.log("🔍 DEBUG: Converted uploadedBy to number:", uploadedBy, "Type:", typeof uploadedBy);
-
         // Check if the user exists
         const userResult = await db.query(`SELECT id FROM users WHERE id = $1`, [uploadedBy]);
 
         if (userResult.rowCount === 0) {
-            console.log("❌ DEBUG: User not found in database");
             return res.status(404).json({ error: "User not found" });
         }
-
-        console.log("✅ DEBUG: User found. Proceeding with file upload.");
 
         // ✅ Step 2: Generate pre-signed upload URL
         const fileKey = `providers/${uploadedBy}/${fileName}`;
@@ -88,17 +77,14 @@ const uploadFile = async (req, res) => {
 
 // ✅ Get user ID by email
 const getUserIdByEmail = async (req, res) => {
-    console.log("✅ DEBUG: Received request for /user-id with email:", req.query.email);
 
     const { email } = req.query;
     try {
         const user = await db.query("SELECT id FROM users WHERE email = $1", [email]);
 
         if (user.rows.length > 0) {
-            console.log("✅ DEBUG: Found User ID:", user.rows[0].id);
             res.json({ userId: user.rows[0].id });
         } else {
-            console.log("❌ DEBUG: No user found with email:", email);
             res.status(404).json({ error: "User not found" });
         }
     } catch (error) {
@@ -125,8 +111,6 @@ const viewFile = async (req, res) => {
 
         const uploadedBy = fileData.rows[0].uploaded_by;  // ✅ Extract provider ID
         const fileKey = `providers/${uploadedBy}/${fileName}`; // ✅ Correct S3 path
-
-        console.log("🔍 DEBUG: Viewing file at path:", fileKey);
 
         const viewUrl = await fileModel.generateViewUrl(fileKey);
         res.json({ viewUrl });
@@ -157,8 +141,6 @@ const deleteFile = async (req, res) => {
         const uploadedBy = fileData.rows[0].uploaded_by;  // ✅ Extract provider ID
         const fileKey = `providers/${uploadedBy}/${fileName}`; // ✅ Correct S3 path
 
-        console.log("🔍 DEBUG: Deleting file at path:", fileKey);
-
         // ✅ Step 1: Delete file from S3
         await fileModel.deleteFile(fileKey);
 
@@ -181,39 +163,30 @@ const deleteFile = async (req, res) => {
 // ✅ Share a file with a patient using user IDs
 const shareFile = async (req, res) => {
     const { fileName, uploadedBy, sharedWith, expiresIn } = req.body;
-
-    console.log("✅ DEBUG: Received Share Request:", req.body);
     
     if (!fileName || !uploadedBy || !sharedWith || !expiresIn) {
-        console.log("❌ DEBUG: Missing required fields");
         return res.status(400).json({ error: "Missing required fields" });
     }
 
     try {
         // Convert `sharedWith` to a number
         const sharedWithId = Number(sharedWith);
-        console.log("🔍 DEBUG: Converted sharedWith to number:", sharedWithId);
 
         // Check if sharedWith user exists
         const userResult = await db.query(`SELECT id FROM users WHERE id = $1`, [sharedWithId]);
 
         if (userResult.rowCount === 0) {
-            console.log("❌ DEBUG: Shared user not found in database");
             return res.status(404).json({ error: "User not found" });
         }
-
-        console.log("✅ DEBUG: Shared user found:", userResult.rows[0]);
 
         // Get file ID
         const fileResult = await db.query(`SELECT id FROM files WHERE file_name = $1`, [fileName]);
 
         if (fileResult.rowCount === 0) {
-            console.log("❌ DEBUG: File not found in database");
             return res.status(404).json({ error: "File not found" });
         }
 
         const fileId = fileResult.rows[0].id;
-        console.log("✅ DEBUG: Found File ID:", fileId);
 
         // Store shared record
         await db.query(
@@ -222,7 +195,6 @@ const shareFile = async (req, res) => {
             [fileId, uploadedBy, sharedWithId, expiresIn]
         );
 
-        console.log("✅ DEBUG: File shared successfully");
         res.json({ message: "File shared successfully" });
 
     } catch (error) {
