@@ -1,9 +1,10 @@
-import { Component, ViewChild, ElementRef } from "@angular/core";
+import { Component, ViewChild, ElementRef, OnInit } from "@angular/core";
 import { Router, RouterModule } from "@angular/router";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { AuthenticationService } from "../../shared/services/authentication.service";
 import { ImageModalComponent } from "../../shared/image-modal/image-modal.component";
+import { S3FileService } from "../../shared/services/s3-file.service";
 
 @Component({
 	selector: "app-uploaded-images",
@@ -12,47 +13,43 @@ import { ImageModalComponent } from "../../shared/image-modal/image-modal.compon
 	templateUrl: "./uploaded-images.component.html",
 	styleUrl: "./uploaded-images.component.scss",
 })
-export class UploadedImagesComponent {
+
+export class UploadedImagesComponent implements OnInit {
+	currentUserId: number = 0;
 	currentUserName: string | null = null;
 	selectedImage: any | null = null;
-	isEditing: boolean = false; // Tracks if the user is in edit mode
+	isEditing: boolean = false;
+	isLoading: boolean = false;
 
-	uploadedImages = [
-		{
-			name: "CT_Scan_2025.jpg",
-			uploadedBy: "John Doe",
-			uploadedOn: "2025-01-15",
-			tags: ["CT", "Scan"],
-		},
-		{
-			name: "MRI_Brain_2025.jpg",
-			uploadedBy: "Jane Smith",
-			uploadedOn: "2025-01-10",
-			tags: ["MRI", "Brain"],
-		},
-	];
-
+<<<<<<< HEAD
 	searchTerm: string = ""; // Bound to the search input field
 	filteredImages: any[] = []; // Array to hold filtered images
 
+=======
+	uploadedImages: any[] = [];
+>>>>>>> zhi
 	newFileName: string = "";
 	newFileTags: string = "";
-	pendingFile: File | null = null; // Stores the dragged file for confirmation
-	isDragging = false; // Tracks drag-over state for UI effect
+	pendingFile: File | null = null;
+	isDragging = false;
 
 	@ViewChild("fileInput") fileInput!: ElementRef<HTMLInputElement>;
 
 	constructor(
 		private authService: AuthenticationService,
-		private router: Router
+		private router: Router,
+		private s3Service: S3FileService
 	) {}
 
 	ngOnInit() {
 		const currentUser = localStorage.getItem("user");
+
 		if (currentUser) {
 			const user = JSON.parse(currentUser);
-			this.currentUserName = user.userName;
+			this.currentUserId = Number(user.userId) || 0; // Ensure it's a number
+			this.currentUserName = user.username || null;
 		}
+<<<<<<< HEAD
 		// Initialize filteredImages with all uploaded images
 		this.filteredImages = this.uploadedImages;
 	}
@@ -76,6 +73,49 @@ export class UploadedImagesComponent {
 					)
 			);
 		}
+=======
+
+		console.log("✅ Current User ID:", this.currentUserId);
+		this.fetchUploadedImages();
+	}
+
+	// ✅ Fetch uploaded images
+	fetchUploadedImages() {
+		this.isLoading = true;
+
+		this.s3Service.getUploadedFiles(this.currentUserId).subscribe(
+			(res) => {
+				console.log("📌 API Response:", res);
+
+				this.uploadedImages = res.files.map((file: any) => ({
+					name: file.fileName || "Unknown File",
+					uploadedBy: file.uploadedBy || "Unknown",
+					uploaderEmail: file.uploaderEmail || "",
+					uploadedOn: file.uploadedOn
+					  ? new Date(file.uploadedOn).toLocaleString("en-US", {
+						  timeZone: "America/New_York", // ✅ Convert from UTC to EST/EDT
+						  month: "short",
+						  day: "2-digit",
+						  year: "numeric",
+						  hour: "2-digit",
+						  minute: "2-digit",
+						  second: "2-digit",
+						  hour12: true,
+						})
+					  : "N/A",
+					tags: Array.isArray(file.tags) ? file.tags : [],
+				  }));
+				  
+				  console.log("📌 Processed Uploaded Images:", this.uploadedImages);
+				  
+				this.isLoading = false;
+			},
+			(error) => {
+				console.error("❌ ERROR: Failed to fetch uploaded files", error);
+				this.isLoading = false;
+			}
+		);
+>>>>>>> zhi
 	}
 
 	logout() {
@@ -83,41 +123,73 @@ export class UploadedImagesComponent {
 		this.router.navigate(["/login"]);
 	}
 
-	viewImage(image: any) {
-		this.selectedImage = image; // Store the full image object
-		this.isEditing = false;
+	// ✅ Open Image
+	viewImage(imageName: string) {
+		const uploadedBy = this.currentUserId; // Ensure current provider ID is passed
+		this.s3Service.getFileUrl(imageName, uploadedBy).subscribe((res) => {
+		window.open(res.viewUrl, "_blank");
+		});
 	}
 
-	editImage(image: any) {
-		this.selectedImage = { ...image }; // Clone the image object for editing
-		this.isEditing = true;
-	}
-	saveChanges(updatedImage: any) {
-		if (this.selectedImage) {
-			const index = this.uploadedImages.findIndex(
-				(img) => img.name === this.selectedImage.name
-			);
-			if (index !== -1) {
-				this.uploadedImages[index] = { ...this.selectedImage, ...updatedImage };
+	// ✅ Open Share Modal (Uses Email, then Fetches User ID)
+	openShareModal(imageName: string) {
+		const patientEmail = prompt("Enter the patient's email:");
+		if (!patientEmail) return;
+
+		this.s3Service.getUserIdByEmail(patientEmail).subscribe(
+			(res) => {
+				if (res.userId) {
+					this.shareImage(imageName, Number(res.userId));
+				} else {
+					alert("❌ ERROR: No user found with that email.");
+				}
+			},
+			(error) => {
+				console.error("❌ ERROR: Failed to fetch user ID", error);
+				alert("Failed to find the user. Please try again.");
 			}
-		}
-		this.selectedImage = null;
-	}
-	closeModal() {
-		this.selectedImage = null;
-	}
-	shareImage(imageName: string) {
-		alert(`Sharing: ${imageName}`);
+		);
 	}
 
+	// ✅ Share Image with Validated User ID
+	shareImage(imageName: string, patientId: number) {
+		if (!patientId || patientId === 0) {
+			alert("Invalid user ID for sharing.");
+			return;
+		}
+
+		const expiresIn = 86400; // 1 day in seconds
+
+		this.s3Service.shareFile(imageName, this.currentUserId, patientId, expiresIn).subscribe(
+			(res) => {
+				alert(`✅ Image shared successfully with User ID: ${patientId}`);
+				console.log("Shared Link:", res.viewUrl);
+			},
+			(error) => {
+				console.error("❌ ERROR: Failed to share image", error);
+				alert("Failed to share image. Please try again.");
+			}
+		);
+	}
+
+	// ✅ Delete Image
 	deleteImage(imageName: string) {
+		const uploadedBy = this.currentUserId; // Ensure current provider ID is passed
 		if (confirm(`Are you sure you want to delete ${imageName}?`)) {
-			this.uploadedImages = this.uploadedImages.filter(
-				(img) => img.name !== imageName
-			);
+		this.s3Service.deleteFile(imageName, uploadedBy).subscribe(
+			() => {
+			alert("✅ File deleted successfully!");
+			this.fetchUploadedImages();
+			},
+			(error) => {
+			console.error("❌ ERROR: Failed to delete file", error);
+			alert("Failed to delete file. Please try again.");
+			}
+		);
 		}
 	}
 
+	// ✅ Upload Image
 	triggerFileInput() {
 		this.fileInput.nativeElement.click();
 	}
@@ -126,24 +198,55 @@ export class UploadedImagesComponent {
 		const input = event.target as HTMLInputElement;
 		if (input.files && input.files.length > 0) {
 			this.pendingFile = input.files[0];
-			this.newFileName = this.pendingFile.name; // Prefill the file name field
+			this.newFileName = this.pendingFile.name;
 		}
 	}
 
 	confirmUpload() {
-		if (this.pendingFile) {
-			const newImage = {
-				name: this.newFileName.trim() || this.pendingFile.name,
-				uploadedBy: this.currentUserName || "Unknown",
-				uploadedOn: new Date().toISOString().split("T")[0],
-				tags: this.newFileTags.split(",").map((tag) => tag.trim()),
-			};
-			this.uploadedImages.push(newImage);
-			this.resetUploadForm();
-		}
-	}
+		console.log("🔍 Current User ID:", this.currentUserId);
 
-	// Drag & Drop Functions
+		if (!this.pendingFile) {
+			alert("Please select a file to upload.");
+			return;
+		}
+
+		if (!this.currentUserId || this.currentUserId === 0) {
+			alert("You must be logged in to upload files.");
+			return;
+		}
+
+		const fileName = this.pendingFile.name;
+		const fileType = this.pendingFile.type;
+		const uploadedBy = this.currentUserId;
+		const tags = this.newFileTags ? this.newFileTags.split(",").map(tag => tag.trim()) : [];
+
+		this.s3Service.uploadFile(fileName, fileType, uploadedBy, tags).subscribe(
+			(res) => {
+				if (res.uploadUrl) {
+					fetch(res.uploadUrl, {
+						method: "PUT",
+						body: this.pendingFile,
+						headers: { "Content-Type": fileType },
+					})
+					.then(() => {
+						alert("✅ File uploaded successfully!");
+						this.fetchUploadedImages();
+						this.resetUploadForm();
+					})
+					.catch((err) => {
+						console.error("❌ Upload error:", err);
+						alert("Upload failed. Please try again.");
+					});
+				}
+			},
+			(error) => {
+				console.error("❌ ERROR: Failed to upload file", error);
+				alert("Failed to upload file. Please try again.");
+			}
+		);
+	}	
+
+	// ✅ Drag & Drop Handlers
 	handleDragOver(event: DragEvent) {
 		event.preventDefault();
 		this.isDragging = true;
@@ -158,16 +261,40 @@ export class UploadedImagesComponent {
 		this.isDragging = false;
 		if (event.dataTransfer && event.dataTransfer.files.length > 0) {
 			this.pendingFile = event.dataTransfer.files[0];
-			this.newFileName = this.pendingFile.name; // Prefill file name field
+			this.newFileName = this.pendingFile.name;
 		}
 	}
 
+	// ✅ Reset Upload Form
 	resetUploadForm() {
 		this.pendingFile = null;
 		this.newFileName = "";
 		this.newFileTags = "";
-		if (this.fileInput) {
+
+		if (this.fileInput && this.fileInput.nativeElement) {
 			this.fileInput.nativeElement.value = "";
 		}
+
+		this.isDragging = false;
+	}
+
+	// ✅ Close Modal
+	closeModal() {
+		this.selectedImage = null;
+		this.isEditing = false;
+	}
+
+	// ✅ Save Changes
+	saveChanges(updatedImage: any) {
+		if (this.selectedImage) {
+			const index = this.uploadedImages.findIndex(
+				(img) => img.name === this.selectedImage.name
+			);
+			if (index !== -1) {
+				this.uploadedImages[index] = { ...this.selectedImage, ...updatedImage };
+			}
+		}
+		this.selectedImage = null;
+		this.isEditing = false;
 	}
 }

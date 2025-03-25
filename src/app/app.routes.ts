@@ -1,5 +1,7 @@
 import { Routes } from "@angular/router";
 import { LandingComponent } from "./landing/landing.component";
+import { AuthGuard } from "./shared/guards/auth.guard"; // ✅ Ensure guard is imported
+
 export const routes: Routes = [
 	{ path: "", component: LandingComponent },
 	{
@@ -10,17 +12,22 @@ export const routes: Routes = [
 		path: "provider",
 		loadChildren: () =>
 			import("./provider/provider.routes").then((m) => m.PROVIDER_ROUTES),
+		canActivate: [AuthGuard], // ✅ Protect provider routes
+		data: { role: "provider" }, // ✅ Ensure only providers can access
 	},
 	{
 		path: "patient",
 		loadChildren: () =>
 			import("./patient/patient.routes").then((m) => m.PATIENT_ROUTES),
+		canActivate: [AuthGuard], // ✅ Protect patient routes
+		data: { role: "patient" }, // ✅ Ensure only patients can access
 	},
 	{
 		path: "admin",
 		loadChildren: () =>
 			import("./admin/admin.routes").then((m) => m.ADMIN_ROUTES),
+		canActivate: [AuthGuard], // ✅ Protect admin routes
+		data: { role: "admin" },
 	},
-	// { path: "", redirectTo: "/auth/login", pathMatch: "full" },
 	{ path: "**", redirectTo: "/auth/login" },
 ];

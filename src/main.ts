@@ -5,11 +5,24 @@ import { routes } from "./app/app.routes";
 import { provideHttpClient, withInterceptors } from "@angular/common/http";
 import { provideAnimationsAsync } from "@angular/platform-browser/animations/async";
 import { AuthInterceptor } from "./app/shared/interceptors/auth.interceptor";
+<<<<<<< HEAD
 
 bootstrapApplication(AppComponent, {
+=======
+ 
+bootstrapApplication(AppComponent, {
+
+>>>>>>> zhi
 	providers: [
 		provideRouter(routes),
 		provideHttpClient(withInterceptors([AuthInterceptor])),
 		provideAnimationsAsync(),
 	],
+<<<<<<< HEAD
 }).catch((err) => console.error(err));
+=======
+
+}).catch((err) => console.error(err));
+
+ 
+>>>>>>> zhi
