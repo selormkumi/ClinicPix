@@ -1,15 +1,6 @@
 import { Component } from "@angular/core";
 import { Router, RouterModule } from "@angular/router";
-<<<<<<< HEAD
-import {
-	FormBuilder,
-	FormGroup,
-	Validators,
-	ReactiveFormsModule,
-} from "@angular/forms";
-=======
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from "@angular/forms";
->>>>>>> zhi
 import { CommonModule } from "@angular/common";
 import { AuthenticationService } from "../../shared/services/authentication.service";
 
