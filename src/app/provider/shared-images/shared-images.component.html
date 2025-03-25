@@ -17,6 +17,7 @@
 			<div class="card-body">
 				<h5>Shared Images</h5>
 
+<<<<<<< HEAD
 				<!-- Search Input -->
 				<div class="search-container" style="margin-bottom: 20px">
 					<input
@@ -28,34 +29,46 @@
 				</div>
 
 				<!-- Shared Images Table -->
+=======
+				<!-- Table of Shared Files -->
+>>>>>>> zhi
 				<table class="table table-striped">
 					<thead>
 						<tr>
 							<th>Image Name</th>
-							<th>Shared By</th>
+							<th>Shared With</th>
 							<th>Shared On</th>
-							<th>Tags</th>
+							<th>Expires On</th>
 							<th>Actions</th>
 						</tr>
 					</thead>
 					<tbody>
 						<tr *ngFor="let image of filteredImages">
 							<td>{{ image.name }}</td>
-							<td>{{ image.sharedBy }}</td>
-							<td>{{ image.sharedOn }}</td>
-							<td>{{ image.tags.join(", ") }}</td>
+							<td>{{ image.sharedWith }}</td>
+							<td>{{ image.sharedOn | date: 'short' }}</td>
+							<td>{{ image.expiresAt | date: 'short' }}</td>
 							<td>
+								<!-- View File -->
 								<button
 									class="btn btn-primary btn-sm"
 									(click)="viewImage(image)">
-									View</button
-								>&nbsp;
+									View
+								</button>
+								&nbsp;
+								
+								<!-- Revoke Access -->
 								<button
 									class="btn btn-danger btn-sm"
 									(click)="revokeAccess(image)">
 									Revoke Access
 								</button>
 							</td>
+						</tr>
+
+						<!-- Show message if no shared files -->
+						<tr *ngIf="sharedImages.length === 0">
+							<td colspan="5" class="text-center">No shared images available.</td>
 						</tr>
 					</tbody>
 				</table>

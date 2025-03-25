@@ -158,3 +158,11 @@ body {
 	padding: 20px;
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
+/* Fix input tag field size */
+.small-tag-input {
+    width: auto !important;  /* Prevent full-width */
+    max-width: 200px !important; /* Set reasonable width */
+    padding: 5px 10px !important; /* Reduce padding */
+    font-size: 14px !important;  /* Match input fields */
+}

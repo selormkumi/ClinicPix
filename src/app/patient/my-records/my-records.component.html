@@ -1,72 +1,91 @@
-<body>
-	<!-- Sidebar -->
-	<div class="sidebar">
-		<h2>Patient Dashboard</h2>
-		<a routerLink="/patient/dashboard">Home</a>
-		<a routerLink="/patient/my-records">My Records</a>
-		<a routerLink="/patient/profile">Profile</a>
-		<a href="#" (click)="logout()">Logout</a>
-	</div>
+<!-- Sidebar -->
+<div class="sidebar">
+	<h2>Patient Dashboard</h2>
+	<a routerLink="/patient/dashboard">Home</a>
+	<a routerLink="/patient/my-records">My Records</a>
+	<a routerLink="/patient/profile">Profile</a>
+	<a href="#" (click)="logout()">Logout</a>
+</div>
 
-	<!-- Main Content -->
-	<div class="main-content">
-		<!-- Search & Filter Section -->
-		<div class="filter-container">
-			<input
-				type="text"
-				class="form-control search-input"
-				placeholder="Search by name or tag..."
-				[(ngModel)]="searchQuery"
-				(input)="filterRecords()" />
+<!-- Main Content -->
+<div class="main-content">
+	<!-- My Shared Records Section -->
+	<div id="shared-records" class="card">
+		<div class="card-body">
+			<h5>My Shared Images</h5>
 
-			<select [(ngModel)]="selectedTag" (change)="filterRecords()">
-				<option value="">All Tags</option>
-				<option *ngFor="let tag of uniqueTags" [value]="tag">{{ tag }}</option>
-			</select>
-		</div>
+			<!-- Loading Indicator -->
+			<div *ngIf="isLoading" class="loading-spinner">
+				<i class="fas fa-spinner fa-spin"></i> Loading shared images...
+			</div>
 
-		<!-- My Images Section -->
-		<div class="card">
-			<div class="card-body">
-				<h5>My Images</h5>
+			<!-- Search & Filter Section -->
+			<div class="filter-container">
+				<div class="filter-group search-box">
+					<input
+						type="text"
+						class="form-control"
+						placeholder="Search..."
+						[(ngModel)]="searchQuery"
+						(input)="filterRecords()" />
+				</div>
+				<div class="filter-group">
+					<select class="form-control tag-dropdown" [(ngModel)]="selectedTag" (change)="filterRecords()">
+						<option value="">All Tags</option>
+						<option *ngFor="let tag of uniqueTags" [value]="tag">{{ tag }}</option>
+					</select>
+				</div>
+			</div>
+
+			<!-- Table of Shared Images -->
+			<div class="table-responsive">
 				<table class="table table-striped">
 					<thead>
 						<tr>
 							<th>Image Name</th>
-							<th>Uploaded By</th>
-							<th>Uploaded On</th>
-							<th>Tags</th>
+							<th>Shared By</th>
+							<th>Shared On</th>
+							<th>Expires At</th>
+							<th>Tag(s)</th>
 							<th>Actions</th>
 						</tr>
 					</thead>
 					<tbody>
 						<tr *ngFor="let image of filteredRecords">
 							<td>{{ image.name }}</td>
-							<td>{{ image.uploadedBy }}</td>
-							<td>{{ image.uploadedOn }}</td>
-							<td>{{ image.tags.join(", ") }}</td>
+							<td>{{ image.sharedBy }} <span *ngIf="image.sharedByEmail">({{ image.sharedByEmail }})</span></td>
+							<td>{{ image.sharedOn }}</td>
+							<td>{{ image.expiresAt }}</td>
 							<td>
-								<button
-									class="btn btn-primary btn-sm"
-									(click)="viewImage(image)">
-									View</button
-								>&nbsp;
-								<button
-									class="btn btn-danger btn-sm"
-									(click)="downloadImage(image)">
-									Download
+								<span *ngIf="image.tags.length > 0; else noTags">
+									<span *ngFor="let tag of image.tags" class="tag-text">{{ tag }}</span>
+								</span>
+								<ng-template #noTags>No tags</ng-template>
+							</td>
+							
+							<td>
+								<button class="btn btn-primary btn-sm" (click)="viewImage(image)">
+									<i class="fas fa-eye"></i> View
+								</button>&nbsp;
+								<button class="btn btn-success btn-sm" (click)="downloadImage(image)">
+									<i class="fas fa-download"></i> Download
 								</button>
 							</td>
+						</tr>
+						
+						<tr *ngIf="filteredRecords.length === 0">
+							<td colspan="6" class="text-center">No shared images found.</td>
 						</tr>
 					</tbody>
 				</table>
 			</div>
+
+			<!-- Image Modal Component -->
+			<app-image-modal
+				*ngIf="selectedImage"
+				[image]="selectedImage"
+				(closeModal)="closeModal()">
+			</app-image-modal>
 		</div>
-		<app-image-modal
-			*ngIf="selectedImage"
-			[image]="selectedImage"
-			[isEditing]="isEditing"
-			(closeModal)="closeModal()">
-		</app-image-modal>
 	</div>
-</body>
+</div>

@@ -7,7 +7,9 @@
 <div class="container">
 	<div class="card">
 		<h3>Login</h3>
-		<form [formGroup]="loginForm" (ngSubmit)="submitForm()">
+
+		<!-- ✅ Step 1: Email & Password Login -->
+		<form [formGroup]="loginForm" *ngIf="!isOtpSent" (ngSubmit)="submitForm()">
 			<!-- Email -->
 			<div class="form-group">
 				<label for="email">Email</label>
@@ -48,7 +50,35 @@
 				Login
 			</button>
 		</form>
-		<p class="footer">
+
+		<!-- ✅ Step 2: OTP Verification Form (Shown After Login) -->
+		<form [formGroup]="otpForm" *ngIf="isOtpSent" (ngSubmit)="verifyOtp()"> <!-- ✅ Fixed function name -->
+			<h4>Enter OTP</h4>
+			<p class="info-text">A 6-digit OTP has been sent to your email.</p>
+
+			<!-- OTP Input -->
+			<div class="form-group">
+				<label for="otp">One-Time Password (OTP)</label>
+				<input
+					type="text"
+					id="otp"
+					formControlName="otp"
+					placeholder="Enter OTP"
+					required
+					maxlength="6" />
+				<p class="error" *ngIf="otpForm.controls['otp'].invalid && otpForm.controls['otp'].touched">
+					OTP must be 6 digits.
+				</p>
+			</div>
+
+			<!-- OTP Submit Button -->
+			<button type="submit" [disabled]="otpForm.invalid" class="btn">
+				Verify OTP
+			</button>
+		</form>
+
+		<!-- Signup Link -->
+		<p class="footer" *ngIf="!isOtpSent">
 			Don't have an account? <a routerLink="/auth/signup">Sign Up</a>
 		</p>
 	</div>

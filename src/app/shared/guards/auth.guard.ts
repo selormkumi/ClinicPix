@@ -8,8 +8,9 @@ import {
 import { AuthenticationService } from "../services/authentication.service";
 
 @Injectable({
-	providedIn: "root", // Ensures Angular provides the service
+	providedIn: "root",
 })
+
 export class AuthGuard implements CanActivate {
 	constructor(
 		private authService: AuthenticationService,
@@ -20,23 +21,22 @@ export class AuthGuard implements CanActivate {
 		route: ActivatedRouteSnapshot,
 		state: RouterStateSnapshot
 	): boolean {
-		const user = this.authService.getCurrentUser(); // Retrieve the logged-in user
+		const user = this.authService.getCurrentUser();
 
 		if (!user) {
-			// Not logged in, redirect to login page
+			console.warn("🚨 User is not logged in! Redirecting to login...");
 			this.router.navigate(["/auth/login"]);
 			return false;
 		}
 
-		// Extract the expected role from the route data (patient or provider)
+		// ✅ Check if user has the required role
 		const expectedRole = route.data["role"];
-
 		if (expectedRole && user.role !== expectedRole) {
-			// User role mismatch, redirect to unauthorized page
-			this.router.navigate(["/unauthorized"]);
+			console.warn("🚨 Unauthorized access! Redirecting to login...");
+			this.router.navigate(["/auth/login"]); // ✅ Redirect unauthorized users to login
 			return false;
 		}
 
-		return true; // Allow access
+		return true;
 	}
 }
