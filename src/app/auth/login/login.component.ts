@@ -91,24 +91,12 @@ export class LoginComponent {
                     // Store JWT token
                     this.authService.storeToken(response.token);
 
-<<<<<<< HEAD
-					localStorage.setItem(
-						"user",
-						JSON.stringify({
-							email: matchedUser.email,
-							fullName: matchedUser.fullName,
-							role: matchedUser.role,
-							userId: matchedUser.id || null,
-						})
-					);
-=======
                     // Ensure role exists in response before storing user data
                     if (!response.user || !response.user.role) {
                         console.error("❌ Role is missing in the response:", response);
                         alert("Login failed. Missing user role.");
                         return;
                     }
->>>>>>> zhi
 
                     // Store user details
                     localStorage.setItem(
