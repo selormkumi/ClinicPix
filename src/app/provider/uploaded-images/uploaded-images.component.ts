@@ -21,13 +21,7 @@ export class UploadedImagesComponent implements OnInit {
 	isEditing: boolean = false;
 	isLoading: boolean = false;
 
-<<<<<<< HEAD
-	searchTerm: string = ""; // Bound to the search input field
-	filteredImages: any[] = []; // Array to hold filtered images
-
-=======
 	uploadedImages: any[] = [];
->>>>>>> zhi
 	newFileName: string = "";
 	newFileTags: string = "";
 	pendingFile: File | null = null;
@@ -49,31 +43,6 @@ export class UploadedImagesComponent implements OnInit {
 			this.currentUserId = Number(user.userId) || 0; // Ensure it's a number
 			this.currentUserName = user.username || null;
 		}
-<<<<<<< HEAD
-		// Initialize filteredImages with all uploaded images
-		this.filteredImages = this.uploadedImages;
-	}
-
-	// Search function that filters images based on the search term
-	onSearch() {
-		if (this.searchTerm.trim() === "") {
-			this.filteredImages = this.uploadedImages; // If search term is empty, show all images
-		} else {
-			this.filteredImages = this.uploadedImages.filter(
-				(image) =>
-					image.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-					image.uploadedBy
-						.toLowerCase()
-						.includes(this.searchTerm.toLowerCase()) ||
-					image.uploadedOn
-						.toLowerCase()
-						.includes(this.searchTerm.toLowerCase()) ||
-					image.tags.some((tag) =>
-						tag.toLowerCase().includes(this.searchTerm.toLowerCase())
-					)
-			);
-		}
-=======
 
 		console.log("✅ Current User ID:", this.currentUserId);
 		this.fetchUploadedImages();
@@ -115,7 +84,6 @@ export class UploadedImagesComponent implements OnInit {
 				this.isLoading = false;
 			}
 		);
->>>>>>> zhi
 	}
 
 	logout() {
