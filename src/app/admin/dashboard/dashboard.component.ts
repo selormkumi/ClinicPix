@@ -1,13 +1,14 @@
 import { Component, OnInit } from "@angular/core";
 import { Router, RouterModule } from "@angular/router";
 import { AuthenticationService } from "../../shared/services/authentication.service";
+
 @Component({
-	selector: "app-manage-users",
+	selector: "app-dashboard.",
 	imports: [RouterModule],
-	templateUrl: "./manage-users.component.html",
-	styleUrl: "./manage-users.component.scss",
+	templateUrl: "./dashboard.component.html",
+	styleUrl: "./dashboard.component.scss",
 })
-export class ManageUsersComponent implements OnInit {
+export class DashboardComponent implements OnInit {
 	currentUserName: string | null = "User"; // Default fallback name
 	constructor(
 		private authService: AuthenticationService,

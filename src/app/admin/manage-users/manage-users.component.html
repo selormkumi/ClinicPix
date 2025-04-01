@@ -1,1 +1,49 @@
-<p>manage-users works!</p>
+<div class="sidebar">
+	<h2>Manage-users</h2>
+	<a routerLink="/admin/dashboard">Home</a>
+	<a routerLink="/admin/manage-users">Manage Users</a>
+	<a routerLink="/admin/audit-logs">Audit Logs</a>
+	<a href="#" (click)="logout()">Logout</a>
+</div>
+
+<!-- Manage Users Section -->
+<div id="manage-users" class="card">
+	<div class="card-body">
+		<h5>Manage Users</h5>
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th>User Name</th>
+					<th>Email</th>
+					<th>Role</th>
+					<th>Status</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>John Doe</td>
+					<td>john.doe"at"example.com</td>
+					<td>Patient</td>
+					<td>Active</td>
+					<td>
+						<button class="btn btn-warning btn-sm">Edit</button>
+						<button class="btn btn-danger btn-sm">Deactivate</button>
+						<button class="btn btn-secondary btn-sm">Reset Password</button>
+					</td>
+				</tr>
+				<tr>
+					<td>Jane Smith</td>
+					<td>jane.smith"at"example.com</td>
+					<td>Healthcare Provider</td>
+					<td>Active</td>
+					<td>
+						<button class="btn btn-warning btn-sm">Edit</button>
+						<button class="btn btn-danger btn-sm">Deactivate</button>
+						<button class="btn btn-secondary btn-sm">Reset Password</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
