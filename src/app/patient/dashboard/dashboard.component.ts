@@ -26,12 +26,17 @@ export class DashboardComponent implements OnInit {
 
 				// ✅ Ensure `userName` exists, check common naming variations
 				this.currentUserName =
-					user.userName?.trim() || user.username?.trim() || user.name?.trim() || "Unknown"; // ✅ Use correct username
-
+					user.userName?.trim() ||
+					user.username?.trim() ||
+					user.name?.trim() ||
+					"Unknown"; // ✅ Use correct username
 
 				console.log("🔍 Loaded User:", user);
 			} catch (error) {
-				console.error("❌ ERROR: Failed to parse user data from localStorage", error);
+				console.error(
+					"❌ ERROR: Failed to parse user data from localStorage",
+					error
+				);
 				this.currentUserName = "User"; // Prevent crashes
 			}
 		} else {

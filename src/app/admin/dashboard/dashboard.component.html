@@ -1,0 +1,29 @@
+<div class="sidebar">
+	<h2>Admin Dashboard</h2>
+	<a routerLink="/admin/dashboard">Home</a>
+	<a routerLink="/admin/manage-users">Manage Users</a>
+	<a routerLink="/admin/audit-logs">Audit Logs</a>
+	<a href="#" (click)="logout()">Logout</a>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+	<!-- Header -->
+	<div class="header">
+		<h3>Welcome, Admin</h3>
+		<p>Monitor and manage the platform efficiently.</p>
+	</div>
+
+	<!-- Home Section -->
+	<div id="home" class="card">
+		<div class="card-body">
+			<h5>Dashboard Overview</h5>
+			<p>Welcome to the Admin Dashboard. Here you can:</p>
+			<ul>
+				<li>Manage users and their roles.</li>
+				<li>Monitor uploaded and shared images.</li>
+				<li>Review audit logs for activity tracking.</li>
+			</ul>
+		</div>
+	</div>
+</div>
