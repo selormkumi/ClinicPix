@@ -2,37 +2,40 @@
 	<h2>Admin Dashboard</h2>
 	<a routerLink="/admin/dashboard">Home</a>
 	<a routerLink="/admin/manage-users">Manage Users</a>
-	<a routerLink="/admin/audit-logs">Audit Logs</a>
+	<a routerLink="/admin/audit">Audit Logs</a>
 	<a href="#" (click)="logout()">Logout</a>
 </div>
 
-<!-- Audit Logs Section -->
-<div id="audit-logs" class="card">
-	<div class="card-body">
-		<h5>Audit Logs</h5>
-		<table class="table table-striped">
-			<thead>
-				<tr>
-					<th>Action</th>
-					<th>User</th>
-					<th>Date</th>
-					<th>Details</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr>
-					<td>Login</td>
-					<td>John Doe</td>
-					<td>2025-01-15 10:00 AM</td>
-					<td>Successful login</td>
-				</tr>
-				<tr>
-					<td>Image Upload</td>
-					<td>Jane Smith</td>
-					<td>2025-01-14 02:30 PM</td>
-					<td>Uploaded MRI_Brain_2025.jpg</td>
-				</tr>
-			</tbody>
-		</table>
+<!-- Main Content -->
+<div class="main-content">
+	<!-- Audit Logs Section -->
+	<div id="audit-logs" class="card">
+		<div class="card-body">
+			<h5>Audit Logs</h5>
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th>Action</th>
+						<th>User</th>
+						<th>Date</th>
+						<th>Details</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>Login</td>
+						<td>John Doe</td>
+						<td>2025-01-15 10:00 AM</td>
+						<td>Successful login</td>
+					</tr>
+					<tr>
+						<td>Image Upload</td>
+						<td>Jane Smith</td>
+						<td>2025-01-14 02:30 PM</td>
+						<td>Uploaded MRI_Brain_2025.jpg</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
 	</div>
 </div>

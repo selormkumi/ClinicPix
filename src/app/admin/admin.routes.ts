@@ -11,6 +11,10 @@ export const ADMIN_ROUTES: Routes = [
 		component: ManageUsersComponent,
 		canActivate: [AuthGuard],
 	},
-
+	{
+		path: "dashboard",
+		component: DashboardComponent,
+		canActivate: [AuthGuard],
+	},
 	{ path: "audit", component: AuditComponent, canActivate: [AuthGuard] },
 ];
