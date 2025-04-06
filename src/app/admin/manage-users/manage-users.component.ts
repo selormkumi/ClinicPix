@@ -1,9 +1,12 @@
 import { Component, OnInit } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { FormsModule } from "@angular/forms";
 import { Router, RouterModule } from "@angular/router";
 import { AuthenticationService } from "../../shared/services/authentication.service";
 @Component({
 	selector: "app-manage-users",
-	imports: [RouterModule],
+	imports: [RouterModule, FormsModule, CommonModule],
+	standalone: true,
 	templateUrl: "./manage-users.component.html",
 	styleUrl: "./manage-users.component.scss",
 })
@@ -12,7 +15,25 @@ export class ManageUsersComponent implements OnInit {
 		private authService: AuthenticationService,
 		private router: Router
 	) {}
+	searchTerm: string = "";
+	users = [
+		{
+			name: "John Doe",
+			email: "john.doe@example.com",
+			phone: "(123) 456-7890",
+		},
+	];
 
+	filteredusers = this.users;
+	onSearch() {
+		// Filtering users based on the search term
+		this.filteredusers = this.users.filter(
+			(user) =>
+				user.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+				user.email.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+				user.phone.includes(this.searchTerm)
+		);
+	}
 	ngOnInit() {}
 	// ✅ Logout Function
 	logout() {

@@ -8,6 +8,16 @@
 
 <!-- Main Content -->
 <div class="main-content">
+	<!-- search bar -->
+	<div class="search-container">
+		<input
+			type="text"
+			class="form-control"
+			placeholder="Search Patients..."
+			[(ngModel)]="searchTerm"
+			(input)="onSearch()" />
+	</div>
+	<br />
 	<!-- Audit Logs Section -->
 	<div id="audit-logs" class="card">
 		<div class="card-body">
