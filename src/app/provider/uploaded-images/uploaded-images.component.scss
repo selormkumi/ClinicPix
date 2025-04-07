@@ -161,8 +161,53 @@ body {
 
 /* Fix input tag field size */
 .small-tag-input {
-    width: auto !important;  /* Prevent full-width */
-    max-width: 200px !important; /* Set reasonable width */
-    padding: 5px 10px !important; /* Reduce padding */
-    font-size: 14px !important;  /* Match input fields */
+	width: auto !important; /* Prevent full-width */
+	max-width: 200px !important; /* Set reasonable width */
+	padding: 5px 10px !important; /* Reduce padding */
+	font-size: 14px !important; /* Match input fields */
+}
+
+/* Table Section Styling */
+.table-responsive {
+	margin-top: 20px;
+}
+
+.table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.table thead th {
+	background-color: #3498db;
+	color: white;
+	padding: 12px;
+	text-align: left;
+	font-weight: 500;
+}
+
+.table tbody tr:nth-child(even) {
+	background-color: #f2f2f2;
+}
+
+.table tbody tr:hover {
+	background-color: #e9ecef;
+}
+
+.table td,
+.table th {
+	padding: 10px;
+	text-align: left;
+	border: 1px solid #dee2e6;
+}
+
+/* Fix for action buttons in table */
+.table button {
+	margin-right: 5px;
+}
+
+/* Tag styling for consistency */
+.tag-text {
+	font-size: 1rem;
+	font-weight: normal;
+	color: black;
 }
