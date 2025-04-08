@@ -26,6 +26,20 @@
 	<div id="patients" class="card">
 		<div class="card-body">
 			<h5>Patients</h5>
+
+			<!-- Add Patient Form -->
+			<div class="add-patient-form mb-3 d-flex align-items-center">
+				<select
+				  class="form-control patient-select mr-2"
+				  [(ngModel)]="selectedPatientEmail">
+				  <option value="" disabled selected>Select a patient</option>
+				  <option *ngFor="let patient of availablePatientEmails" [value]="patient.email">
+					{{ patient.name }} ({{ patient.email }})
+				  </option>
+				</select>
+				<button class="btn btn-primary" (click)="assignPatient()">+ Add Patient</button>
+			  </div>			  
+
 			<table class="table table-striped">
 				<thead>
 					<tr>
@@ -42,7 +56,13 @@
 						<td>{{ patient.phone }}</td>
 						<td>
 							<button class="btn btn-primary btn-sm">View Details</button>&nbsp;
-							<button class="btn btn-secondary btn-sm">Send Message</button>
+							<button class="btn btn-secondary btn-sm">Send Message</button>&nbsp;
+							<button
+							class="btn btn-danger btn-sm"
+							(click)="removePatient(patient.id)">
+							Remove
+							</button>
+
 						</td>
 					</tr>
 				</tbody>

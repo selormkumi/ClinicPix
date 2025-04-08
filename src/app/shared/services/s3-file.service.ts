@@ -12,7 +12,7 @@ export class S3FileService {
 
   // 📌 Get all uploaded files for a provider
   getUploadedFiles(userId: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}?uploadedBy=${userId}`); // Send provider ID to backend
+    return this.http.get(`${this.apiUrl}?uploadedBy=${userId}`);
   }
 
   // 📌 Get pre-signed URL to upload a file
@@ -22,7 +22,7 @@ export class S3FileService {
 
   // 📌 Upload a file to S3 using pre-signed URL
   uploadFile(fileName: string, fileType: string, uploadedBy: number, tags: string[]): Observable<any> {
-    const apiUrl = "http://localhost:5001/api/files/upload";  // ✅ Correct URL
+    const apiUrl = "http://localhost:5001/api/files/upload";
     return this.http.post<{ uploadUrl: string }>(apiUrl, { fileName, fileType, uploadedBy, tags });
   }
 
@@ -47,7 +47,7 @@ export class S3FileService {
       fileName,
       uploadedBy,
       sharedWith,
-      expiresIn
+      expiresIn,
     });
   }
 
@@ -62,7 +62,7 @@ export class S3FileService {
     return this.http.post(`${this.apiUrl}/revoke`, {
       fileName,
       uploadedBy,
-      sharedWith
+      sharedWith,
     });
   }
 
@@ -79,6 +79,31 @@ export class S3FileService {
   // ✅ Fetch shared files uploaded by the provider
   getProviderSharedFiles(providerId: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/provider-shared?uploadedBy=${encodeURIComponent(providerId)}`);
+  }
+
+  // 📌 Assign a patient to a provider
+  assignPatient(providerId: number, patientEmail: string): Observable<any> {
+    return this.http.post("http://localhost:5001/api/patients/assign", {
+      providerId,
+      patientEmail,
+    });
+  }
+
+  // 📌 Get all patients assigned to a provider
+  getPatientsByProvider(providerId: number): Observable<any> {
+    return this.http.get(`http://localhost:5001/api/patients/${providerId}`);
+  }
+
+  // 📌 Get all available patients (for dropdown email selector)
+  getAllPatientEmails(providerId: number): Observable<any> {
+    return this.http.get(`http://localhost:5001/api/patients/all-patient-emails/${providerId}`);
+  }  
+
+  // 📌 Unassign (remove) patient from provider
+  unassignPatient(providerId: number, patientId: number): Observable<any> {
+    return this.http.request("delete", "http://localhost:5001/api/patients/unassign", {
+      body: { providerId, patientId }
+    });
   }
 
 }

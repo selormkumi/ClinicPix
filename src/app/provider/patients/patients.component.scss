@@ -73,3 +73,11 @@ body {
 .card h5 {
 	margin-bottom: 15px;
 }
+
+.patient-select {
+	width: 500px; /* fixed width */
+	min-width: 250px;
+	max-width: 100%;
+	margin-right: 10px; /* gap between select and button */
+  }
+  

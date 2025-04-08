@@ -17,96 +17,111 @@
 			<div class="card-body">
 				<h5>Uploaded Images</h5>
 
-			<!-- Drag & Drop Zone -->
-			<div
-				class="drop-zone"
-				[ngClass]="{ 'dragging': isDragging }"
-				(dragover)="handleDragOver($event)"
-				(dragleave)="handleDragLeave()"
-				(drop)="handleDrop($event)">
-				<div class="drop-zone-content">
-					<i class="fas fa-cloud-upload-alt"></i>
-					<p *ngIf="!pendingFile"><b>Drag & drop an image file here</b></p>
+				<!-- Drag & Drop Zone -->
+				<div
+					class="drop-zone"
+					[ngClass]="{ 'dragging': isDragging }"
+					(dragover)="handleDragOver($event)"
+					(dragleave)="handleDragLeave()"
+					(drop)="handleDrop($event)">
+					<div class="drop-zone-content">
+						<i class="fas fa-cloud-upload-alt"></i>
+						<p *ngIf="!pendingFile"><b>Drag & drop an image file here</b></p>
+					</div>
+					
+					<p *ngIf="pendingFile" class="selected-file">
+						<b>Selected: {{ pendingFile.name }}</b>
+					</p>
+					<button class="btn btn-success btn-sm" (click)="triggerFileInput()">Select File</button>
+
+					<input type="file" 
+						#fileInput
+						accept=".jpeg,.jpg,.png,.pdf"
+						(change)="uploadImage($event)" 
+						style="display: none"
+					/>
 				</div>
-				
-				<p *ngIf="pendingFile" class="selected-file">
-					<b>Selected: {{ pendingFile.name }}</b>
-				</p>
-				<button class="btn btn-success btn-sm" (click)="triggerFileInput()">Select File</button>
 
-				<input type="file" 
-					#fileInput
-					accept=".jpeg,.jpg,.png,.pdf"
-					(change)="uploadImage($event)" 
-					style="display: none"
-				/>
-			</div>
-
-			<!-- Upload Controls -->
-			<div class="upload-controls">
-				<span><b>File Name: </b>{{ pendingFile?.name || "No file selected" }}</span>&nbsp;
-				<input type="text" [(ngModel)]="newFileTags" placeholder="Enter tag(s)" class="form-control small-tag-input"/>
-				<button class="btn btn-primary btn-sm upload-btn" (click)="confirmUpload()" [disabled]="!pendingFile">
-					<i class="fas fa-upload"></i> Upload
-				</button>
-			</div>
-
-			<!-- Table of Uploaded Images -->
-			<!-- Table of Uploaded Images -->
-<div class="table-responsive">
-	<table class="table table-striped">
-		<thead>
-			<tr>
-				<th>Image Name</th>
-				<th>Uploaded By</th>
-				<th>Uploaded On</th>
-				<th>Tag(s)</th>
-				<th>Actions</th>
-			</tr>
-		</thead>
-		<tbody>
-			<tr *ngFor="let image of uploadedImages">
-				<td>{{ image.name }}</td>
-				<td>{{ image.uploadedBy }} <span *ngIf="image.uploaderEmail">({{ image.uploaderEmail }})</span></td>
-				<td>{{ image.uploadedOn }}</td>
-				<td>
-					<span *ngIf="image.tags.length > 0; else noTags">
-						<span *ngFor="let tag of image.tags">{{ tag }}</span>
-					</span>
-					<ng-template #noTags> No tags </ng-template>
-				</td>
-				<td>
-					<!-- View Button -->
-					<button class="btn btn-primary btn-sm" (click)="viewImage(image.name)">
-						<i class="fas fa-eye"></i> View
-					</button>&nbsp;
-
-					<!-- Share Button -->
-					<button class="btn btn-warning btn-sm" (click)="openShareModal(image.name)">
-						<i class="fas fa-share-alt"></i> Share
-					</button>&nbsp;
-
-					<!-- Delete Button -->
-					<button class="btn btn-danger btn-sm" (click)="deleteImage(image.name)">
-						<i class="fas fa-trash"></i> Delete
+				<!-- Upload Controls -->
+				<div class="upload-controls">
+					<span><b>File Name: </b>{{ pendingFile?.name || "No file selected" }}</span>&nbsp;
+					<input type="text" [(ngModel)]="newFileTags" placeholder="Enter tag(s)" class="form-control small-tag-input"/>
+					<button class="btn btn-primary btn-sm upload-btn" (click)="confirmUpload()" [disabled]="!pendingFile">
+						<i class="fas fa-upload"></i> Upload
 					</button>
-				</td>
-			</tr>
-			<tr *ngIf="uploadedImages.length === 0">
-				<td colspan="5" class="text-center">No uploaded images found.</td>
-			</tr>
-		</tbody>
-	</table>
-</div>
+				</div>
 
+				<!-- Table of Uploaded Images -->
+				<div class="table-responsive">
+					<table class="table table-striped">
+						<thead>
+							<tr>
+								<th>Image Name</th>
+								<th>Uploaded By</th>
+								<th>Uploaded On</th>
+								<th>Tag(s)</th>
+								<th>Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr *ngFor="let image of uploadedImages">
+								<td>{{ image.name }}</td>
+								<td>{{ image.uploadedBy }} <span *ngIf="image.uploaderEmail">({{ image.uploaderEmail }})</span></td>
+								<td>{{ image.uploadedOn }}</td>
+								<td>
+									<span *ngIf="image.tags.length > 0; else noTags">
+										<span *ngFor="let tag of image.tags">{{ tag }}</span>
+									</span>
+									<ng-template #noTags> No tags </ng-template>
+								</td>
+								<td>
+									<!-- View Button -->
+									<button class="btn btn-primary btn-sm" (click)="viewImage(image.name)">
+										<i class="fas fa-eye"></i> View
+									</button>&nbsp;
 
-			<!-- Image Modal Component -->
-			<app-image-modal
-				*ngIf="selectedImage"
-				[image]="selectedImage"
-				(closeModal)="closeModal()"
-				(saveChanges)="saveChanges($event)">
-			</app-image-modal>
+									<!-- Share Dropdown Trigger -->
+									<button class="btn btn-warning btn-sm" (click)="toggleShareDropdown(image)">
+										<i class="fas fa-share-alt"></i> Share
+									</button>&nbsp;
+
+									<!-- Delete Button -->
+									<button class="btn btn-danger btn-sm" (click)="deleteImage(image.name)">
+										<i class="fas fa-trash"></i> Delete
+									</button>
+
+									<!-- Share Dropdown Panel -->
+									<div *ngIf="image.showDropdown" style="margin-top: 10px;">
+										<select
+											class="form-control"
+											style="display: inline-block; width: 200px;"
+											[(ngModel)]="selectedPatientEmail">
+											<option value="" disabled selected>Select patient email</option>
+											<option *ngFor="let p of assignedPatients" [value]="p.email">
+												{{ p.name }} ({{ p.email }})
+											</option>
+										</select>
+										<button class="btn btn-success btn-sm ml-2" (click)="shareImageToPatient(image)">
+											Share
+										</button>
+									</div>
+								</td>
+							</tr>
+							<tr *ngIf="uploadedImages.length === 0">
+								<td colspan="5" class="text-center">No uploaded images found.</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<!-- Image Modal Component -->
+				<app-image-modal
+					*ngIf="selectedImage"
+					[image]="selectedImage"
+					(closeModal)="closeModal()"
+					(saveChanges)="saveChanges($event)">
+				</app-image-modal>
+			</div>
 		</div>
 	</div>
 </div>
