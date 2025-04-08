@@ -92,12 +92,23 @@ export class UploadedImagesComponent implements OnInit {
 	}
 
 	// ✅ Open Image
-	viewImage(imageName: string) {
-		const uploadedBy = this.currentUserId; // Ensure current provider ID is passed
-		this.s3Service.getFileUrl(imageName, uploadedBy).subscribe((res) => {
-		window.open(res.viewUrl, "_blank");
-		});
-	}
+	viewImage(fileName: string) {
+		const uploadedBy = this.currentUserId;
+	  
+		this.s3Service.getFileUrl(fileName, uploadedBy).subscribe(
+		  (res) => {
+			this.selectedImage = {
+			  name: fileName,
+			  viewUrl: res.viewUrl
+			};
+		  },
+		  (error) => {
+			console.error("❌ ERROR: Failed to generate view URL", error);
+			alert("Unable to view image. Try again.");
+		  }
+		);
+	  }
+
 
 	// ✅ Open Share Modal (Uses Email, then Fetches User ID)
 	openShareModal(imageName: string) {
