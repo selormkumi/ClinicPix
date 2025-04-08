@@ -3,16 +3,17 @@
 		<h2>{{ isEditing ? "Edit Image" : "View Image" }}</h2>
 
 		<!-- Image Preview -->
-		<div *ngIf="image">
-			<img
-				*ngIf="image.name.endsWith('.jpg') || image.name.endsWith('.png')"
-				[src]="'assets/uploads/' + image.name"
-				[alt]="image.name"
-				class="image-preview" />
-			<p *ngIf="!image.name.endsWith('.jpg') && !image.name.endsWith('.png')">
-				Preview not available
-			</p>
-		</div>
+	<div *ngIf="image">
+		<img
+		*ngIf="image.viewUrl && (image.name.endsWith('.jpg') || image.name.endsWith('.png'))"
+		[src]="image.viewUrl"
+		[alt]="image.name"
+		class="image-preview" />
+	
+		<p *ngIf="!image.viewUrl || (!image.name.endsWith('.jpg') && !image.name.endsWith('.png'))">
+		Preview not available
+		</p>
+	</div>  
 
 		<!-- Edit Fields -->
 		<div *ngIf="isEditing">

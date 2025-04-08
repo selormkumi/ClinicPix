@@ -1,72 +1,71 @@
-<body>
-	<!-- Sidebar -->
-	<div class="sidebar">
-		<h2>Provider Dashboard</h2>
-		<a routerLink="/provider/dashboard">Home</a>
-		<a routerLink="/provider/patients">Patients</a>
-		<a routerLink="/provider/uploaded-images">Uploaded Images</a>
-		<a routerLink="/provider/shared-images">Shared Images</a>
-		<a routerLink="/provider/profile">Profile</a>
-		<a href="#" (click)="logout()">Logout</a>
-	</div>
-
-	<!-- Main Content -->
-	<div class="main-content">
-		<!-- Shared Images Section -->
-		<div class="card">
-			<div class="card-body">
-				<h5>Shared Images</h5>
-
-				<!-- Table of Shared Files -->
-				<table class="table table-striped">
-					<thead>
-						<tr>
-							<th>Image Name</th>
-							<th>Shared With</th>
-							<th>Shared On</th>
-							<th>Expires On</th>
-							<th>Actions</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr *ngFor="let image of sharedImages">
-							<td>{{ image.name }}</td>
-							<td>{{ image.sharedWith }}</td>
-							<td>{{ image.sharedOn | date: 'short' }}</td>
-							<td>{{ image.expiresAt | date: 'short' }}</td>
-							<td>
-								<!-- View File -->
-								<button
-									class="btn btn-primary btn-sm"
-									(click)="viewImage(image)">
-									View
-								</button>
-								&nbsp;
-								
-								<!-- Revoke Access -->
-								<button
-									class="btn btn-danger btn-sm"
-									(click)="revokeAccess(image)">
-									Revoke Access
-								</button>
-							</td>
-						</tr>
-
-						<!-- Show message if no shared files -->
-						<tr *ngIf="sharedImages.length === 0">
-							<td colspan="5" class="text-center">No shared images available.</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
+<!-- Sidebar Section -->
+<div class="sidebar">
+	<h2>Provider Dashboard</h2>
+	<a routerLink="/provider/dashboard">Home</a>
+	<a routerLink="/provider/patients">Patients</a>
+	<a routerLink="/provider/uploaded-images">Uploaded Images</a>
+	<a routerLink="/provider/shared-images">Shared Images</a>
+	<a routerLink="/provider/profile">Profile</a>
+	<a href="#" (click)="logout()">Logout</a>
+  </div>
+  
+  <!-- Main Content Section -->
+  <div class="main-content">
+	<div class="uploaded-images-section">
+	  <div class="card">
+		<div class="card-body">
+		  <h5>Shared Images</h5>
+  
+		  <!-- Loading Indicator -->
+		  <div *ngIf="isLoading" class="loading-spinner">
+			<i class="fas fa-spinner fa-spin"></i> Loading shared images...
+		  </div>
+  
+		  <!-- Table of Shared Images -->
+		  <div class="table-responsive" *ngIf="!isLoading">
+			<table class="table table-striped">
+			  <thead>
+				<tr>
+				  <th>Image Name</th>
+				  <th>Shared With</th>
+				  <th>Shared On</th>
+				  <th>Expires On</th>
+				  <th>Actions</th>
+				</tr>
+			  </thead>
+			  <tbody>
+				<tr *ngFor="let image of sharedImages">
+				  <td>{{ image.name }}</td>
+				  <td>{{ image.sharedWithName }} <span *ngIf="image.sharedWithEmail">({{ image.sharedWithEmail }})</span></td>
+				  <td>{{ image.sharedOn }}</td>
+				  <td>{{ image.expiresAt }}</td>
+				  <td>
+					<!-- View Button -->
+					<button class="btn btn-primary btn-sm" (click)="viewImage(image)">
+					  <i class="fas fa-eye"></i> View
+					</button>&nbsp;
+  
+					<!-- Revoke Button -->
+					<button class="btn btn-danger btn-sm" (click)="revokeAccess(image)">
+					  <i class="fas fa-trash"></i> Revoke Access
+					</button>
+				  </td>
+				</tr>
+				<tr *ngIf="sharedImages.length === 0">
+				  <td colspan="5" class="text-center">No shared images found.</td>
+				</tr>
+			  </tbody>
+			</table>
+		  </div>
+  
+		  <!-- Image Modal Component -->
+		  <app-image-modal
+			*ngIf="selectedImage"
+			[image]="selectedImage"
+			[isEditing]="false"
+			(closeModal)="closeModal()">
+		  </app-image-modal>
 		</div>
+	  </div>
 	</div>
-
-	<!-- Image Modal -->
-	<app-image-modal
-		*ngIf="selectedImage"
-		[image]="selectedImage"
-		[isEditing]="false"
-		(closeModal)="closeModal()">
-	</app-image-modal>
-</body>
+  </div>  

@@ -18,6 +18,7 @@ export class SharedImagesComponent implements OnInit {
 	currentUserId: number = 0;
 	currentUserEmail: string | null = null;
 	selectedImage: any | null = null;
+	isLoading: boolean = false;
 
 	constructor(
 		private authService: AuthenticationService,
@@ -51,28 +52,43 @@ export class SharedImagesComponent implements OnInit {
 			return;
 		}
 
-		this.s3Service.getSharedFiles(this.currentUserId).subscribe(
+		this.s3Service.getProviderSharedFiles(this.currentUserId).subscribe(
 			(res) => {
 				console.log("✅ Shared Files Response:", res);
 
 				this.sharedImages = res.sharedFiles.map((file: any) => ({
-					name: file.file_name, // File name
-					sharedBy: file.uploaded_by, // Provider ID
-					sharedByEmail: file.shared_by_email, // Provider email
-					sharedWith: file.shared_with, // Patient ID
-					sharedWithEmail: file.shared_with_email, // Patient email
-					expiresAt: file.expires_at
-						? new Date(file.expires_at).toLocaleString("en-US", {
-							month: "short",
-							day: "2-digit",
-							year: "numeric",
-							hour: "2-digit",
-							minute: "2-digit",
-							second: "2-digit",
-							hour12: true,
+					name: file.file_name,
+					sharedBy: file.uploaded_by,
+					sharedByEmail: file.shared_by_email,
+					sharedWith: file.shared_with,
+					sharedWithName: file.shared_with_name,
+					sharedWithEmail: file.shared_with_email,
+					sharedOn: file.shared_on
+					  ? new Date(file.shared_on).toLocaleString("en-US", {
+						  timeZone: "America/New_York",
+						  month: "short",
+						  day: "2-digit",
+						  year: "numeric",
+						  hour: "2-digit",
+						  minute: "2-digit",
+						  second: "2-digit",
+						  hour12: true,
 						})
-						: "N/A", // ✅ Format expiration date
-				}));
+					  : "N/A",
+					expiresAt: file.expires_at
+					  ? new Date(file.expires_at).toLocaleString("en-US", {
+						  timeZone: "America/New_York",
+						  month: "short",
+						  day: "2-digit",
+						  year: "numeric",
+						  hour: "2-digit",
+						  minute: "2-digit",
+						  second: "2-digit",
+						  hour12: true,
+						})
+					  : "N/A"
+				  }));
+				  
 
 				console.log("📌 Updated Shared Images List:", this.sharedImages);
 			},
@@ -84,8 +100,19 @@ export class SharedImagesComponent implements OnInit {
 
 	// ✅ View Image (Generate signed URL)
 	viewImage(image: any) {
-		this.selectedImage = image;
-	}
+		this.s3Service.getFileUrl(image.name, image.sharedBy).subscribe(
+		  (res) => {
+			this.selectedImage = {
+			  ...image,
+			  viewUrl: res.viewUrl // pre-signed URL from backend
+			};
+		  },
+		  (error) => {
+			console.error("❌ ERROR: Failed to generate view URL", error);
+			alert("Unable to view image. Try again.");
+		  }
+		);
+	  }	  
 
 	// ✅ Close Modal
 	closeModal() {

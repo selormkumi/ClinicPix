@@ -17,11 +17,6 @@
 			<div class="card-body">
 				<h5>Uploaded Images</h5>
 
-			<!-- Loading Indicator -->
-			<div *ngIf="isLoading" class="loading-spinner">
-				<i class="fas fa-spinner fa-spin"></i> Loading uploaded images...
-			</div>
-
 			<!-- Drag & Drop Zone -->
 			<div
 				class="drop-zone"
@@ -29,8 +24,11 @@
 				(dragover)="handleDragOver($event)"
 				(dragleave)="handleDragLeave()"
 				(drop)="handleDrop($event)">
-				<i class="fas fa-cloud-upload-alt" style="font-size: 40px; color: #007bff"></i>
-				<p *ngIf="!pendingFile"><b>Drag & drop an image file here</b></p>
+				<div class="drop-zone-content">
+					<i class="fas fa-cloud-upload-alt"></i>
+					<p *ngIf="!pendingFile"><b>Drag & drop an image file here</b></p>
+				</div>
+				
 				<p *ngIf="pendingFile" class="selected-file">
 					<b>Selected: {{ pendingFile.name }}</b>
 				</p>
@@ -51,6 +49,11 @@
 				<button class="btn btn-primary btn-sm upload-btn" (click)="confirmUpload()" [disabled]="!pendingFile">
 					<i class="fas fa-upload"></i> Upload
 				</button>
+			</div>
+
+			<!-- Loading Indicator -->
+			<div *ngIf="isLoading" class="loading-spinner">
+				<i class="fas fa-spinner fa-spin"></i> Loading uploaded images...
 			</div>
 
 			<!-- Table of Uploaded Images -->

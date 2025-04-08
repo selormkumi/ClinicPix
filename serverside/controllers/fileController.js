@@ -258,4 +258,39 @@ const revokeSharedFile = async (req, res) => {
     }
 };
 
-module.exports = { getFiles, uploadFile, viewFile, deleteFile, shareFile, getSharedFiles, getUserIdByEmail, revokeSharedFile };
+const getProviderSharedFiles = async (req, res) => {
+	const { uploadedBy } = req.query;
+
+	if (!uploadedBy) {
+		return res.status(400).json({ error: "Missing uploadedBy parameter" });
+	}
+
+	try {
+		const result = await db.query(
+            `SELECT 
+              f.file_name, 
+              sf.shared_with, 
+              shared_user.username AS shared_with_name,
+              shared_user.email AS shared_with_email,
+              sf.uploaded_by,
+              upload_user.email AS shared_by_email,
+              sf.shared_on, 
+              sf.expires_at
+            FROM shared_files sf
+            JOIN files f ON sf.file_id = f.id
+            JOIN users shared_user ON sf.shared_with = shared_user.id
+            JOIN users upload_user ON sf.uploaded_by = upload_user.id
+            WHERE sf.uploaded_by = $1
+            ORDER BY sf.shared_on DESC`,
+            [uploadedBy]
+          );
+          
+
+		res.json({ sharedFiles: result.rows });
+	} catch (error) {
+		console.error("❌ ERROR: Failed to fetch provider-shared files", error);
+		res.status(500).json({ error: error.message });
+	}
+};
+
+module.exports = { getFiles, uploadFile, viewFile, deleteFile, shareFile, getSharedFiles, getUserIdByEmail, revokeSharedFile, getProviderSharedFiles};

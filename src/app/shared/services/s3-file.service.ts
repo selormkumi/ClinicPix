@@ -75,4 +75,10 @@ export class S3FileService {
   getUserIdByEmail(email: string): Observable<any> {
     return this.http.get(`http://localhost:5001/api/user-id?email=${encodeURIComponent(email)}`);
   }
+
+  // ✅ Fetch shared files uploaded by the provider
+  getProviderSharedFiles(providerId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/provider-shared?uploadedBy=${encodeURIComponent(providerId)}`);
+  }
+
 }
