@@ -64,8 +64,12 @@ const uploadFile = async (req, res) => {
         await db.query(
             `INSERT INTO files (file_name, uploaded_by, uploaded_on, tags) 
              VALUES ($1, $2, NOW(), $3)`,
-            [fileName, uploadedBy, tags.length > 0 ? tags.join(",") : null]
-        );
+            [
+              fileName,
+              uploadedBy,
+              (Array.isArray(tags) && tags.length > 0) ? tags.join(",") : null,
+            ]
+          );          
 
         res.json({ uploadUrl });
 

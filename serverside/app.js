@@ -21,11 +21,13 @@ app.use(
 const authRoutes = require("./routes/authRoutes");
 const fileRoutes = require("./routes/fileRoutes");
 const providerRoutes = require("./routes/providerRoutes");
+const userRoutes = require("./routes/userRoutes"); // ✅ Added this
 
 // ✅ Register API routes
 app.use("/auth", authRoutes);                  // Auth routes (login/register)
 app.use("/api", fileRoutes);                   // File management routes
 app.use("/api/patients", providerRoutes);      // Provider-patient related routes
+app.use("/api/users", userRoutes);             // ✅ User profile routes
 
 // ✅ Root test route
 app.get("/", (req, res) => {

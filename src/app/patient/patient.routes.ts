@@ -1,7 +1,7 @@
 import { Routes } from "@angular/router";
 import { DashboardComponent } from "./dashboard/dashboard.component";
 import { MyRecordsComponent } from "./my-records/my-records.component";
-import { ProfileComponent } from "./profile/profile.component";
+import { PatientProfileComponent } from "./patient-profile/patient-profile.component";
 import { AuthGuard } from "../shared/guards/auth.guard";
 
 export const PATIENT_ROUTES: Routes = [
@@ -9,7 +9,7 @@ export const PATIENT_ROUTES: Routes = [
 		path: "",
 		component: DashboardComponent,
 		canActivate: [AuthGuard],
-		data: { role: "patient" }, // Restrict to patients only
+		data: { role: "patient" }, // Default route
 	},
 	{
 		path: "dashboard",
@@ -25,7 +25,7 @@ export const PATIENT_ROUTES: Routes = [
 	},
 	{
 		path: "profile",
-		component: ProfileComponent,
+		component: PatientProfileComponent,
 		canActivate: [AuthGuard],
 		data: { role: "patient" },
 	},

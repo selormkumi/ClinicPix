@@ -74,7 +74,7 @@ export class PatientsComponent implements OnInit {
 				alert(error?.error?.error || "Failed to assign patient.");
 			}
 		);
-	}	
+	}
 
 	// ✅ Load Patients Assigned to This Provider
 	loadPatients() {
@@ -101,37 +101,37 @@ export class PatientsComponent implements OnInit {
 	fetchAvailablePatientEmails() {
 		const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 		const providerId = currentUser.userId;
-	  
+
 		if (!providerId) return;
-	  
+
 		this.s3FileService.getAllPatientEmails(providerId).subscribe(
-		  (res) => {
-			this.availablePatientEmails = res.patients || [];
-		  },
-		  (error) => {
-			console.error("❌ ERROR fetching emails", error);
-		  }
+			(res) => {
+				this.availablePatientEmails = res.patients || [];
+			},
+			(error) => {
+				console.error("❌ ERROR fetching emails", error);
+			}
 		);
-	  }	  
+	}
 
 	removePatient(patientId: number) {
 		const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 		const providerId = currentUser.userId;
-	  
+
 		if (confirm("Are you sure you want to remove this patient?")) {
-		  this.s3FileService.unassignPatient(providerId, patientId).subscribe(
-			() => {
-			  alert("✅ Patient removed.");
-			  this.loadPatients(); // Refresh table
-			  this.fetchAvailablePatientEmails(); // Update dropdown
-			},
-			(error) => {
-			  console.error("❌ ERROR unassigning patient", error);
-			  alert("Failed to remove patient.");
-			}
-		  );
+			this.s3FileService.unassignPatient(providerId, patientId).subscribe(
+				() => {
+					alert("✅ Patient removed.");
+					this.loadPatients(); // Refresh table
+					this.fetchAvailablePatientEmails(); // Update dropdown
+				},
+				(error) => {
+					console.error("❌ ERROR unassigning patient", error);
+					alert("Failed to remove patient.");
+				}
+			);
 		}
-	  }	  
+	}
 
 	// ✅ Logout
 	logout() {

@@ -2,7 +2,7 @@ import { Routes } from "@angular/router";
 import { DashboardComponent } from "./dashboard/dashboard.component";
 import { PatientsComponent } from "./patients/patients.component";
 import { UploadedImagesComponent } from "./uploaded-images/uploaded-images.component";
-import { ProfileComponent } from "./profile/profile.component";
+import { ProfileComponent } from "./provider-profile/provider-profile.component";
 import { AuthGuard } from "../shared/guards/auth.guard";
 import { SharedImagesComponent } from "./shared-images/shared-images.component";
 

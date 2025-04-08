@@ -6,7 +6,8 @@ import { Observable } from "rxjs";
   providedIn: "root",
 })
 export class S3FileService {
-  private apiUrl = "http://localhost:5001/api/files"; // Backend API base URL
+  private apiUrl = "http://localhost:5001/api/files";        // File-related routes
+  private userApiUrl = "http://localhost:5001/api/users";    // User-related routes
 
   constructor(private http: HttpClient) {}
 
@@ -97,7 +98,7 @@ export class S3FileService {
   // 📌 Get all available patients (for dropdown email selector)
   getAllPatientEmails(providerId: number): Observable<any> {
     return this.http.get(`http://localhost:5001/api/patients/all-patient-emails/${providerId}`);
-  }  
+  }
 
   // 📌 Unassign (remove) patient from provider
   unassignPatient(providerId: number, patientId: number): Observable<any> {
@@ -106,4 +107,18 @@ export class S3FileService {
     });
   }
 
+  // ✅ Fetch a user's profile (merged from users + user_profiles)
+  getUserById(userId: number): Observable<any> {
+    return this.http.get(`${this.userApiUrl}/${userId}`);
+  }
+
+  // ✅ Update user's profile data (into user_profiles table)
+  updateUserProfile(userId: number, data: any): Observable<any> {
+    return this.http.put(`http://localhost:5001/api/users/${userId}/profile`, data);
+  }  
+
+  // ✅ Upload profile picture and save S3 URL to user_profiles
+  uploadProfilePicture(userId: number, formData: FormData): Observable<any> {
+    return this.http.post(`http://localhost:5001/api/users/${userId}/upload-profile-picture`, formData);
+  }
 }
