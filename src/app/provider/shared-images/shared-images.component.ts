@@ -47,6 +47,7 @@ export class SharedImagesComponent implements OnInit {
 
 	// ✅ Fetch files that have been shared by this provider
 	fetchSharedFiles() {
+
 		if (!this.currentUserId) {
 			console.error("❌ ERROR: No provider ID found.");
 			return;
