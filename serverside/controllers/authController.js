@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const pool = require("../config/dbConfig");
 require("dotenv").config();
 const nodemailer = require("nodemailer");
+const { logAudit } = require("../utils/auditLogger");
 
 // ✅ User Signup (Register)
 exports.signup = async (req, res) => {
@@ -11,7 +12,7 @@ exports.signup = async (req, res) => {
 			role: req.body.role,
 			userName: req.body.userName,
 			email: req.body.email,
-		}); // ✅ Safe logging, no password exposed
+		});
 
 		const { userName, email, role, password } = req.body;
 
@@ -19,7 +20,6 @@ exports.signup = async (req, res) => {
 			return res.status(400).json({ message: "All fields are required" });
 		}
 
-		// Check if the user already exists
 		const userExists = await pool.query(
 			"SELECT * FROM users WHERE email = $1",
 			[email]
@@ -29,22 +29,20 @@ exports.signup = async (req, res) => {
 			return res.status(400).json({ message: "User already exists" });
 		}
 
-		// 🔐 Hash the password before storing it
 		const saltRounds = 10;
 		const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-		// ✅ Ensure column name `username` matches your PostgreSQL table
 		const newUser = await pool.query(
 			"INSERT INTO users (username, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id, username, email, role",
 			[userName, email, hashedPassword, role]
 		);
 
-		console.log("✅ User successfully registered:", {
-			id: newUser.rows[0].id,
-			username: newUser.rows[0].username,
-			email: newUser.rows[0].email,
-			role: newUser.rows[0].role,
-		}); // ✅ Safe logging, no password exposed
+		await logAudit({
+			userId: newUser.rows[0].id,
+			action: "signup",
+			details: `User registered with role ${role}`,
+			req: req,
+		});
 
 		res.status(201).json({
 			message: "✅ User registered successfully",
@@ -64,12 +62,9 @@ exports.login = async (req, res) => {
 		const { email, password } = req.body;
 
 		if (!email || !password) {
-			return res
-				.status(400)
-				.json({ message: "Email and password are required" });
+			return res.status(400).json({ message: "Email and password are required" });
 		}
 
-		// Find the user
 		const userQuery = await pool.query(
 			"SELECT id, username, email, role, password FROM users WHERE email = $1",
 			[email]
@@ -80,25 +75,20 @@ exports.login = async (req, res) => {
 		}
 
 		const user = userQuery.rows[0];
-
-		// Verify password
 		const validPassword = await bcrypt.compare(password, user.password);
 		if (!validPassword) {
 			return res.status(401).json({ message: "Invalid email or password" });
 		}
 
-		// 🎟 Generate OTP for MFA
-		const otp = Math.floor(100000 + Math.random() * 900000); // 6-digit OTP
-		const otpExpires = new Date(Date.now() + 5 * 60 * 1000); // Expires in 5 minutes
-		const hashedOtp = await bcrypt.hash(otp.toString(), 10); // ✅ Hash OTP before storing
+		const otp = Math.floor(100000 + Math.random() * 900000);
+		const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
+		const hashedOtp = await bcrypt.hash(otp.toString(), 10);
 
-		// Store OTP in database
 		await pool.query(
 			"UPDATE users SET otp_code = $1, otp_expires_at = $2 WHERE email = $3",
 			[hashedOtp, otpExpires, email]
 		);
 
-		// ✅ Configure Nodemailer
 		const transporter = nodemailer.createTransport({
 			host: process.env.SMTP_HOST,
 			port: process.env.SMTP_PORT,
@@ -109,7 +99,6 @@ exports.login = async (req, res) => {
 			},
 		});
 
-		// ✅ Send OTP email
 		await transporter.sendMail({
 			from: process.env.SMTP_USER,
 			to: email,
@@ -117,51 +106,19 @@ exports.login = async (req, res) => {
 			text: `Your OTP code is: ${otp}. It expires in 5 minutes.`,
 		});
 
+		await logAudit({
+			userId: user.id,
+			action: "login_attempt",
+			details: `OTP sent to ${email}`,
+			req: req,
+		});
+
 		res.status(200).json({
 			message: "🔑 OTP sent. Please verify to complete login.",
-			email: email, // Add email to response
+			email: email,
 		});
 	} catch (err) {
 		console.error("❌ Login Error:", err);
-		res.status(500).json({ message: "Server error" });
-	}
-};
-
-// ✅ OTP Verification
-exports.sendOTP = async (req, res) => {
-	try {
-		const { email } = req.body;
-
-		const userQuery = await pool.query(
-			"SELECT id FROM users WHERE email = $1",
-			[email]
-		);
-		if (userQuery.rows.length === 0)
-			return res.status(401).json({ message: "Email not found" });
-
-		const otp = Math.floor(100000 + Math.random() * 900000);
-		const otpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 min expiry
-
-		await pool.query(
-			"UPDATE users SET otp_code = $1, otp_expires_at = $2 WHERE email = $3",
-			[otp, otpExpires, email]
-		);
-
-		const transporter = nodemailer.createTransport({
-			service: "gmail",
-			auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-		});
-
-		await transporter.sendMail({
-			from: process.env.EMAIL_USER,
-			to: email,
-			subject: "Your ClinicPix OTP Code",
-			text: `Your OTP code is: ${otp}. It expires in 5 minutes.`,
-		});
-
-		res.json({ message: "✅ OTP sent successfully" });
-	} catch (err) {
-		console.error("❌ OTP Error:", err);
 		res.status(500).json({ message: "Server error" });
 	}
 };
@@ -190,15 +147,23 @@ exports.verifyOTP = async (req, res) => {
 		// Compare OTP with the hashed value in the database
 		const isMatch = await bcrypt.compare(otp, otp_code);
 		if (!isMatch) {
-			return res
-				.status(400)
-				.json({ message: "Invalid OTP. Please try again." });
+			await logAudit({
+				userId: id,
+				action: "OTP_FAILURE",
+				details: `Invalid OTP attempt for ${email}`,
+				req,
+			});
+			return res.status(400).json({ message: "Invalid OTP. Please try again." });
 		}
 
 		if (new Date(otp_expires_at) < new Date()) {
-			return res
-				.status(400)
-				.json({ message: "OTP expired. Request a new one." });
+			await logAudit({
+				userId: id,
+				action: "OTP_EXPIRED",
+				details: `Expired OTP for ${email}`,
+				req,
+			});
+			return res.status(400).json({ message: "OTP expired. Request a new one." });
 		}
 
 		// Generate JWT Token
@@ -214,13 +179,28 @@ exports.verifyOTP = async (req, res) => {
 
 		console.log("✅ OTP Verified for:", email);
 
+		// ✅ Log audit entry for OTP verification
+		await logAudit({
+		  userId: id,
+		  action: "otp_verified",
+		  details: `OTP verified for ${email}`,
+		  req,
+		});
+		
+		await logAudit({
+			userId: id,
+			action: "login_success",
+			details: `Login successful for ${email}`,
+			req,
+		});
+
 		res.status(200).json({
 			message: "✅ OTP verified successfully",
 			token,
 			user: {
 				id,
 				email,
-				username: username || "Unknown", // ✅ Ensure correct column name
+				username: username || "Unknown",
 				role,
 			},
 		});
@@ -235,10 +215,7 @@ exports.protectedRoute = async (req, res) => {
 	try {
 		console.log("🔍 Received Headers:", req.headers);
 		const token = req.header("Authorization")?.replace("Bearer ", "");
-		console.log(
-			"🔍 Extracted Token:",
-			token ? "✅ Token received" : "❌ No token found"
-		);
+		console.log("🔍 Extracted Token:", token ? "✅ Token received" : "❌ No token found");
 
 		if (!token) {
 			return res
@@ -248,8 +225,7 @@ exports.protectedRoute = async (req, res) => {
 
 		// Verify the token
 		const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-		console.log("✅ Decoded Token:", decoded);
+		console.log("✅ Decoded Token:", decoded);	
 
 		res.status(200).json({
 			message: "✅ Access granted",
@@ -258,5 +234,24 @@ exports.protectedRoute = async (req, res) => {
 	} catch (err) {
 		console.error("❌ Token Verification Error:", err.message);
 		res.status(401).json({ message: "Invalid or expired token" });
+	}
+};
+
+// ✅ User Logout
+exports.logout = async (req, res) => {
+	const { userId, email } = req.body;
+
+	try {
+		await logAudit({
+			userId,
+			action: "logout_success",
+			details: `Logout successful for ${email || "unknown"}`,
+			req,
+		});
+
+		res.status(200).json({ message: "✅ Logout logged" });
+	} catch (err) {
+		console.error("❌ Logout audit log failed:", err);
+		res.status(500).json({ message: "Failed to log logout" });
 	}
 };

@@ -67,7 +67,7 @@
 								<button class="btn btn-primary btn-sm" (click)="viewImage(image)">
 									<i class="fas fa-eye"></i> View
 								</button>&nbsp;
-								<button class="btn btn-success btn-sm" (click)="downloadImage(image)">
+								<button class="btn btn-success btn-sm" (click)="openDisclaimer(image)">
 									<i class="fas fa-download"></i> Download
 								</button>
 							</td>
@@ -86,6 +86,19 @@
 				[image]="selectedImage"
 				(closeModal)="closeModal()">
 			</app-image-modal>
+
+			<!-- Download Disclaimer Modal -->
+			<div *ngIf="showDisclaimerModal" class="modal-overlay">
+				<div class="modal-content">
+					<h2>Download Disclaimer</h2>
+					<p>Please do not download sensitive medical images on public or shared computers. Proceed only if you're on a trusted device.</p>
+					<div class="modal-buttons">
+						<button class="btn btn-secondary" (click)="cancelDownload()">Cancel</button>
+						<button class="btn btn-danger" (click)="confirmDownload()">Proceed to Download</button>
+					</div>
+				</div>
+			</div>
+
 		</div>
 	</div>
 </div>

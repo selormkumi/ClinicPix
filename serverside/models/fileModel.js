@@ -79,6 +79,22 @@ const generateViewUrl = async (fileName) => {
     }
 };
 
+// ✅ Generate a pre-signed URL for downloading files
+const generateDownloadUrl = async (fileKey) => {
+    try {
+      const params = {
+        Bucket: BUCKET_NAME,
+        Key: fileKey,
+        ResponseContentDisposition: "attachment", // ✅ Force browser to download
+      };
+  
+      const command = new GetObjectCommand(params);
+      return await getSignedUrl(s3Client, command, { expiresIn: 300 }); // 5 mins
+    } catch (error) {
+      console.error("❌ ERROR: Failed to generate download URL:", error);
+      throw error;
+    }
+  };  
 
 // ✅ Delete a file from S3 (Handles versioned deletes)
 const deleteFile = async (fileName) => {
@@ -109,4 +125,10 @@ const deleteFile = async (fileName) => {
     }
 };
 
-module.exports = { listFiles, generateUploadUrl, generateViewUrl, deleteFile };
+module.exports = {
+    listFiles,
+    generateUploadUrl,
+    generateViewUrl,
+    generateDownloadUrl,
+    deleteFile
+};

@@ -5,6 +5,9 @@ const cors = require("cors");
 const app = express();
 const PORT = process.env.PORT || 5001;
 
+// ✅ Trust proxy for accurate IP logging behind load balancers (e.g., EC2/Nginx)
+app.set("trust proxy", true); // 👈 Important for accurate IPs when deployed
+
 // ✅ Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -21,13 +24,15 @@ app.use(
 const authRoutes = require("./routes/authRoutes");
 const fileRoutes = require("./routes/fileRoutes");
 const providerRoutes = require("./routes/providerRoutes");
-const userRoutes = require("./routes/userRoutes"); // ✅ Added this
+const userRoutes = require("./routes/userRoutes");
+const auditRoutes = require("./routes/auditRoutes"); // ✅ New audit log routes
 
 // ✅ Register API routes
 app.use("/auth", authRoutes);                  // Auth routes (login/register)
 app.use("/api", fileRoutes);                   // File management routes
 app.use("/api/patients", providerRoutes);      // Provider-patient related routes
-app.use("/api/users", userRoutes);             // ✅ User profile routes
+app.use("/api/users", userRoutes);             // User profile routes
+app.use("/api", auditRoutes);                  // ✅ Audit log route
 
 // ✅ Root test route
 app.get("/", (req, res) => {

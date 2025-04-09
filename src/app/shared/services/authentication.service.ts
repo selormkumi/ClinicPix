@@ -1,8 +1,8 @@
 import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Observable } from "rxjs";
-import { tap } from "rxjs/operators"; // ✅ Import tap
-import { Router } from "@angular/router"; // ✅ Import Router
+import { tap } from "rxjs/operators";
+import { Router } from "@angular/router";
 
 @Injectable({
 	providedIn: "root",
@@ -10,7 +10,7 @@ import { Router } from "@angular/router"; // ✅ Import Router
 export class AuthenticationService {
 	private apiUrl = "http://localhost:5001/auth"; // Backend API URL
 
-	constructor(private http: HttpClient, private router: Router) {} // ✅ Inject Router
+	constructor(private http: HttpClient, private router: Router) {}
 
 	// ✅ User Login
 	login(credentials: { email: string; password: string }): Observable<any> {
@@ -18,22 +18,21 @@ export class AuthenticationService {
 			tap((response: any) => {
 				if (response.token && response.user) {
 					this.storeToken(response.token);
-	
-					// ✅ Ensure `userName` is stored correctly
-					const userName = response.user.userName || "User"; // Fallback
-	
+
+					const userName = response.user.userName || "User";
+
 					localStorage.setItem("user", JSON.stringify({
 						email: response.user.email,
-						userName: userName,  // ✅ Now stored correctly!
+						userName: userName,
 						role: response.user.role,
 						userId: response.user.id
 					}));
-	
+
 					console.log("🔍 Stored User:", localStorage.getItem("user"));
 				}
 			})
 		);
-	}	
+	}
 
 	// ✅ User Signup (No Auto Login)
 	signup(userData: { userName: string; email: string; password: string; role: string }): Observable<any> {
@@ -69,22 +68,41 @@ export class AuthenticationService {
 		return null;
 	}
 
-	// ✅ Logout (Ensure Proper Redirection)
+	// ✅ Logout (Audit & Redirect)
 	logout(): void {
+		const user = this.getCurrentUser();
+		const userId = user?.userId;
+		const email = user?.email;
+	
+		if (userId && email) {
+			this.http.post("http://localhost:5001/auth/logout", { userId, email }).subscribe({
+				next: () => console.log("📝 Logout logged"),
+				error: (err) => console.error("❌ Failed to log logout:", err),
+			});
+		}
+	
 		console.log("🚪 Logging out...");
-		localStorage.removeItem("token"); // ✅ Remove JWT
-		localStorage.removeItem("user");  // ✅ Remove User Data
-
+		localStorage.removeItem("token");
+		localStorage.removeItem("user");
+	
 		this.router.navigate(["/auth/login"]).then(() => {
 			console.log("✅ Redirected to Login Page");
 		});
-	}
+	}	
 
 	// ✅ OTP Verification Request
-    verifyOtp(data: { email: string; otp: string }): Observable<any> {
-        if (!data.email) {
-            data.email = localStorage.getItem("email") || "";
-        }
-        return this.http.post(`${this.apiUrl}/verify-otp`, data);
-    }	
+	verifyOtp(data: { email: string; otp: string }): Observable<any> {
+		if (!data.email) {
+			data.email = localStorage.getItem("email") || "";
+		}
+		return this.http.post(`${this.apiUrl}/verify-otp`, data);
+	}
+
+	// ✅ Access Protected Route
+	accessProtectedRoute(): Observable<any> {
+		const token = this.getToken();
+		const headers = new HttpHeaders().set("Authorization", `Bearer ${token}`);
+		return this.http.post(`${this.apiUrl}/protected`, {}, { headers });
+	}
+
 }

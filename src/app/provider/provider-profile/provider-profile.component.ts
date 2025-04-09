@@ -20,8 +20,6 @@ import {
   styleUrls: ["./provider-profile.component.scss"],
 })
 export class ProfileComponent implements OnInit {
-  defaultProfileImage = "https://via.placeholder.com/150";
-
   countries: any[] = [];
   states: any[] = [];
   cities: any[] = [];
@@ -38,7 +36,6 @@ export class ProfileComponent implements OnInit {
     height: "",
     address: "",
     phone: null,
-    profilePicture: this.defaultProfileImage,
   };
 
   isEditing = false;
@@ -74,7 +71,6 @@ export class ProfileComponent implements OnInit {
         const countryCode = res.country || "";
         const date = res.dob ? new Date(res.dob) : null;
 
-        // Parse phone as ngx-intl-tel-input compatible object
         const formattedPhone = res.phone
           ? {
               number: res.phone,
@@ -98,7 +94,6 @@ export class ProfileComponent implements OnInit {
                 year: "numeric",
               }).replace(",", "")
             : "",
-          profilePicture: res.profile_picture || this.defaultProfileImage,
           phone: formattedPhone,
         };
 
@@ -124,55 +119,12 @@ export class ProfileComponent implements OnInit {
   getStates(countryCode: string) {
     this.states = State.getStatesOfCountry(countryCode);
     this.cities = [];
-    this.selectedCountryISO = countryCode as CountryISO; // 🟢 Dynamically update phone input
+    this.selectedCountryISO = countryCode as CountryISO;
   }
 
   getCities(stateCode: string): void {
     const selectedCountryCode = this.provider.country;
     this.cities = City.getCitiesOfState(selectedCountryCode, stateCode);
-  }
-
-  handleFileInput(event: any): void {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const fileName = `profile-picture/${this.currentUserId}_${Date.now()}_${file.name}`;
-    const fileType = file.type;
-
-    this.s3FileService.getUploadUrl(fileName, fileType, this.currentUserId).subscribe(
-      (res) => {
-        fetch(res.uploadUrl, {
-          method: "PUT",
-          body: file,
-          headers: { "Content-Type": fileType },
-        })
-          .then(() => {
-            const fileUrl = res.uploadUrl.split("?")[0];
-            this.provider.profilePicture = fileUrl;
-            this.saveProfilePictureUrl(fileUrl);
-            console.log("✅ Profile picture uploaded:", fileUrl);
-          })
-          .catch((err) => {
-            console.error("❌ Upload failed:", err);
-          });
-      },
-      (err) => {
-        console.error("❌ Failed to get pre-signed URL:", err);
-      }
-    );
-  }
-
-  saveProfilePictureUrl(fileUrl: string) {
-    const payload = { profile_picture: fileUrl };
-
-    this.s3FileService.updateUserProfile(this.currentUserId, payload).subscribe(
-      () => {
-        console.log("✅ Profile picture URL saved to backend");
-      },
-      (err) => {
-        console.error("❌ Failed to save profile picture URL:", err);
-      }
-    );
   }
 
   toggleEdit() {
@@ -182,18 +134,14 @@ export class ProfileComponent implements OnInit {
   saveChanges() {
     const payload = { ...this.provider };
 
-    // Convert country name back to ISO code
     const countryObj = Country.getAllCountries().find(
-      (c) => c.isoCode.toLowerCase() === this.provider.country.toLowerCase() ||
-            c.name.toLowerCase() === this.provider.country.toLowerCase()
+      (c) =>
+        c.isoCode.toLowerCase() === this.provider.country.toLowerCase() ||
+        c.name.toLowerCase() === this.provider.country.toLowerCase()
     );
     payload.country = countryObj?.isoCode || this.provider.country;
 
-    // Extract the phone number as international format
     payload.phone = this.provider.phone?.internationalNumber || "";
-
-    // Ensure profile picture persists
-    payload.profile_picture = this.provider.profilePicture;
 
     this.s3FileService.updateUserProfile(this.currentUserId, payload).subscribe(
       () => {

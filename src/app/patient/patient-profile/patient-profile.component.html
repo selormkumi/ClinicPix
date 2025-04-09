@@ -13,7 +13,7 @@
 	  <!-- View Profile Card -->
 	  <div class="card" *ngIf="!isEditing">
 		<div class="profile-header">
-		  <img [src]="patient.profilePicture || defaultProfileImage" alt="Profile Picture" />
+		  <!-- Removed profile picture image -->
 		  <h2>{{ patient.name || 'No name' }}</h2>
 		</div>
 		<div class="profile-details">
@@ -114,13 +114,7 @@
 			></ngx-intl-tel-input>
 		  </div>
   
-		  <div class="form-group">
-			<label for="profilePicture">Profile Picture:</label>
-			<input type="file" id="profilePicture" (change)="handleFileInput($event)" />
-			<div *ngIf="patient.profilePicture">
-			  <img [src]="patient.profilePicture" alt="Preview" class="preview-img" />
-			</div>
-		  </div>
+		  <!-- Removed profile picture upload section -->
   
 		  <div class="form-buttons">
 			<button class="save-button" type="submit">Save Changes</button>&nbsp;

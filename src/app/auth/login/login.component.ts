@@ -8,7 +8,7 @@ import {
     ReactiveFormsModule,
 } from "@angular/forms";
 import { CommonModule } from "@angular/common";
- 
+
 @Component({
     selector: "app-login",
     standalone: true,
@@ -16,7 +16,6 @@ import { CommonModule } from "@angular/common";
     styleUrls: ["./login.component.scss"],
     imports: [CommonModule, ReactiveFormsModule, RouterModule],
 })
-
 export class LoginComponent {
     loginForm: FormGroup;
     otpForm: FormGroup;
@@ -24,7 +23,11 @@ export class LoginComponent {
     isOtpSent: boolean = false;
     email: string = ""; // Store email for OTP step
 
-    constructor(private router: Router, private fb: FormBuilder, private authService: AuthenticationService) {
+    constructor(
+        private router: Router,
+        private fb: FormBuilder,
+        private authService: AuthenticationService
+    ) {
         this.loginForm = this.fb.group({
             email: ["", [Validators.required, Validators.email]],
             password: ["", [Validators.required, Validators.minLength(6)]],
@@ -34,7 +37,7 @@ export class LoginComponent {
             otp: ["", [Validators.required, Validators.minLength(6), Validators.maxLength(6)]],
         });
     }
- 
+
     isFieldInvalid(field: string): boolean {
         const control = this.loginForm.get(field);
         return control ? control.invalid && (control.dirty || control.touched) : false;
@@ -63,13 +66,15 @@ export class LoginComponent {
                     } else if (error.status === 0) {
                         errorMessage = "Network error. Check your connection.";
                     }
- 
+
                     alert(errorMessage);
                     this.loading = false;
                 }
             );
         } else {
-            Object.values(this.loginForm.controls).forEach((control) => control.markAsTouched());
+            Object.values(this.loginForm.controls).forEach((control) =>
+                control.markAsTouched()
+            );
             console.log("⚠️ Please fill in all fields correctly.");
         }
     }
@@ -80,36 +85,32 @@ export class LoginComponent {
     verifyOtp() {
         if (this.otpForm.valid) {
             const otpData = {
-                email: this.email, // Ensure email is included
-                otp: this.otpForm.controls['otp'].value,
+                email: this.email,
+                otp: this.otpForm.controls["otp"].value,
             };
 
             this.authService.verifyOtp(otpData).subscribe(
                 (response: any) => {
                     console.log("✅ OTP Verified:", response);
 
-                    // Store JWT token
                     this.authService.storeToken(response.token);
 
-                    // Ensure role exists in response before storing user data
                     if (!response.user || !response.user.role) {
                         console.error("❌ Role is missing in the response:", response);
                         alert("Login failed. Missing user role.");
                         return;
                     }
 
-                    // Store user details
                     localStorage.setItem(
                         "user",
                         JSON.stringify({
                             email: response.user.email,
-                            userName: response.user.userName || response.user.username || response.user.name || "Unknown", // ✅ Ensure correct username is stored
+                            userName: response.user.userName || response.user.username || response.user.name || "Unknown",
                             role: response.user.role,
                             userId: response.user.id || null,
                         })
-                    );                                      
+                    );
 
-                    // Redirect to Dashboard
                     this.redirectBasedOnRole(response.user.role);
                 },
                 (error: any) => {
@@ -121,11 +122,15 @@ export class LoginComponent {
             console.log("⚠️ Enter a valid OTP.");
         }
     }
- 
+
+    /**
+     * Redirect user based on role after OTP is verified.
+     */
     private redirectBasedOnRole(role: string) {
         const roleRoutes: { [key: string]: string } = {
             patient: "/patient/dashboard",
             provider: "/provider/dashboard",
+            admin: "/admin/dashboard", // ✅ Now supports admin role
         };
 
         const redirectRoute = roleRoutes[role.toLowerCase()];

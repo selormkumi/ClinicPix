@@ -26,6 +26,10 @@ router.get("/user-id", fileController.getUserIdByEmail);
 // ✅ Revoke file sharing
 router.post("/files/revoke", fileController.revokeSharedFile);
 
+// ✅ Get files shared by a provider
 router.get("/files/provider-shared", fileController.getProviderSharedFiles);
+
+// ✅ Download a file (pre-signed URL)
+router.get("/files/download", fileController.getDownloadUrl); // ✅ NEW
 
 module.exports = router;

@@ -1,5 +1,6 @@
 const fileModel = require("../models/fileModel");
 const db = require("../config/dbConfig");
+const { logAudit } = require("../utils/auditLogger"); // Make sure this is at the top
 
 // ✅ Get all files with uploader's username
 const getFiles = async (req, res) => {
@@ -69,7 +70,15 @@ const uploadFile = async (req, res) => {
               uploadedBy,
               (Array.isArray(tags) && tags.length > 0) ? tags.join(",") : null,
             ]
-          );          
+          );
+        
+        // ✅ Audit Log: upload_image
+        await logAudit({
+            userId: uploadedBy,
+            action: "upload_image",
+            details: `Uploaded image ${fileName} to providers/${uploadedBy}/`,
+            req,
+          });
 
         res.json({ uploadUrl });
 
@@ -106,17 +115,25 @@ const viewFile = async (req, res) => {
     }
 
     try {
-        // ✅ Retrieve the uploadedBy from the database
         const fileData = await db.query(`SELECT uploaded_by FROM files WHERE file_name = $1`, [fileName]);
 
         if (fileData.rowCount === 0) {
             return res.status(404).json({ error: "File not found in database" });
         }
 
-        const uploadedBy = fileData.rows[0].uploaded_by;  // ✅ Extract provider ID
-        const fileKey = `providers/${uploadedBy}/${fileName}`; // ✅ Correct S3 path
-
+        const uploadedBy = fileData.rows[0].uploaded_by;  
+        const fileKey = `providers/${uploadedBy}/${fileName}`;
         const viewUrl = await fileModel.generateViewUrl(fileKey);
+        
+        // ✅ Audit Log: view_image
+		const currentUser = req.body.userId || req.query.userId || uploadedBy; // Use user ID if passed, else fallback
+		await logAudit({
+			userId: currentUser,
+			action: "view_image",
+			details: `Viewed image ${fileName} from providers/${uploadedBy}/`,
+			req,
+		});
+
         res.json({ viewUrl });
 
     } catch (error) {
@@ -154,6 +171,13 @@ const deleteFile = async (req, res) => {
         if (dbResult.rowCount === 0) {
             return res.status(404).json({ error: "File not found in database" });
         }
+
+        await logAudit({
+            userId: uploadedBy,
+            action: "delete_image",
+            details: `Deleted image ${fileName} from providers/${uploadedBy}/`,
+            req,
+          });          
 
         res.json({ message: "File deleted successfully from S3 and database" });
 
@@ -199,6 +223,14 @@ const shareFile = async (req, res) => {
             [fileId, uploadedBy, sharedWithId, expiresIn]
         );
 
+        // ✅ Audit log
+        await logAudit({
+            userId: uploadedBy,
+            action: "share_image",
+            details: `Shared image ${fileName} with user ID ${sharedWithId}`,
+            req,
+        });
+
         res.json({ message: "File shared successfully" });
 
     } catch (error) {
@@ -217,7 +249,7 @@ const getSharedFiles = async (req, res) => {
 
     try {
         const sharedFiles = await db.query(
-            `SELECT f.file_name, u.username AS shared_by, u.email AS shared_by_email, sf.shared_on, sf.expires_at, f.tags 
+            `SELECT f.file_name, u.username AS shared_by, u.email AS shared_by_email, sf.shared_on, sf.expires_at, f.tags, f.uploaded_by
              FROM shared_files sf
              JOIN files f ON sf.file_id = f.id
              JOIN users u ON sf.uploaded_by = u.id
@@ -254,6 +286,14 @@ const revokeSharedFile = async (req, res) => {
         if (result.rowCount === 0) {
             return res.status(404).json({ error: "Shared record not found" });
         }
+
+        // ✅ Log audit
+        await logAudit({
+            userId: uploadedBy,
+            action: "revoke_image_access",
+            details: `Revoked access to image ${fileName} shared with patient user ID ${sharedWith}`,
+            req,
+        });
 
         res.json({ message: "File sharing revoked successfully" });
     } catch (error) {
@@ -297,4 +337,45 @@ const getProviderSharedFiles = async (req, res) => {
 	}
 };
 
-module.exports = { getFiles, uploadFile, viewFile, deleteFile, shareFile, getSharedFiles, getUserIdByEmail, revokeSharedFile, getProviderSharedFiles};
+const { generateDownloadUrl } = require("../models/fileModel");
+
+// ✅ Generate pre-signed URL for downloading a file
+const getDownloadUrl = async (req, res) => {
+	const { fileName, uploadedBy } = req.query;
+
+	if (!fileName || !uploadedBy) {
+		return res.status(400).json({ error: "Missing fileName or uploadedBy" });
+	}
+
+	const fileKey = `providers/${uploadedBy}/${fileName}`;
+	try {
+		const downloadUrl = await generateDownloadUrl(fileKey);
+
+		const currentUser = req.body.userId || req.query.userId || uploadedBy;
+
+		await logAudit({
+			userId: currentUser,
+			action: "download_image",
+			details: `Downloaded image ${fileName} from ${fileKey}`,
+			req,
+		});
+
+		res.json({ downloadUrl });
+	} catch (error) {
+		console.error("❌ ERROR: Failed to generate download URL:", error);
+		res.status(500).json({ error: error.message });
+	}
+};
+
+module.exports = { 
+	getFiles, 
+	uploadFile, 
+	viewFile, 
+	deleteFile, 
+	shareFile, 
+	getSharedFiles, 
+	getUserIdByEmail, 
+	revokeSharedFile, 
+	getProviderSharedFiles, 
+	getDownloadUrl
+};

@@ -26,23 +26,24 @@
 				<thead>
 					<tr>
 						<th>Action</th>
-						<th>User</th>
+						<th>User ID</th>
+						<th>Email</th>
+						<th>Role</th>
 						<th>Date</th>
 						<th>Details</th>
 					</tr>
 				</thead>
 				<tbody>
-					<tr>
-						<td>Login</td>
-						<td>John Doe</td>
-						<td>2025-01-15 10:00 AM</td>
-						<td>Successful login</td>
+					<tr *ngFor="let log of filteredLogs">
+						<td>{{ log.action }}</td>
+						<td>{{ log.user_id || 'N/A' }}</td>
+						<td>{{ log.user_email || 'N/A' }}</td>
+						<td>{{ log.user_role || 'N/A' }}</td>
+						<td>{{ log.created_at | date: 'medium' }}</td>
+						<td>{{ log.details }}</td>
 					</tr>
-					<tr>
-						<td>Image Upload</td>
-						<td>Jane Smith</td>
-						<td>2025-01-14 02:30 PM</td>
-						<td>Uploaded MRI_Brain_2025.jpg</td>
+					<tr *ngIf="filteredLogs.length === 0">
+						<td colspan="6" class="text-center">No audit logs.</td>
 					</tr>
 				</tbody>
 			</table>

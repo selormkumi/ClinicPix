@@ -117,8 +117,13 @@ export class S3FileService {
     return this.http.put(`http://localhost:5001/api/users/${userId}/profile`, data);
   }  
 
-  // ✅ Upload profile picture and save S3 URL to user_profiles
-  uploadProfilePicture(userId: number, formData: FormData): Observable<any> {
-    return this.http.post(`http://localhost:5001/api/users/${userId}/upload-profile-picture`, formData);
+  // ✅ Download file using pre-signed URL
+  downloadFile(fileName: string, uploadedBy: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/download-url?fileName=${encodeURIComponent(fileName)}&uploadedBy=${uploadedBy}`);
   }
+
+  getDownloadUrl(fileName: string, uploadedBy: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/download?fileName=${encodeURIComponent(fileName)}&uploadedBy=${uploadedBy}`);
+  }  
+
 }

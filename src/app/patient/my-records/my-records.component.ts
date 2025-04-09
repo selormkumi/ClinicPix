@@ -21,9 +21,11 @@ export class MyRecordsComponent implements OnInit {
 	selectedTag: string = "";
 	selectedImage: any | null = null;
 	isEditing: boolean = false;
-	isLoading: boolean = false; // ✅ Added loading indicator
+	isLoading: boolean = false;
 	currentUserId: number = 0;
 	currentUserName: string | null = null;
+	showDisclaimerModal: boolean = false;
+	downloadImagePending: any = null;
 
 	constructor(
 		private authService: AuthenticationService,
@@ -33,7 +35,7 @@ export class MyRecordsComponent implements OnInit {
 
 	ngOnInit() {
 		console.log("📌 Initializing My Records Component...");
-	
+
 		const currentUser = localStorage.getItem("user");
 		if (currentUser) {
 			const user = JSON.parse(currentUser);
@@ -49,56 +51,52 @@ export class MyRecordsComponent implements OnInit {
 			console.log("✅ Current Patient ID:", this.currentUserId);
 		}
 
-		// 🔥 Fetch shared files
 		this.fetchSharedFiles();
-	}	
+	}
 
-	// 📌 Fetch shared files for the logged-in patient using user ID
 	fetchSharedFiles() {
 		if (!this.currentUserId) {
 			console.error("❌ ERROR: User ID is missing. Cannot fetch shared files.");
 			return;
 		}
-	
+
 		this.isLoading = true;
 		this.s3Service.getSharedFiles(this.currentUserId).subscribe(
 			(res) => {
 				console.log("✅ Shared Files Retrieved:", res);
-	
-				this.sharedImages = res.sharedFiles.map((file: any) => ({
+
+				this.sharedImages = (res.sharedFiles || []).map((file: any) => ({
 					name: file.file_name,
-					sharedBy: file.shared_by,
-					sharedByEmail: file.shared_by_email, // ✅ Ensure email is included
-					uploadedBy: file.uploaded_by, // ✅ Include uploader ID
+					sharedBy: file.shared_by || "Unknown",
+					sharedByEmail: file.shared_by_email || "N/A",
+					uploadedBy: file.uploaded_by || 0,
 					sharedOn: file.shared_on
 						? new Date(file.shared_on).toLocaleString("en-US", {
-							month: "short",
-							day: "2-digit",
-							year: "numeric",
-							hour: "2-digit",
-							minute: "2-digit",
-							second: "2-digit",
-							hour12: true,
-						})
-						: "N/A", // ✅ Format date
+								month: "short",
+								day: "2-digit",
+								year: "numeric",
+								hour: "2-digit",
+								minute: "2-digit",
+								second: "2-digit",
+								hour12: true,
+							})
+						: "N/A",
 					expiresAt: file.expires_at
 						? new Date(file.expires_at).toLocaleString("en-US", {
-							month: "short",
-							day: "2-digit",
-							year: "numeric",
-							hour: "2-digit",
-							minute: "2-digit",
-							second: "2-digit",
-							hour12: true,
-						})
-						: "N/A", // ✅ Format date
+								month: "short",
+								day: "2-digit",
+								year: "numeric",
+								hour: "2-digit",
+								minute: "2-digit",
+								second: "2-digit",
+								hour12: true,
+							})
+						: "N/A",
 					tags: file.tags ? file.tags.split(",") : [],
 				}));
-	
+
 				this.extractUniqueTags();
 				this.filteredRecords = [...this.sharedImages];
-	
-				console.log("📌 Updated Shared Images List:", this.sharedImages);
 				this.isLoading = false;
 			},
 			(error) => {
@@ -106,20 +104,24 @@ export class MyRecordsComponent implements OnInit {
 				this.isLoading = false;
 			}
 		);
-	}			
+	}
 
-	// 📌 Extract unique tags for filtering
 	extractUniqueTags() {
 		const allTags = this.sharedImages.flatMap((file) => file.tags);
 		this.uniqueTags = Array.from(new Set(allTags));
 	}
 
-	// 📌 View Image (Generate signed URL) - ✅ FIXED
 	viewImage(image: any) {
-		const uploadedBy = image.uploadedBy || image.sharedBy; // ✅ Ensure correct provider ID
+		const uploadedBy = image.uploadedBy || image.sharedBy;
 		this.s3Service.getFileUrl(image.name, uploadedBy).subscribe(
 			(res) => {
-				window.open(res.viewUrl, "_blank");
+				this.selectedImage = {
+					name: image.name,
+					url: res.viewUrl,
+					tags: image.tags,
+					sharedBy: image.sharedBy,
+					sharedByEmail: image.sharedByEmail,
+				};
 			},
 			(error) => {
 				console.error("❌ ERROR: Failed to retrieve file URL", error);
@@ -132,7 +134,42 @@ export class MyRecordsComponent implements OnInit {
 		this.selectedImage = null;
 	}
 
-	// 📌 Filter records based on search query and tags
+	openDisclaimer(image: any) {
+		this.downloadImagePending = image;
+		this.showDisclaimerModal = true;
+	}
+
+	confirmDownload() {
+		const image = this.downloadImagePending;
+		if (!image) return;
+		const uploadedBy = image.uploadedBy || image.sharedBy;
+		this.s3Service.getDownloadUrl(image.name, uploadedBy).subscribe(
+			(res) => {
+				if (res.downloadUrl) {
+					const link = document.createElement("a");
+					link.href = res.downloadUrl;
+					link.setAttribute("download", image.name);
+					document.body.appendChild(link);
+					link.click();
+					document.body.removeChild(link);
+				} else {
+					alert("❌ Error: Download link is unavailable.");
+				}
+			},
+			(error) => {
+				console.error("❌ ERROR: Failed to generate download link", error);
+				alert("Failed to download file. Please try again.");
+			}
+		);
+		this.showDisclaimerModal = false;
+		this.downloadImagePending = null;
+	}
+
+	cancelDownload() {
+		this.showDisclaimerModal = false;
+		this.downloadImagePending = null;
+	}
+
 	filterRecords(): void {
 		this.filteredRecords = this.sharedImages.filter((record) => {
 			const matchesSearch =
@@ -147,30 +184,8 @@ export class MyRecordsComponent implements OnInit {
 		});
 	}
 
-	// 📌 Download the shared image - ✅ FIXED
-	downloadImage(image: any): void {
-		const uploadedBy = image.uploadedBy || image.sharedBy; // ✅ Ensure correct provider ID
-		this.s3Service.getFileUrl(image.name, uploadedBy).subscribe(
-			(res) => {
-				if (res.viewUrl) {
-					const link = document.createElement("a");
-					link.href = res.viewUrl;
-					link.download = image.name;
-					link.click();
-				} else {
-					alert("❌ Error: Download link is unavailable.");
-				}
-			},
-			(error) => {
-				console.error("❌ ERROR: Failed to generate download link", error);
-				alert("Failed to download file. Please try again.");
-			}
-		);
-	}
-
-	// 📌 Logout the user
 	logout() {
 		this.authService.logout();
-		this.router.navigate(["/login"]); // Redirect to login after logout
+		this.router.navigate(["/login"]);
 	}
 }
