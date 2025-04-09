@@ -6,58 +6,59 @@ import { AuthenticationService } from "../../shared/services/authentication.serv
 import { HttpClient } from "@angular/common/http";
 
 @Component({
-	selector: "app-audit",
-	standalone: true,
-	imports: [RouterModule, FormsModule, CommonModule],
-	templateUrl: "./audit.component.html",
-	styleUrl: "./audit.component.scss",
+  selector: "app-audit",
+  standalone: true,
+  imports: [RouterModule, FormsModule, CommonModule],
+  templateUrl: "./audit.component.html",
+  styleUrl: "./audit.component.scss",
 })
 export class AuditComponent implements OnInit {
-	searchTerm: string = "";
-	auditLogs: any[] = [];
-	filteredLogs: any[] = [];
+  searchTerm: string = "";
+  auditLogs: any[] = [];
+  filteredLogs: any[] = [];
 
-	constructor(
-		private authService: AuthenticationService,
-		private router: Router,
-		private http: HttpClient
-	) {}
+  constructor(
+    private authService: AuthenticationService,
+    private router: Router,
+    private http: HttpClient
+  ) {}
 
-	ngOnInit() {
-		this.fetchAuditLogs();
-	}
+  ngOnInit() {
+    this.fetchAuditLogs();
+  }
 
-	// ✅ Fetch logs from backend
-	fetchAuditLogs() {
-		this.http.get<any[]>("http://localhost:5001/api/audit-logs").subscribe(
-			(res) => {
-				this.auditLogs = res;
-				this.filteredLogs = [...res];
-			},
-			(error) => {
-				console.error("❌ Failed to load audit logs", error);
-			}
-		);
-	}
+  // ✅ Fetch logs from backend
+  fetchAuditLogs() {
+    this.http.get<any[]>("http://localhost:5001/api/audit-logs").subscribe(
+      (res) => {
+        this.auditLogs = res;
+        this.filteredLogs = [...res];
+      },
+      (error) => {
+        console.error("❌ Failed to load audit logs", error);
+      }
+    );
+  }
 
-	// ✅ Filter logs
-	onSearch() {
-		const query = this.searchTerm.toLowerCase();
-		this.filteredLogs = this.auditLogs.filter(
-			(log) =>
-				log.action.toLowerCase().includes(query) ||
-				log.details.toLowerCase().includes(query) ||
-				(log.user_email && log.user_email.toLowerCase().includes(query)) ||
-				(log.user_role && log.user_role.toLowerCase().includes(query)) ||
-				String(log.user_id).includes(query)
-		);
-	}
+  // ✅ Filter logs (including username)
+  onSearch() {
+    const query = this.searchTerm.toLowerCase();
+    this.filteredLogs = this.auditLogs.filter(
+      (log) =>
+        log.action.toLowerCase().includes(query) ||
+        log.details.toLowerCase().includes(query) ||
+        (log.user_email && log.user_email.toLowerCase().includes(query)) ||
+        (log.user_role && log.user_role.toLowerCase().includes(query)) ||
+        (log.user_username && log.user_username.toLowerCase().includes(query)) ||
+        String(log.user_id).includes(query)
+    );
+  }
 
-	// ✅ Logout Function
-	logout() {
-		this.authService.logout();
-		this.router.navigate(["/auth/login"]).then(() => {
-			console.log("✅ Redirected to login page");
-		});
-	}
+  // ✅ Logout Function
+  logout() {
+    this.authService.logout();
+    this.router.navigate(["/auth/login"]).then(() => {
+      console.log("✅ Redirected to login page");
+    });
+  }
 }

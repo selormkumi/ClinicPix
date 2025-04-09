@@ -1,5 +1,6 @@
+<!-- Sidebar -->
 <div class="sidebar">
-	<h2>Manage-users</h2>
+	<h2>Admin Dashboard</h2>
 	<a routerLink="/admin/dashboard">Home</a>
 	<a routerLink="/admin/manage-users">Manage Users</a>
 	<a routerLink="/admin/audit">Audit Logs</a>
@@ -8,56 +9,74 @@
 
 <!-- Main Content -->
 <div class="main-content">
-	<!-- search bar -->
-	<div class="search-container">
-		<input
-			type="text"
-			class="form-control"
-			placeholder="Search users..."
-			[(ngModel)]="searchTerm"
-			(input)="onSearch()" />
+	<!-- Search Bar -->
+	<div class="row mb-3">
+		<div class="col-md-6">
+			<input
+				type="text"
+				class="form-control"
+				placeholder="Search users..."
+				[(ngModel)]="searchTerm"
+				(input)="onSearch()" />
+		</div>
 	</div>
-	<br />
 
-	<!-- Manage Users Section -->
-	<div id="manage-users" class="card">
+	<!-- Card for User Management -->
+	<div id="manage-users" class="card shadow-sm">
 		<div class="card-body">
-			<h5>Manage Users</h5>
-			<table class="table table-striped">
-				<thead>
-					<tr>
-						<th>User Name</th>
-						<th>Email</th>
-						<th>Role</th>
-						<th>Status</th>
-						<th>Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td>John Doe</td>
-						<td>john.doe"at"example.com</td>
-						<td>Patient</td>
-						<td>Active</td>
-						<td>
-							<button class="btn btn-warning btn-sm">Edit</button>
-							<button class="btn btn-danger btn-sm">Deactivate</button>
-							<button class="btn btn-secondary btn-sm">Reset Password</button>
-						</td>
-					</tr>
-					<tr>
-						<td>Jane Smith</td>
-						<td>jane.smith"at"example.com</td>
-						<td>Healthcare Provider</td>
-						<td>Active</td>
-						<td>
-							<button class="btn btn-warning btn-sm">Edit</button>
-							<button class="btn btn-danger btn-sm">Deactivate</button>
-							<button class="btn btn-secondary btn-sm">Reset Password</button>
-						</td>
-					</tr>
-				</tbody>
-			</table>
+			<h5 class="mb-3">Manage Users</h5>
+
+			<!-- Loading Spinner -->
+			<div *ngIf="isLoading" class="text-center mb-3">
+				<i class="fas fa-spinner fa-spin me-2"></i> Loading users...
+			</div>
+
+			<!-- Users Table -->
+			<div class="table-responsive" *ngIf="!isLoading">
+				<table class="table table-bordered table-hover align-middle">
+					<thead class="table-primary">
+						<tr>
+							<th>User ID</th>
+							<th>User Name</th>
+							<th>Email</th>
+							<th>Role</th>
+							<th>Status</th>
+							<th class="text-center">Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr *ngFor="let user of filteredUsers">
+							<td>{{ user.id }}</td>
+							<td>{{ user.username }}</td>
+							<td>{{ user.email }}</td>
+							<td>{{ user.role }}</td>
+							<td>
+								<span [ngClass]="{ 'text-success': user.is_active, 'text-danger': !user.is_active }">
+									{{ user.is_active ? 'Active' : 'Inactive' }}
+								</span>
+							</td>
+							<td class="text-center">
+								<button class="btn btn-sm btn-warning me-1" (click)="editUser(user)">
+									<i class="fas fa-edit"></i> Edit
+								</button>
+								<button
+									class="btn btn-sm"
+									[ngClass]="user.is_active ? 'btn-danger' : 'btn-success'"
+									(click)="toggleUserStatus(user)">
+									<i class="fas" [ngClass]="user.is_active ? 'fa-user-slash' : 'fa-user-check'"></i>
+									{{ user.is_active ? 'Deactivate' : 'Activate' }}
+								</button>
+								<button class="btn btn-sm btn-secondary ms-1" (click)="resetPassword(user)">
+									<i class="fas fa-key"></i> Reset
+								</button>
+							</td>
+						</tr>
+						<tr *ngIf="filteredUsers.length === 0">
+							<td colspan="6" class="text-center text-muted">No users found.</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 		</div>
 	</div>
 </div>

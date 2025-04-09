@@ -3,43 +3,79 @@ import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { Router, RouterModule } from "@angular/router";
 import { AuthenticationService } from "../../shared/services/authentication.service";
+import { AdminService } from "../../shared/services/admin.service"; // ✅ your admin service
+
 @Component({
 	selector: "app-manage-users",
-	imports: [RouterModule, FormsModule, CommonModule],
 	standalone: true,
+	imports: [RouterModule, FormsModule, CommonModule],
 	templateUrl: "./manage-users.component.html",
 	styleUrl: "./manage-users.component.scss",
 })
 export class ManageUsersComponent implements OnInit {
+	searchTerm: string = "";
+	users: any[] = [];
+	filteredUsers: any[] = [];
+	isLoading: boolean = false;
+
 	constructor(
 		private authService: AuthenticationService,
-		private router: Router
+		private router: Router,
+		private adminService: AdminService
 	) {}
-	searchTerm: string = "";
-	users = [
-		{
-			name: "John Doe",
-			email: "john.doe@example.com",
-			phone: "(123) 456-7890",
-		},
-	];
 
-	filteredusers = this.users;
-	onSearch() {
-		// Filtering users based on the search term
-		this.filteredusers = this.users.filter(
-			(user) =>
-				user.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-				user.email.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-				user.phone.includes(this.searchTerm)
+	ngOnInit() {
+		this.fetchUsers();
+	}
+
+	// ✅ Fetch users from backend
+	fetchUsers() {
+		this.isLoading = true;
+		this.adminService.getAllUsers().subscribe(
+			(res) => {
+				this.users = res;
+				this.filteredUsers = [...res];
+				this.isLoading = false;
+			},
+			(error) => {
+				console.error("❌ ERROR: Failed to fetch users", error);
+				this.isLoading = false;
+			}
 		);
 	}
-	ngOnInit() {}
-	// ✅ Logout Function
+
+	// ✅ Filter users by search
+	onSearch() {
+		const query = this.searchTerm.toLowerCase();
+		this.filteredUsers = this.users.filter(
+			(user) =>
+				user.username.toLowerCase().includes(query) ||
+				user.email.toLowerCase().includes(query)
+		);
+	}
+
+	// ✅ Logout
 	logout() {
 		this.authService.logout();
-		this.router.navigate(["/auth/login"]).then(() => {
-			console.log("✅ Redirected to login page");
-		});
+		this.router.navigate(["/auth/login"]);
+	}
+
+	// ✅ Placeholder for Edit action
+	editUser(user: any) {
+		console.log("🛠️ Edit User:", user);
+		// Future: Open modal/form for editing user info
+	}
+
+	// ✅ Toggle user active status
+	toggleUserStatus(user: any) {
+		const action = user.is_active ? "deactivate" : "activate";
+		console.log(`⚙️ Attempting to ${action} user ID ${user.id}`);
+		// Future: Call backend API to toggle status
+	}
+
+	// ✅ Placeholder for reset password
+	resetPassword(user: any) {
+		console.log("🔐 Resetting password for:", user.email);
+		// Future: Trigger backend to send reset email or auto-generate password
 	}
 }
