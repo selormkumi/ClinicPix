@@ -56,20 +56,22 @@
 								</span>
 							</td>
 							<td class="text-center">
-								<button class="btn btn-sm btn-warning me-1" (click)="editUser(user)">
-									<i class="fas fa-edit"></i> Edit
-								</button>
-								<button
-									class="btn btn-sm"
-									[ngClass]="user.is_active ? 'btn-danger' : 'btn-success'"
-									(click)="toggleUserStatus(user)">
-									<i class="fas" [ngClass]="user.is_active ? 'fa-user-slash' : 'fa-user-check'"></i>
-									{{ user.is_active ? 'Deactivate' : 'Activate' }}
-								</button>
-								<button class="btn btn-sm btn-secondary ms-1" (click)="resetPassword(user)">
-									<i class="fas fa-key"></i> Reset
-								</button>
-							</td>
+								<div class="d-flex justify-content-center align-items-center flex-wrap gap-2">
+									<button class="btn btn-sm btn-warning" (click)="editUser(user)">
+										<i class="fas fa-edit"></i> Edit
+									</button>
+									<button
+										class="btn btn-sm"
+										[ngClass]="user.is_active ? 'btn-danger' : 'btn-success'"
+										(click)="toggleUserStatus(user)">
+										<i class="fas" [ngClass]="user.is_active ? 'fa-user-slash' : 'fa-user-check'"></i>
+										{{ user.is_active ? 'Deactivate' : 'Activate' }}
+									</button>
+									<button class="btn btn-sm btn-secondary" (click)="resetPassword(user)">
+										<i class="fas fa-key"></i> Reset
+									</button>
+								</div>
+							</td>							
 						</tr>
 						<tr *ngIf="filteredUsers.length === 0">
 							<td colspan="6" class="text-center text-muted">No users found.</td>

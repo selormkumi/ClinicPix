@@ -39,8 +39,8 @@ exports.signup = async (req, res) => {
 
 		await logAudit({
 			userId: newUser.rows[0].id,
-			action: "signup",
-			details: `User registered with role ${role}`,
+			action: "signup_success",
+			details: `User successfully registered as role ${role}`,
 			req: req,
 		});
 
