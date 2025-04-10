@@ -34,16 +34,16 @@
 				  [(ngModel)]="selectedPatientEmail">
 				  <option value="" disabled selected>Select a patient</option>
 				  <option *ngFor="let patient of availablePatientEmails" [value]="patient.email">
-					{{ patient.name }} ({{ patient.email }})
+					{{ patient.username }} ({{ patient.email }})
 				  </option>
 				</select>
 				<button class="btn btn-primary" (click)="assignPatient()">+ Add Patient</button>
-			  </div>			  
+			</div>			  
 
 			<table class="table table-striped">
 				<thead>
 					<tr>
-						<th>Patient Name</th>
+						<th>Username</th>
 						<th>Email</th>
 						<th>Phone</th>
 						<th>Actions</th>
@@ -51,18 +51,17 @@
 				</thead>
 				<tbody>
 					<tr *ngFor="let patient of filteredPatients">
-						<td>{{ patient.name }}</td>
+						<td>{{ patient.username }}</td>
 						<td>{{ patient.email }}</td>
 						<td>{{ patient.phone }}</td>
 						<td>
 							<button class="btn btn-primary btn-sm">View Details</button>&nbsp;
 							<button class="btn btn-secondary btn-sm">Send Message</button>&nbsp;
 							<button
-							class="btn btn-danger btn-sm"
-							(click)="removePatient(patient.id)">
-							Remove
+								class="btn btn-danger btn-sm"
+								(click)="removePatient(patient.id)">
+								Remove
 							</button>
-
 						</td>
 					</tr>
 				</tbody>

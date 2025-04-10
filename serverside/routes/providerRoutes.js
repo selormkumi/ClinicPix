@@ -41,9 +41,8 @@ router.get("/all-patient-emails/:providerId", async (req, res) => {
 
   try {
     const result = await db.query(
-      `SELECT u.id, u.email, up.name
+      `SELECT u.id, u.email, u.username
        FROM users u
-       JOIN user_profiles up ON u.id = up.user_id
        WHERE u.role = 'patient'
        AND u.id NOT IN (
          SELECT patient_id FROM provider_patients WHERE provider_id = $1
@@ -62,10 +61,10 @@ router.get("/:providerId", async (req, res) => {
   const providerId = req.params.providerId;
   try {
     const result = await db.query(
-      `SELECT u.id, u.email, p.name, p.phone
+      `SELECT u.id, u.username, u.email, p.phone
        FROM provider_patients pp
        JOIN users u ON pp.patient_id = u.id
-       JOIN user_profiles p ON u.id = p.user_id
+       LEFT JOIN user_profiles p ON u.id = p.user_id
        WHERE pp.provider_id = $1`,
       [providerId]
     );

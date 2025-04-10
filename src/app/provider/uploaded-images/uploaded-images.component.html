@@ -98,7 +98,7 @@
 											[(ngModel)]="selectedPatientEmail">
 											<option value="" disabled selected>Select patient email</option>
 											<option *ngFor="let p of assignedPatients" [value]="p.email">
-												{{ p.name }} ({{ p.email }})
+												{{ p.username }} ({{ p.email }})
 											</option>
 										</select>
 										<button class="btn btn-success btn-sm ml-2" (click)="shareImageToPatient(image)">
