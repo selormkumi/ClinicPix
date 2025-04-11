@@ -39,6 +39,10 @@ app.get("/", (req, res) => {
   res.send("ClinicPix Backend is running...");
 });
 
+app.get("/api/test", (req, res) => {
+  res.send("API is live!");
+});
+
 // ✅ Start Server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
