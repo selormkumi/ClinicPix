@@ -40,6 +40,7 @@
 							<th>User Name</th>
 							<th>Email</th>
 							<th>Role</th>
+							<th>Date Created</th>
 							<th>Status</th>
 							<th class="text-center">Actions</th>
 						</tr>
@@ -50,6 +51,7 @@
 							<td>{{ user.username }}</td>
 							<td>{{ user.email }}</td>
 							<td>{{ user.role }}</td>
+							<td>{{ user.date_created | date: 'medium' }}</td>
 							<td>
 								<span [ngClass]="{ 'text-success': user.is_active, 'text-danger': !user.is_active }">
 									{{ user.is_active ? 'Active' : 'Inactive' }}
@@ -57,18 +59,14 @@
 							</td>
 							<td class="text-center">
 								<div class="d-flex justify-content-center align-items-center flex-wrap gap-2">
-									<button class="btn btn-sm btn-warning" (click)="editUser(user)">
-										<i class="fas fa-edit"></i> Edit
+									<button [ngClass]="user.is_active ? 'btn btn-danger btn-sm' : 'btn btn-success btn-sm'"
+											(click)="toggleUserStatus(user)">
+									<i class="fas" [ngClass]="user.is_active ? 'fa-user-times' : 'fa-user-check'"></i>
+									{{ user.is_active ? 'Deactivate' : 'Activate' }}
 									</button>
-									<button
-										class="btn btn-sm"
-										[ngClass]="user.is_active ? 'btn-danger' : 'btn-success'"
-										(click)="toggleUserStatus(user)">
-										<i class="fas" [ngClass]="user.is_active ? 'fa-user-slash' : 'fa-user-check'"></i>
-										{{ user.is_active ? 'Deactivate' : 'Activate' }}
-									</button>
+
 									<button class="btn btn-sm btn-secondary" (click)="resetPassword(user)">
-										<i class="fas fa-key"></i> Reset
+										<i class="fas fa-key"></i> Reset Password
 									</button>
 								</div>
 							</td>							

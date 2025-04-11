@@ -23,6 +23,9 @@ export class LoginComponent {
     isOtpSent: boolean = false;
     email: string = ""; // Store email for OTP step
 
+    // ✅ Add property to store error message
+    loginErrorMessage: string = "";
+
     constructor(
         private router: Router,
         private fb: FormBuilder,
@@ -49,6 +52,7 @@ export class LoginComponent {
     submitForm() {
         if (this.loginForm.valid) {
             this.loading = true;
+            this.loginErrorMessage = ""; // ✅ Clear previous error
             const formData = this.loginForm.value;
             this.email = formData.email; // Store email for OTP verification
 
@@ -61,13 +65,16 @@ export class LoginComponent {
                 (error: any) => {
                     console.error("❌ Login Error:", error);
                     let errorMessage = "Invalid email or password. Please try again.";
-                    if (error.status === 500) {
+
+                    if (error.status === 403) {
+                        errorMessage = "Your account has been deactivated. Please contact the administrator.";
+                    } else if (error.status === 500) {
                         errorMessage = "Server error. Please try again later.";
                     } else if (error.status === 0) {
                         errorMessage = "Network error. Check your connection.";
                     }
 
-                    alert(errorMessage);
+                    this.loginErrorMessage = errorMessage; // ✅ Show message in UI
                     this.loading = false;
                 }
             );

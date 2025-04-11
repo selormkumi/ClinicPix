@@ -33,9 +33,11 @@ exports.signup = async (req, res) => {
 		const hashedPassword = await bcrypt.hash(password, saltRounds);
 
 		const newUser = await pool.query(
-			"INSERT INTO users (username, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id, username, email, role",
+			`INSERT INTO users (username, email, password, role, is_active)
+			 VALUES ($1, $2, $3, $4, TRUE)
+			 RETURNING id, username, email, role, is_active, date_created`,
 			[userName, email, hashedPassword, role]
-		);
+		  );
 
 		await logAudit({
 			userId: newUser.rows[0].id,
@@ -66,15 +68,28 @@ exports.login = async (req, res) => {
 		}
 
 		const userQuery = await pool.query(
-			"SELECT id, username, email, role, password FROM users WHERE email = $1",
+			"SELECT id, username, email, role, password, is_active FROM users WHERE email = $1",
 			[email]
 		);
+
+
 
 		if (userQuery.rows.length === 0) {
 			return res.status(401).json({ message: "Invalid email or password" });
 		}
 
 		const user = userQuery.rows[0];
+		if (!user.is_active) {
+			await logAudit({
+			  userId: user.id,
+			  action: "login_blocked",
+			  details: `Login attempt blocked for deactivated user ${email}`,
+			  req,
+			});
+		  
+			return res.status(403).json({ message: "Your account has been deactivated by an admin." });
+		  }
+		  
 		const validPassword = await bcrypt.compare(password, user.password);
 		if (!validPassword) {
 			return res.status(401).json({ message: "Invalid email or password" });

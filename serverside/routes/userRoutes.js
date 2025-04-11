@@ -8,8 +8,10 @@ router.get("/all", async (req, res) => {
 	try {
 		console.log("📌 Fetching all users...");
 		const result = await db.query(`
-			SELECT id, username, email, role FROM users
-		`);
+      SELECT id, username, email, role, is_active, date_created
+      FROM users
+      ORDER BY id DESC
+    `);    
 		console.log("✅ Users found:", result.rows);
 		res.json(result.rows);
 	} catch (error) {
@@ -93,6 +95,46 @@ router.put('/:userId/profile', async (req, res) => {
   } catch (error) {
     console.error("❌ Error saving user profile:", error);
     res.status(500).json({ error: "Failed to save user profile" });
+  }
+});
+
+router.patch('/activate/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    await db.query(`UPDATE users SET is_active = TRUE WHERE id = $1`, [userId]);
+
+    await logAudit({
+      userId,
+      action: "activate_user",
+      details: `Admin activated user ID ${userId}`,
+      req,
+    });
+
+    res.json({ message: "User activated successfully." });
+  } catch (error) {
+    console.error("❌ Error activating user:", error);
+    res.status(500).json({ error: "Activation failed" });
+  }
+});
+
+router.patch('/deactivate/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    await db.query(`UPDATE users SET is_active = FALSE WHERE id = $1`, [userId]);
+
+    await logAudit({
+      userId,
+      action: "deactivate_user",
+      details: `Admin deactivated user ID ${userId}`,
+      req,
+    });
+
+    res.json({ message: "User deactivated successfully." });
+  } catch (error) {
+    console.error("❌ Error deactivating user:", error);
+    res.status(500).json({ error: "Deactivation failed" });
   }
 });
 

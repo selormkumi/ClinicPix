@@ -4,7 +4,7 @@ import { FormsModule } from "@angular/forms";
 import { Router, RouterModule } from "@angular/router";
 import { AuthenticationService } from "../../shared/services/authentication.service";
 import { AdminService } from "../../shared/services/admin.service"; // ✅ your admin service
-
+import { ToastrService } from 'ngx-toastr';
 @Component({
 	selector: "app-manage-users",
 	standalone: true,
@@ -21,7 +21,8 @@ export class ManageUsersComponent implements OnInit {
 	constructor(
 		private authService: AuthenticationService,
 		private router: Router,
-		private adminService: AdminService
+		private adminService: AdminService,
+		private toastr: ToastrService
 	) {}
 
 	ngOnInit() {
@@ -60,18 +61,20 @@ export class ManageUsersComponent implements OnInit {
 		this.router.navigate(["/auth/login"]);
 	}
 
-	// ✅ Placeholder for Edit action
-	editUser(user: any) {
-		console.log("🛠️ Edit User:", user);
-		// Future: Open modal/form for editing user info
-	}
-
 	// ✅ Toggle user active status
 	toggleUserStatus(user: any) {
-		const action = user.is_active ? "deactivate" : "activate";
-		console.log(`⚙️ Attempting to ${action} user ID ${user.id}`);
-		// Future: Call backend API to toggle status
-	}
+		const action = user.is_active ? this.adminService.deactivateUser : this.adminService.activateUser;
+	  
+		action.call(this.adminService, user.id).subscribe({
+		  next: () => {
+			user.is_active = !user.is_active;
+			this.toastr.success(`User ${user.is_active ? 'activated' : 'deactivated'} successfully`);
+		  },
+		  error: () => {
+			this.toastr.error('Action failed');
+		  }
+		});
+	  }	  
 
 	// ✅ Placeholder for reset password
 	resetPassword(user: any) {

@@ -20,8 +20,12 @@ export class AdminService {
     return this.http.put(`${this.baseUrl}/${userId}`, data);
   }
 
-  // ✅ Activate/deactivate user
-  toggleUserActiveStatus(userId: number, isActive: boolean): Observable<any> {
-    return this.http.patch(`${this.baseUrl}/${userId}/status`, { isActive });
+  activateUser(userId: number) {
+    return this.http.patch(`${this.baseUrl}/activate/${userId}`, {});
   }
+  
+  deactivateUser(userId: number) {
+    return this.http.patch(`${this.baseUrl}/deactivate/${userId}`, {});
+  }
+  
 }

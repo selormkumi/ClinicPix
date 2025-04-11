@@ -8,6 +8,11 @@
 	<div class="card">
 		<h3>Login</h3>
 
+		<!-- 🔴 Error Message Display -->
+		<div *ngIf="loginErrorMessage" class="alert alert-danger">
+			{{ loginErrorMessage }}
+		</div>
+
 		<!-- ✅ Step 1: Email & Password Login -->
 		<form [formGroup]="loginForm" *ngIf="!isOtpSent" (ngSubmit)="submitForm()">
 			<!-- Email -->
@@ -52,7 +57,7 @@
 		</form>
 
 		<!-- ✅ Step 2: OTP Verification Form (Shown After Login) -->
-		<form [formGroup]="otpForm" *ngIf="isOtpSent" (ngSubmit)="verifyOtp()"> <!-- ✅ Fixed function name -->
+		<form [formGroup]="otpForm" *ngIf="isOtpSent" (ngSubmit)="verifyOtp()">
 			<h4>Enter OTP</h4>
 			<p class="info-text">A 6-digit OTP has been sent to your email.</p>
 

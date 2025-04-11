@@ -5,11 +5,14 @@ import { routes } from "./app/app.routes";
 import { provideHttpClient, withInterceptors } from "@angular/common/http";
 import { provideAnimationsAsync } from "@angular/platform-browser/animations/async";
 import { AuthInterceptor } from "./app/shared/interceptors/auth.interceptor";
+import { provideToastr } from "ngx-toastr";
+
 bootstrapApplication(AppComponent, {
 	providers: [
 		provideRouter(routes),
 		provideHttpClient(withInterceptors([AuthInterceptor])),
 		provideAnimationsAsync(),
+		provideToastr(),
 	],
 
 }).catch((err) => console.error(err));
