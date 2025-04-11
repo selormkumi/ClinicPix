@@ -3,12 +3,13 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { tap } from "rxjs/operators";
 import { Router } from "@angular/router";
+import { environment } from "../../../environments/environment";
 
 @Injectable({
 	providedIn: "root",
 })
 export class AuthenticationService {
-	private apiUrl = "http://localhost:5001/api/auth"; // ✅ Updated to match backend route
+	private apiUrl = `${environment.apiUrl}/auth`;
 
 	constructor(private http: HttpClient, private router: Router) {}
 

@@ -1,12 +1,13 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
+import { environment } from "../../../environments/environment";
 
 @Injectable({
   providedIn: "root",
 })
 export class AdminService {
-  private baseUrl = "http://localhost:5001/api/users";
+  private baseUrl = `${environment.apiUrl}/users`;
 
   constructor(private http: HttpClient) {}
 
@@ -20,18 +21,22 @@ export class AdminService {
     return this.http.put(`${this.baseUrl}/${userId}`, data);
   }
 
-  activateUser(userId: number) {
+  // ✅ Activate user
+  activateUser(userId: number): Observable<any> {
     return this.http.patch(`${this.baseUrl}/activate/${userId}`, {});
   }
-  
-  deactivateUser(userId: number) {
+
+  // ✅ Deactivate user
+  deactivateUser(userId: number): Observable<any> {
     return this.http.patch(`${this.baseUrl}/deactivate/${userId}`, {});
   }
 
-  adminResetPassword(targetEmail: string, options: any) {
-    return this.http.post('http://localhost:5001/api/auth/admin-reset-password', {
-      targetEmail
-    }, options);
-  }  
-  
+  // ✅ Admin-triggered password reset
+  adminResetPassword(targetEmail: string, options: any): Observable<any> {
+    return this.http.post(
+      `${environment.apiUrl}/auth/admin-reset-password`,
+      { targetEmail },
+      options
+    );
+  }
 }

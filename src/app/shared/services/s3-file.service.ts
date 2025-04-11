@@ -1,13 +1,14 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
+import { environment } from "../../../environments/environment";
 
 @Injectable({
   providedIn: "root",
 })
 export class S3FileService {
-  private apiUrl = "http://localhost:5001/api/files";        // File-related routes
-  private userApiUrl = "http://localhost:5001/api/users";    // User-related routes
+  private apiUrl = `${environment.apiUrl}/files`;     // File-related routes
+  private userApiUrl = `${environment.apiUrl}/users`; // User-related routes
 
   constructor(private http: HttpClient) {}
 
@@ -23,8 +24,12 @@ export class S3FileService {
 
   // 📌 Upload a file to S3 using pre-signed URL
   uploadFile(fileName: string, fileType: string, uploadedBy: number, tags: string[]): Observable<any> {
-    const apiUrl = "http://localhost:5001/api/files/upload";
-    return this.http.post<{ uploadUrl: string }>(apiUrl, { fileName, fileType, uploadedBy, tags });
+    return this.http.post<{ uploadUrl: string }>(`${this.apiUrl}/upload`, {
+      fileName,
+      fileType,
+      uploadedBy,
+      tags,
+    });
   }
 
   // 📌 Get pre-signed URL to view a file
@@ -74,7 +79,7 @@ export class S3FileService {
 
   // 📌 Get User ID by Email (For Email-Based Sharing)
   getUserIdByEmail(email: string): Observable<any> {
-    return this.http.get(`http://localhost:5001/api/user-id?email=${encodeURIComponent(email)}`);
+    return this.http.get(`${environment.apiUrl}/user-id?email=${encodeURIComponent(email)}`);
   }
 
   // ✅ Fetch shared files uploaded by the provider
@@ -84,7 +89,7 @@ export class S3FileService {
 
   // 📌 Assign a patient to a provider
   assignPatient(providerId: number, patientEmail: string): Observable<any> {
-    return this.http.post("http://localhost:5001/api/patients/assign", {
+    return this.http.post(`${environment.apiUrl}/patients/assign`, {
       providerId,
       patientEmail,
     });
@@ -92,18 +97,18 @@ export class S3FileService {
 
   // 📌 Get all patients assigned to a provider
   getPatientsByProvider(providerId: number): Observable<any> {
-    return this.http.get(`http://localhost:5001/api/patients/${providerId}`);
+    return this.http.get(`${environment.apiUrl}/patients/${providerId}`);
   }
 
   // 📌 Get all available patients (for dropdown email selector)
   getAllPatientEmails(providerId: number): Observable<any> {
-    return this.http.get(`http://localhost:5001/api/patients/all-patient-emails/${providerId}`);
+    return this.http.get(`${environment.apiUrl}/patients/all-patient-emails/${providerId}`);
   }
 
   // 📌 Unassign (remove) patient from provider
   unassignPatient(providerId: number, patientId: number): Observable<any> {
-    return this.http.request("delete", "http://localhost:5001/api/patients/unassign", {
-      body: { providerId, patientId }
+    return this.http.request("delete", `${environment.apiUrl}/patients/unassign`, {
+      body: { providerId, patientId },
     });
   }
 
@@ -114,16 +119,16 @@ export class S3FileService {
 
   // ✅ Update user's profile data (into user_profiles table)
   updateUserProfile(userId: number, data: any): Observable<any> {
-    return this.http.put(`http://localhost:5001/api/users/${userId}/profile`, data);
-  }  
+    return this.http.put(`${this.userApiUrl}/${userId}/profile`, data);
+  }
 
   // ✅ Download file using pre-signed URL
   downloadFile(fileName: string, uploadedBy: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/download-url?fileName=${encodeURIComponent(fileName)}&uploadedBy=${uploadedBy}`);
   }
 
+  // ✅ Another download endpoint
   getDownloadUrl(fileName: string, uploadedBy: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/download?fileName=${encodeURIComponent(fileName)}&uploadedBy=${uploadedBy}`);
-  }  
-
+  }
 }
