@@ -12,10 +12,13 @@ app.set("trust proxy", true); // 👈 Important for accurate IPs when deployed
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ CORS for Angular frontend
+// ✅ CORS for Angular frontend (local + deployed)
 app.use(
   cors({
-    origin: "http://localhost:4200",
+    origin: [
+      "http://localhost:4200",
+      "https://clinicpix-frontend.onrender.com"
+    ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   })
 );
