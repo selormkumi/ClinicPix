@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const authController = require("../controllers/authController"); // ✅ Centralized import
+const { authenticateAdmin } = require("../middleware/authMiddleware"); // ✅ Import admin auth middleware
 
 const {
   signup,
@@ -33,5 +34,8 @@ router.post("/request-password-reset", requestPasswordReset);
 
 // ✅ Perform password reset using token
 router.post("/reset-password", resetPassword);
+
+// ✅ Admin password reset for users using token
+router.post("/admin-reset-password", authenticateAdmin, authController.adminResetPassword);
 
 module.exports = router;

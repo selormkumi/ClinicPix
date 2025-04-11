@@ -5,6 +5,7 @@ body {
 	padding: 0;
 }
 
+/* Sidebar */
 .sidebar {
 	width: 250px;
 	height: 100vh;
@@ -37,47 +38,208 @@ body {
 	background-color: #1a252f;
 }
 
+/* Main Content */
 .main-content {
 	margin-left: 250px;
 	padding: 20px;
 }
 
-.header {
+/* Uploaded Images Section */
+.uploaded-images-section {
+	margin-top: 20px;
+}
+
+/* File Upload Section */
+.upload-zone {
+	border: 2px dashed #007bff;
+	padding: 20px;
+	text-align: center;
+	border-radius: 10px;
+	background-color: #f8f9fa;
+	cursor: pointer;
+}
+
+.upload-zone:hover {
+	background-color: #e9ecef;
+}
+
+.upload-zone.active {
+	background-color: #d0e6fa;
+	border-color: #1a66b9;
+}
+
+/* File Input Button */
+.file-input {
+	display: none;
+}
+
+.file-label {
+	display: inline-block;
+	padding: 10px 15px;
 	background-color: #3498db;
 	color: white;
-	padding: 15px;
 	border-radius: 5px;
-	margin-bottom: 20px;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+	text-align: center;
+	margin-top: 10px;
+}
+
+.file-label:hover {
+	background-color: #2980b9;
+}
+
+/* File Name Input */
+.file-name-input {
+	width: 100%;
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	font-size: 1rem;
+	margin-top: 10px;
+}
+
+.file-name-input:focus {
+	border-color: #3498db;
+	outline: none;
+	box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+}
+
+/* Upload Controls */
+.upload-controls {
+	margin-top: 20px;
+	display: flex;
+	gap: 10px;
+	align-items: center;
+}
+
+.upload-btn {
+	margin-left: 10px;
+}
+
+/* Table Section */
+.uploaded-images-table {
+	margin-top: 30px;
+}
+
+.uploaded-images-table table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.uploaded-images-table th,
+.uploaded-images-table td {
+	padding: 10px;
+	text-align: left;
+}
+
+.uploaded-images-table th {
+	background-color: #2c3e50;
+	color: white;
+}
+
+.uploaded-images-table tr:nth-child(even) {
+	background-color: #f2f2f2;
+}
+
+.uploaded-images-table tr:hover {
+	background-color: #e9ecef;
+}
+
+.uploaded-images-table button {
+	margin-right: 10px;
+}
+
+/* Modal Section */
+.app-image-modal {
+	width: 600px;
+	background-color: white;
+	border-radius: 5px;
+	padding: 20px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Fix input tag field size */
+.small-tag-input {
+	width: auto !important; /* Prevent full-width */
+	max-width: 200px !important; /* Set reasonable width */
+	padding: 5px 10px !important; /* Reduce padding */
+	font-size: 14px !important; /* Match input fields */
+}
+
+/* Table Section Styling */
+.table-responsive {
+	margin-top: 20px;
+}
+
+.table {
+	width: 100%;
+	border-collapse: collapse;
 }
 
 .table thead th {
 	background-color: #3498db;
 	color: white;
+	padding: 12px;
+	text-align: left;
+	font-weight: 500;
 }
 
-.btn-primary {
-	background-color: #3498db;
-	border: none;
+.table tbody tr:nth-child(even) {
+	background-color: #f2f2f2;
 }
 
-.btn-primary:hover {
-	background-color: #2980b9;
+.table tbody tr:hover {
+	background-color: #e9ecef;
 }
 
-.card {
-	margin-bottom: 20px;
+.table td,
+.table th {
+	padding: 10px;
+	text-align: left;
+	border: 1px solid #dee2e6;
+}
+
+/* Fix for action buttons in table */
+.table button {
+	margin-right: 5px;
+}
+
+/* Tag styling for consistency */
+.tag-text {
+	font-size: 1rem;
+	font-weight: normal;
+	color: black;
+}
+
+.drop-zone {
+	border: 2px dashed #ccc;
 	border-radius: 10px;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	padding: 30px;
+	text-align: center;
+	margin-bottom: 20px;
+	transition: background-color 0.3s;
+	background-color: #f9f9f9;
 }
 
-.card h5 {
-	margin-bottom: 15px;
+.drop-zone.dragging {
+	background-color: #e6f7ff;
 }
 
-.patient-select {
-	width: 500px; /* fixed width */
-	min-width: 250px;
-	max-width: 100%;
-	margin-right: 10px; /* gap between select and button */
-  }
-  
+.drop-zone-content {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	margin-bottom: 10px;
+}
+
+.drop-zone-content i {
+	font-size: 40px;
+	color: #007bff;
+}
+
+.custom-select-width {
+	width: 500px !important;
+}

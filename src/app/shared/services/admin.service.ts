@@ -6,7 +6,7 @@ import { Observable } from "rxjs";
   providedIn: "root",
 })
 export class AdminService {
-  private baseUrl = "http://localhost:5001/api/users"; // ✅ Correct base path
+  private baseUrl = "http://localhost:5001/api/users";
 
   constructor(private http: HttpClient) {}
 
@@ -27,5 +27,11 @@ export class AdminService {
   deactivateUser(userId: number) {
     return this.http.patch(`${this.baseUrl}/deactivate/${userId}`, {});
   }
+
+  adminResetPassword(targetEmail: string, options: any) {
+    return this.http.post('http://localhost:5001/api/auth/admin-reset-password', {
+      targetEmail
+    }, options);
+  }  
   
 }

@@ -5,78 +5,93 @@
 	<a routerLink="/admin/manage-users">Manage Users</a>
 	<a routerLink="/admin/audit">Audit Logs</a>
 	<a href="#" (click)="logout()">Logout</a>
-</div>
-
-<!-- Main Content -->
-<div class="main-content">
+  </div>
+  
+  <!-- Main Content -->
+  <div class="main-content">
 	<!-- Search Bar -->
 	<div class="row mb-3">
-		<div class="col-md-6">
-			<input
-				type="text"
-				class="form-control"
-				placeholder="Search users..."
-				[(ngModel)]="searchTerm"
-				(input)="onSearch()" />
-		</div>
+	  <div class="col-md-6">
+		<input
+		  type="text"
+		  class="form-control"
+		  placeholder="Search users..."
+		  [(ngModel)]="searchTerm"
+		  (input)="onSearch()" />
+	  </div>
 	</div>
-
+  
 	<!-- Card for User Management -->
 	<div id="manage-users" class="card shadow-sm">
-		<div class="card-body">
-			<h5 class="mb-3">Manage Users</h5>
-
-			<!-- Loading Spinner -->
-			<div *ngIf="isLoading" class="text-center mb-3">
-				<i class="fas fa-spinner fa-spin me-2"></i> Loading users...
-			</div>
-
-			<!-- Users Table -->
-			<div class="table-responsive" *ngIf="!isLoading">
-				<table class="table table-bordered table-hover align-middle">
-					<thead class="table-primary">
-						<tr>
-							<th>User ID</th>
-							<th>User Name</th>
-							<th>Email</th>
-							<th>Role</th>
-							<th>Date Created</th>
-							<th>Status</th>
-							<th class="text-center">Actions</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr *ngFor="let user of filteredUsers">
-							<td>{{ user.id }}</td>
-							<td>{{ user.username }}</td>
-							<td>{{ user.email }}</td>
-							<td>{{ user.role }}</td>
-							<td>{{ user.date_created | date: 'medium' }}</td>
-							<td>
-								<span [ngClass]="{ 'text-success': user.is_active, 'text-danger': !user.is_active }">
-									{{ user.is_active ? 'Active' : 'Inactive' }}
-								</span>
-							</td>
-							<td class="text-center">
-								<div class="d-flex justify-content-center align-items-center flex-wrap gap-2">
-									<button [ngClass]="user.is_active ? 'btn btn-danger btn-sm' : 'btn btn-success btn-sm'"
-											(click)="toggleUserStatus(user)">
-									<i class="fas" [ngClass]="user.is_active ? 'fa-user-times' : 'fa-user-check'"></i>
-									{{ user.is_active ? 'Deactivate' : 'Activate' }}
-									</button>
-
-									<button class="btn btn-sm btn-secondary" (click)="resetPassword(user)">
-										<i class="fas fa-key"></i> Reset Password
-									</button>
-								</div>
-							</td>							
-						</tr>
-						<tr *ngIf="filteredUsers.length === 0">
-							<td colspan="6" class="text-center text-muted">No users found.</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
+	  <div class="card-body">
+		<h5 class="mb-3">Manage Users</h5>
+  
+		<!-- Loading Spinner -->
+		<div *ngIf="isLoading" class="text-center mb-3">
+		  <i class="fas fa-spinner fa-spin me-2"></i> Loading users...
 		</div>
+  
+		<!-- Users Table -->
+		<div class="table-responsive" *ngIf="!isLoading">
+		  <table class="table table-bordered table-hover align-middle">
+			<thead class="table-primary">
+			  <tr>
+				<th>User ID</th>
+				<th>User Name</th>
+				<th>Email</th>
+				<th>Role</th>
+				<th>Date Created</th>
+				<th>Status</th>
+				<th class="text-center">Actions</th>
+			  </tr>
+			</thead>
+			<tbody>
+			  <tr *ngFor="let user of filteredUsers">
+				<td>{{ user.id }}</td>
+				<td>{{ user.username }}</td>
+				<td>{{ user.email }}</td>
+				<td>{{ user.role }}</td>
+				<td>{{ user.date_created | date: 'medium' }}</td>
+				<td>
+				  <span [ngClass]="{ 'text-success': user.is_active, 'text-danger': !user.is_active }">
+					{{ user.is_active ? 'Active' : 'Inactive' }}
+				  </span>
+				</td>
+				<td class="text-center">
+				  <div class="d-flex justify-content-center align-items-center flex-wrap gap-2">
+					<button [ngClass]="user.is_active ? 'btn btn-danger btn-sm' : 'btn btn-success btn-sm'"
+							(click)="toggleUserStatus(user)">
+					  <i class="fas" [ngClass]="user.is_active ? 'fa-user-times' : 'fa-user-check'"></i>
+					  {{ user.is_active ? 'Deactivate' : 'Activate' }}
+					</button>
+  
+					<button class="btn btn-sm btn-secondary" (click)="resetPassword(user)">
+					  <i class="fas fa-key"></i> Reset Password
+					</button>
+				  </div>
+				</td>
+			  </tr>
+			  <tr *ngIf="filteredUsers.length === 0">
+				<td colspan="7" class="text-center text-muted">No users found.</td>
+			  </tr>
+			</tbody>
+		  </table>
+		</div>
+	  </div>
 	</div>
-</div>
+  </div>
+  
+  <!-- Reset Password Confirmation Modal -->
+  <div class="modal-backdrop" *ngIf="showResetModal">
+	<div class="modal-content">
+	  <h5 class="modal-title">Reset Password</h5>
+	  <p>
+		Please confirm that you want to send a password reset link to:<br>
+		<strong>{{ userToReset?.email }}</strong>
+	  </p>
+	  <div class="modal-actions mt-3 d-flex justify-content-center gap-3">
+		<button class="btn btn-secondary" (click)="cancelReset()">Cancel</button>
+		<button class="btn btn-danger" (click)="confirmResetPassword()">Confirm</button>
+	  </div>
+	</div>
+  </div>  

@@ -138,11 +138,6 @@ body {
 	margin-top: 10px;
 }
 
-.modal-buttons button {
-	flex: 1;
-	max-width: 150px;
-}
-
 /* Close button styling */
 .close-button {
 	position: absolute;
@@ -217,4 +212,10 @@ body {
     font-size: 1rem;  /* Match the standard text size */
     font-weight: normal; /* Ensure it's not bold */
     color: black; /* Ensure the text is visible */
+}
+
+.modal-buttons button {
+	padding: 6px 12px;
+	font-size: 0.9rem;
+	border-radius: 5px;
 }

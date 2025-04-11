@@ -376,5 +376,57 @@ exports.requestPasswordReset = async (req, res) => {
 	  res.status(500).json({ message: "Server error" });
 	}
   };
-  
 
+  exports.adminResetPassword = async (req, res) => {
+	const { targetEmail } = req.body;
+  
+	try {
+	  const userResult = await pool.query("SELECT id FROM users WHERE email = $1", [targetEmail]);
+  
+	  if (userResult.rowCount === 0) {
+		return res.status(404).json({ message: "User not found." });
+	  }
+  
+	  const userId = userResult.rows[0].id;
+	  const rawToken = require("crypto").randomBytes(32).toString("hex");
+	  const hashedToken = await bcrypt.hash(rawToken, 10);
+	  const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 min
+  
+	  await pool.query(
+		"UPDATE users SET password_reset_token = $1, password_reset_expires_at = $2 WHERE id = $3",
+		[hashedToken, expiresAt, userId]
+	  );
+  
+	  const resetLink = `http://localhost:4200/reset-password?token=${rawToken}&email=${targetEmail}`;
+  
+	  const transporter = require("nodemailer").createTransport({
+		host: process.env.SMTP_HOST,
+		port: process.env.SMTP_PORT,
+		secure: false,
+		auth: {
+		  user: process.env.SMTP_USER,
+		  pass: process.env.SMTP_PASS,
+		},
+	  });
+  
+	  await transporter.sendMail({
+		from: process.env.SMTP_USER,
+		to: targetEmail,
+		subject: "ClinicPix Admin-Initiated Password Reset",
+		text: `An administrator has triggered a password reset. Click the link to reset your password: ${resetLink}`,
+	  });
+  
+	  await logAudit({
+		userId,
+		action: "admin_reset_initiated",
+		details: `Admin triggered password reset for ${targetEmail}`,
+		req,
+	  });
+  
+	  res.status(200).json({ message: "✅ Password reset link sent by admin." });
+	} catch (err) {
+	  console.error("❌ Admin Reset Error:", err);
+	  res.status(500).json({ message: "Server error" });
+	}
+  };
+  

@@ -12,60 +12,66 @@
 <!-- Main Content -->
 <div class="main-content">
 	<!-- Search Input -->
-	<div class="search-container">
+	<div class="mb-3 d-flex justify-content-between align-items-center">
 		<input
 			type="text"
-			class="form-control"
+			class="form-control w-50"
 			placeholder="Search Patients..."
 			[(ngModel)]="searchTerm"
 			(input)="onSearch()" />
 	</div>
-	<br />
 
 	<!-- Patients Section -->
-	<div id="patients" class="card">
+	<div id="patients" class="card shadow-sm rounded">
 		<div class="card-body">
-			<h5>Patients</h5>
+			<h5 class="mb-3">Patients</h5>
 
 			<!-- Add Patient Form -->
-			<div class="add-patient-form mb-3 d-flex align-items-center">
+			<div class="add-patient-form mb-4 d-flex flex-wrap gap-2 align-items-center">
 				<select
-				  class="form-control patient-select mr-2"
-				  [(ngModel)]="selectedPatientEmail">
-				  <option value="" disabled selected>Select a patient</option>
-				  <option *ngFor="let patient of availablePatientEmails" [value]="patient.email">
+				class="form-select form-select-sm custom-select-width"
+				[(ngModel)]="selectedPatientEmail">
+				<option value="" disabled selected>Select a patient</option>
+				<option *ngFor="let patient of availablePatientEmails" [value]="patient.email">
 					{{ patient.username }} ({{ patient.email }})
-				  </option>
-				</select>
-				<button class="btn btn-primary" (click)="assignPatient()">+ Add Patient</button>
-			</div>			  
+				</option>
+			</select>
+				<button class="btn btn-sm btn-primary" (click)="assignPatient()">+ Add Patient</button>
+			</div>
 
-			<table class="table table-striped">
-				<thead>
-					<tr>
-						<th>Username</th>
-						<th>Email</th>
-						<th>Phone</th>
-						<th>Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr *ngFor="let patient of filteredPatients">
-						<td>{{ patient.username }}</td>
-						<td>{{ patient.email }}</td>
-						<td>{{ patient.phone }}</td>
-						<td>
-							<button class="btn btn-primary btn-sm">View Details</button>&nbsp;
-							<button class="btn btn-secondary btn-sm">Send Message</button>&nbsp;
-							<button
-								class="btn btn-danger btn-sm"
-								(click)="removePatient(patient.id)">
-								Remove
-							</button>
-						</td>
-					</tr>
-				</tbody>
-			</table>
+			<!-- Patients Table -->
+			<div class="table-responsive">
+				<table class="table table-striped align-middle table-bordered">
+					<thead class="table-primary">
+						<tr>
+							<th>Username</th>
+							<th>Email</th>
+							<th>Phone</th>
+							<th style="width: 160px;" class="text-center">Actions</th>
+						</tr>
+					</thead>
+					<tbody style="font-size: 1rem;">
+						<tr *ngFor="let patient of filteredPatients">
+							<td>{{ patient.username }}</td>
+							<td>{{ patient.email }}</td>
+							<td>{{ patient.phone }}</td>
+							<td class="text-center">
+								<div class="d-flex justify-content-center gap-2 flex-wrap">
+									<button
+										class="btn btn-danger btn-sm"
+										style="font-size: 0.87rem; padding: 2px 10px;"
+										(click)="removePatient(patient.id)">
+										<i class="fas fa-trash me-1"></i> Remove
+									</button>
+								</div>
+							</td>
+						</tr>
+						<tr *ngIf="filteredPatients.length === 0">
+							<td colspan="4" class="text-center text-muted">No patients found.</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 		</div>
 	</div>
 </div>
