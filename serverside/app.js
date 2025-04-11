@@ -28,11 +28,11 @@ const userRoutes = require("./routes/userRoutes");
 const auditRoutes = require("./routes/auditRoutes"); // ✅ New audit log routes
 
 // ✅ Register API routes
-app.use("/auth", authRoutes);                  // Auth routes (login/register)
-app.use("/api", fileRoutes);                   // File management routes
-app.use("/api/patients", providerRoutes);      // Provider-patient related routes
-app.use("/api/users", userRoutes);             // User profile routes
-app.use("/api", auditRoutes);                  // ✅ Audit log route
+app.use("/api/auth", authRoutes);           // ✅ Use this full path in Angular: /api/auth/login, /api/auth/signup, etc.
+app.use("/api", fileRoutes);                // File management routes
+app.use("/api/patients", providerRoutes);  // Provider-patient related routes
+app.use("/api/users", userRoutes);         // User profile routes
+app.use("/api", auditRoutes);              // ✅ Audit log route
 
 // ✅ Root test route
 app.get("/", (req, res) => {

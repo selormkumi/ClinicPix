@@ -1,88 +1,96 @@
 <!-- Header -->
-<div class="header">
+<div class="header text-center">
 	<h1>ClinicPix</h1>
-</div>
-
-<!-- Signup Section -->
-<div class="container">
-	<div class="card">
-		<h3>Sign Up</h3>
-		<form [formGroup]="signupForm" (ngSubmit)="submitForm()">
-			<!-- Role Selection -->
-			<div class="form-group">
-				<label for="role">Role</label>
-				<select id="role" formControlName="role" required>
-					<option value="">Select your role</option>
-					<option value="patient">Patient</option>
-					<option value="provider">Healthcare Provider</option>
-				</select>
-				<p class="error" *ngIf="roleTouched">⚠️ Please select a role.</p>
-			</div>
-
-			<!-- Full Name -->
-			<div class="form-group">
-				<label for="userName">User Name</label>
-				<input
-					type="text"
-					id="userName"
-					formControlName="userName"
-					placeholder="Enter your user name"
-					(focus)="onFieldFocus()"
-					required />
-				<p class="error" *ngIf="isFieldInvalid('userName')">
-					⚠️ Full name is required.
-				</p>
-			</div>
-
-			<!-- Email -->
-			<div class="form-group">
-				<label for="email">Email</label>
-				<input
-					type="email"
-					id="email"
-					formControlName="email"
-					placeholder="Enter your email"
-					(focus)="onFieldFocus()"
-					required />
-				<p class="error" *ngIf="isFieldInvalid('email')">
-					⚠️ Enter a valid email address.
-				</p>
-			</div>
-
-			<!-- Password -->
-			<div class="form-group password-field">
-				<label for="password">Password</label>
-				<div class="password-container">
-					<input
-						[type]="showPassword ? 'text' : 'password'"
-						id="password"
-						formControlName="password"
-						placeholder="Create a strong password"
-						(focus)="onFieldFocus()"
-						required />
-					<img
-						[src]="eyeIcon"
-						alt="Toggle Password Visibility"
-						class="toggle-password-icon"
-						(click)="togglePasswordVisibility()" />
-				</div>
-				<p class="error" *ngIf="isFieldInvalid('password')">
-					⚠️ Password is required (at least 6 characters).
-				</p>
-			</div>
-
-			<!-- Submit Button -->
-			<button type="submit" [disabled]="signupForm.invalid" class="btn">
-				Sign Up
-			</button>
-		</form>
-		<p class="footer">
-			Already have an account? <a routerLink="/auth/login">Login</a>
+  </div>
+  
+  <!-- Signup Section -->
+  <div class="container">
+	<div class="card login-card">
+	  <h2 class="text-center">Sign Up</h2>
+  
+	  <form [formGroup]="signupForm" (ngSubmit)="submitForm()">
+		<!-- Role Selection -->
+		<div class="form-group">
+		  <label for="role">Role</label>
+		  <select id="role" formControlName="role" class="form-control" required>
+			<option value="">Select your role</option>
+			<option value="patient">Patient</option>
+			<option value="provider">Healthcare Provider</option>
+		  </select>
+		  <p class="error" *ngIf="roleTouched">⚠️ Please select a role.</p>
+		</div>
+  
+		<!-- Full Name -->
+		<div class="form-group mt-2">
+		  <label for="userName">User Name</label>
+		  <input
+			type="text"
+			id="userName"
+			formControlName="userName"
+			placeholder="Enter your user name"
+			class="form-control"
+			(focus)="onFieldFocus()"
+			required />
+		  <p class="error" *ngIf="isFieldInvalid('userName')">
+			⚠️ Full name is required.
+		  </p>
+		</div>
+  
+		<!-- Email -->
+		<div class="form-group mt-2">
+		  <label for="email">Email</label>
+		  <input
+			type="email"
+			id="email"
+			formControlName="email"
+			placeholder="Enter your email"
+			class="form-control"
+			(focus)="onFieldFocus()"
+			required />
+		  <p class="error" *ngIf="isFieldInvalid('email')">
+			⚠️ Enter a valid email address.
+		  </p>
+		</div>
+  
+		<!-- Password -->
+		<div class="form-group password-field mt-2">
+		  <label for="password">Password</label>
+		  <div class="password-container">
+			<input
+			  [type]="showPassword ? 'text' : 'password'"
+			  id="password"
+			  formControlName="password"
+			  class="form-control"
+			  placeholder="Create a strong password"
+			  (focus)="onFieldFocus()"
+			  required />
+			<img
+			  [src]="eyeIcon"
+			  alt="Toggle Password Visibility"
+			  class="toggle-password-icon"
+			  (click)="togglePasswordVisibility()" />
+		  </div>
+		  <p class="error" *ngIf="isFieldInvalid('password')">
+			⚠️ Password is required (at least 6 characters).
+		  </p>
+		</div>
+  
+		<!-- Submit Button -->
+		<button type="submit" [disabled]="signupForm.invalid" class="btn btn-primary w-100 mt-3">
+		  Sign Up
+		</button>
+	  </form>
+  
+	  <!-- Already have an account -->
+	  <div class="text-center mt-4">
+		<p>Already have an account?
+		  <a routerLink="/auth/login" class="link">Login</a>
 		</p>
+	  </div>
 	</div>
-</div>
-
-<!-- Footer -->
-<div class="footer">
+  </div>
+  
+  <!-- Footer -->
+  <div class="footer text-center mt-4">
 	<p>&copy; 2025 Secure Medical Image Sharing Platform</p>
-</div>
+  </div>  

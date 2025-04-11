@@ -91,6 +91,10 @@ exports.login = async (req, res) => {
 		  }
 		  
 		const validPassword = await bcrypt.compare(password, user.password);
+		console.log("👉 Email entered:", email);
+		console.log("👉 Password entered:", password);
+		console.log("🔐 Password from DB:", user.password);
+		console.log("✅ Password valid?", validPassword);
 		if (!validPassword) {
 			return res.status(401).json({ message: "Invalid email or password" });
 		}
@@ -270,3 +274,107 @@ exports.logout = async (req, res) => {
 		res.status(500).json({ message: "Failed to log logout" });
 	}
 };
+
+exports.requestPasswordReset = async (req, res) => {
+	const { email } = req.body;
+  
+	try {
+	  const result = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
+  
+	  if (result.rowCount === 0) {
+		return res.status(404).json({ message: "No user found with that email." });
+	  }
+  
+	  const userId = result.rows[0].id;
+	  const rawToken = require("crypto").randomBytes(32).toString("hex");
+	  const hashedToken = await bcrypt.hash(rawToken, 10);
+
+	  const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+  
+	  await pool.query(
+		"UPDATE users SET password_reset_token = $1, password_reset_expires_at = $2 WHERE id = $3",
+		[hashedToken, expiresAt, userId]
+	  );
+  
+	  const resetLink = `http://localhost:4200/reset-password?token=${rawToken}&email=${email}`;
+  
+	  const transporter = require("nodemailer").createTransport({
+		host: process.env.SMTP_HOST,
+		port: process.env.SMTP_PORT,
+		secure: false,
+		auth: {
+		  user: process.env.SMTP_USER,
+		  pass: process.env.SMTP_PASS,
+		},
+	  });
+  
+	  await transporter.sendMail({
+		from: process.env.SMTP_USER,
+		to: email,
+		subject: "ClinicPix Password Reset",
+		text: `Click to reset your password: ${resetLink}`,
+	  });
+  
+	  await logAudit({
+		userId,
+		action: "reset_request_sent",
+		details: `Reset email sent to ${email}`,
+		req,
+	  });
+  
+	  res.status(200).json({ message: "Reset email sent." });
+	} catch (error) {
+	  console.error("Reset request failed:", error);
+	  res.status(500).json({ message: "Server error" });
+	}
+  };  
+
+  exports.resetPassword = async (req, res) => {
+	const { email, token, newPassword } = req.body;
+  
+	try {
+	  const userResult = await pool.query(
+		"SELECT id, password_reset_token, password_reset_expires_at FROM users WHERE email = $1",
+		[email]
+	  );
+  
+	  if (userResult.rowCount === 0) {
+		return res.status(400).json({ message: "Invalid reset request." });
+	  }
+  
+	  const user = userResult.rows[0];
+	  const isMatch = await bcrypt.compare(token, user.password_reset_token);
+		if (!isMatch) {
+		return res.status(400).json({ message: "Invalid or expired token." });
+		}
+  
+	  if (new Date(user.password_reset_expires_at) < new Date()) {
+		return res.status(400).json({ message: "Token has expired." });
+	  }
+  
+	  const hashed = await require("bcryptjs").hash(newPassword, 10);
+	  console.log("🔐 New hashed password:", hashed);
+  
+	  await pool.query(
+		`UPDATE users SET password = $1, password_reset_token = NULL, password_reset_expires_at = NULL WHERE id = $2`,
+		[hashed, user.id]
+	  );
+
+	  console.log("✅ Password updated in DB for:", email);
+
+  
+	  await logAudit({
+		userId: user.id,
+		action: "password_reset_success",
+		details: `Password reset for ${email}`,
+		req,
+	  });
+  
+	  res.status(200).json({ message: "Password has been reset." });
+	} catch (err) {
+	  console.error("Password reset failed:", err);
+	  res.status(500).json({ message: "Server error" });
+	}
+  };
+  
+

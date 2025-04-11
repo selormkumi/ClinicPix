@@ -8,7 +8,7 @@ import { Router } from "@angular/router";
 	providedIn: "root",
 })
 export class AuthenticationService {
-	private apiUrl = "http://localhost:5001/auth"; // Backend API URL
+	private apiUrl = "http://localhost:5001/api/auth"; // ✅ Updated to match backend route
 
 	constructor(private http: HttpClient, private router: Router) {}
 
@@ -75,7 +75,7 @@ export class AuthenticationService {
 		const email = user?.email;
 	
 		if (userId && email) {
-			this.http.post("http://localhost:5001/auth/logout", { userId, email }).subscribe({
+			this.http.post(`${this.apiUrl}/logout`, { userId, email }).subscribe({
 				next: () => console.log("📝 Logout logged"),
 				error: (err) => console.error("❌ Failed to log logout:", err),
 			});
@@ -104,5 +104,4 @@ export class AuthenticationService {
 		const headers = new HttpHeaders().set("Authorization", `Bearer ${token}`);
 		return this.http.post(`${this.apiUrl}/protected`, {}, { headers });
 	}
-
 }
