@@ -47,13 +47,16 @@
 							<th>Shared On</th>
 							<th>Expires At</th>
 							<th>Tag(s)</th>
-							<th>Actions</th>
+							<th style="width: 210px;" class="text-center">Actions</th>
 						</tr>
 					</thead>
-					<tbody>
+					<tbody style="font-size: 0.95rem;">
 						<tr *ngFor="let image of filteredRecords">
 							<td>{{ image.name }}</td>
-							<td>{{ image.sharedBy }} <span *ngIf="image.sharedByEmail">({{ image.sharedByEmail }})</span></td>
+							<td>
+								{{ image.sharedBy }}
+								<span *ngIf="image.sharedByEmail">({{ image.sharedByEmail }})</span>
+							</td>
 							<td>{{ image.sharedOn }}</td>
 							<td>{{ image.expiresAt }}</td>
 							<td>
@@ -62,12 +65,12 @@
 								</span>
 								<ng-template #noTags>No tags</ng-template>
 							</td>
-							<td>
-								<div class="d-flex flex-wrap gap-2">
-									<button class="btn btn-primary btn-sm" (click)="viewImage(image)">
+							<td class="text-center">
+								<div class="d-flex justify-content-center flex-wrap gap-1">
+									<button class="btn btn-primary btn-sm" style="font-size: 0.87rem; padding: 2px 10px;" (click)="viewImage(image)">
 										<i class="fas fa-eye"></i> View
 									</button>
-									<button class="btn btn-success btn-sm" (click)="openDisclaimer(image)">
+									<button class="btn btn-success btn-sm" style="font-size: 0.87rem; padding: 2px 10px;" (click)="openDisclaimer(image)">
 										<i class="fas fa-download"></i> Download
 									</button>
 								</div>
@@ -92,11 +95,9 @@
 				<div class="modal-content">
 					<h5 class="mb-3">Download Disclaimer</h5>
 					<p>
-						Please do not download sensitive medical images<br />
-						on public or shared computers. Proceed only if<br />
-						you are on a trusted device.
+						Please do not download sensitive medical images on public or shared computers. Proceed only if you are on a trusted device.
 					</p>
-					<div class="modal-buttons mt-3">
+					<div class="modal-buttons">
 						<button class="btn btn-secondary" (click)="cancelDownload()">Cancel</button>
 						<button class="btn btn-danger" (click)="confirmDownload()">Proceed to Download</button>
 					</div>
