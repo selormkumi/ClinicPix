@@ -15,7 +15,14 @@ router.get("/audit-logs", async (req, res) => {
       LEFT JOIN users u ON al.user_id = u.id
       ORDER BY al.created_at DESC
     `);
-    res.json(result.rows); // ✅ Send raw UTC timestamps to be handled in frontend
+
+    // ✅ Ensure created_at is in proper ISO UTC format
+    const logsWithUtc = result.rows.map((log) => ({
+      ...log,
+      created_at: new Date(log.created_at).toISOString()
+    }));
+
+    res.json(logsWithUtc);
   } catch (err) {
     console.error("❌ Failed to fetch audit logs:", err);
     res.status(500).json({ error: "Failed to fetch audit logs" });

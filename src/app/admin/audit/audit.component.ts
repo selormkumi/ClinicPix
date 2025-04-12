@@ -34,11 +34,22 @@ export class AuditComponent implements OnInit {
     this.isLoading = true;
     this.http.get<any[]>(`${environment.apiUrl}/audit-logs`).subscribe(
       (res) => {
+        const formatter = new Intl.DateTimeFormat("en-US", {
+          timeZone: "America/New_York", // ✅ Always EST/EDT
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: true,
+        });
+  
         this.auditLogs = res.map((log) => ({
           ...log,
-          // Automatically adapts to user's local timezone
-          created_at: new Date(log.created_at)
+          created_at_est: formatter.format(new Date(log.created_at)) // ✅ Convert UTC to EST
         }));
+  
         this.filteredLogs = [...this.auditLogs];
         this.isLoading = false;
       },
@@ -47,8 +58,8 @@ export class AuditComponent implements OnInit {
         this.isLoading = false;
       }
     );
-  }  
-
+  }
+  
   // ✅ Filter logs
   onSearch() {
     const query = this.searchTerm.toLowerCase();
