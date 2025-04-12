@@ -5,6 +5,7 @@ import { Router, RouterModule } from "@angular/router";
 import { AuthenticationService } from "../../shared/services/authentication.service";
 import { HttpClient } from "@angular/common/http";
 import { environment } from "../../../environments/environment.prod";
+import * as moment from 'moment-timezone';
 
 @Component({
   selector: "app-audit",
@@ -34,22 +35,12 @@ export class AuditComponent implements OnInit {
     this.isLoading = true;
     this.http.get<any[]>(`${environment.apiUrl}/audit-logs`).subscribe(
       (res) => {
-        const formatter = new Intl.DateTimeFormat("en-US", {
-          timeZone: "America/New_York", // ✅ Always EST/EDT
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: true,
-        });
-  
         this.auditLogs = res.map((log) => ({
           ...log,
-          created_at_est: formatter.format(new Date(log.created_at)) // ✅ Convert UTC to EST
+          // ✅ Convert raw UTC to local time using moment-timezone
+          created_at_local: moment.utc(log.created_at).local().format("YYYY-MM-DD hh:mm A")
         }));
-  
+
         this.filteredLogs = [...this.auditLogs];
         this.isLoading = false;
       },
@@ -59,7 +50,7 @@ export class AuditComponent implements OnInit {
       }
     );
   }
-  
+
   // ✅ Filter logs
   onSearch() {
     const query = this.searchTerm.toLowerCase();

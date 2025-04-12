@@ -12,8 +12,20 @@ router.get("/all", async (req, res) => {
       FROM users
       ORDER BY id DESC
     `);    
-		console.log("✅ Users found:", result.rows);
-		res.json(result.rows);
+
+    // 🔧 Convert EST to proper UTC
+    const usersWithUtc = result.rows.map(user => {
+      const estDate = new Date(user.date_created);
+      const utcDate = new Date(estDate.getTime() + estDate.getTimezoneOffset() * 60000);
+
+      return {
+        ...user,
+        date_created: utcDate.toISOString()
+      };
+    });
+
+		console.log("✅ Users found:", usersWithUtc);
+		res.json(usersWithUtc);
 	} catch (error) {
 		console.error("❌ Failed to fetch users:", error.stack);
 		res.status(500).json({ error: "Failed to fetch user data" });

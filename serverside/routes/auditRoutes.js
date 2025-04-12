@@ -16,11 +16,16 @@ router.get("/audit-logs", async (req, res) => {
       ORDER BY al.created_at DESC
     `);
 
-    // ✅ Ensure created_at is in proper ISO UTC format
-    const logsWithUtc = result.rows.map((log) => ({
-      ...log,
-      created_at: new Date(log.created_at).toISOString()
-    }));
+    // ✅ Convert EST to UTC before formatting to ISO string
+    const logsWithUtc = result.rows.map((log) => {
+      const estDate = new Date(log.created_at);
+      const utcTimestamp = new Date(estDate.getTime() + estDate.getTimezoneOffset() * 60000); // convert to real UTC
+    
+      return {
+        ...log,
+        created_at: utcTimestamp.toISOString()
+      };
+    });    
 
     res.json(logsWithUtc);
   } catch (err) {
