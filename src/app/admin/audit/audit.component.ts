@@ -16,7 +16,8 @@ import { environment } from "../../../environments/environment.prod"; // ✅ Imp
 export class AuditComponent implements OnInit {
   searchTerm: string = "";
   auditLogs: any[] = [];
-  filteredLogs: any[] = [];
+  filteredLogs: any[] = [];  
+  isLoading: boolean = false;
 
   constructor(
     private authService: AuthenticationService,
@@ -30,13 +31,27 @@ export class AuditComponent implements OnInit {
 
   // ✅ Fetch logs from backend
   fetchAuditLogs() {
+    this.isLoading = true;
     this.http.get<any[]>(`${environment.apiUrl}/audit-logs`).subscribe(
       (res) => {
-        this.auditLogs = res;
-        this.filteredLogs = [...res];
+        this.auditLogs = res.map((log) => ({
+          ...log,
+          formattedTime: new Date(log.timestamp).toLocaleString(undefined, {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour12: true,
+          }),
+        }));
+        this.filteredLogs = [...this.auditLogs];
+        this.isLoading = false;
       },
       (error) => {
         console.error("❌ Failed to load audit logs", error);
+        this.isLoading = false;
       }
     );
   }

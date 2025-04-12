@@ -17,7 +17,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:4200",
-      "https://clinicpix-frontend.onrender.com"
+      "https://clinicpix.onrender.com"
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   })

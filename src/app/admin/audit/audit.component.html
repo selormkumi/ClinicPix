@@ -26,12 +26,9 @@
 		<div class="card-body">
 			<h5 class="mb-3">Audit Logs</h5>
 
-			<!-- Loading Spinner (optional if needed) -->
-			<!--
 			<div *ngIf="isLoading" class="text-center mb-3">
 				<i class="fas fa-spinner fa-spin me-2"></i> Loading logs...
 			</div>
-			-->
 
 			<!-- Logs Table -->
 			<div class="table-responsive">
@@ -40,23 +37,23 @@
 						<tr>
 							<th style="white-space: nowrap;">Action</th>
 							<th style="white-space: nowrap;">User ID</th>
-							<th style="white-space: nowrap;">User Name</th> <!-- 👈 New -->
+							<th style="white-space: nowrap;">User Name</th>
 							<th style="white-space: nowrap;">Email</th>
 							<th style="white-space: nowrap;">Role</th>
 							<th style="white-space: nowrap;">Date</th>
 							<th style="min-width: 200px;">Details</th>
-						  </tr>
-						</thead>
-						<tbody>
-						  <tr *ngFor="let log of filteredLogs">
+						</tr>
+					</thead>
+					<tbody>
+						<tr *ngFor="let log of filteredLogs">
 							<td>{{ log.action }}</td>
 							<td>{{ log.user_id || 'N/A' }}</td>
-							<td>{{ log.user_username || 'N/A' }}</td> <!-- 👈 New -->
+							<td>{{ log.user_username || 'N/A' }}</td>
 							<td>{{ log.user_email || 'N/A' }}</td>
 							<td>{{ log.user_role || 'N/A' }}</td>
-							<td>{{ log.created_at | date: 'medium' }}</td>
+							<td>{{ log.formattedTime || (log.created_at | date: 'medium') }}</td>
 							<td style="white-space: normal; word-break: break-word;">{{ log.details }}</td>
-						  </tr>
+						</tr>
 					</tbody>
 				</table>
 			</div> <!-- end table-responsive -->
