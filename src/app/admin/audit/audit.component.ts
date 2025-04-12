@@ -4,6 +4,7 @@ import { FormsModule } from "@angular/forms";
 import { Router, RouterModule } from "@angular/router";
 import { AuthenticationService } from "../../shared/services/authentication.service";
 import { HttpClient } from "@angular/common/http";
+import { environment } from "../../../environments/environment.prod"; // ✅ Import env
 
 @Component({
   selector: "app-audit",
@@ -29,7 +30,7 @@ export class AuditComponent implements OnInit {
 
   // ✅ Fetch logs from backend
   fetchAuditLogs() {
-    this.http.get<any[]>("http://localhost:5001/api/audit-logs").subscribe(
+    this.http.get<any[]>(`${environment.apiUrl}/audit-logs`).subscribe(
       (res) => {
         this.auditLogs = res;
         this.filteredLogs = [...res];
