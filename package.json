@@ -5,7 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "postbuild": "cp public/_redirects dist/clinicpix/browser/",
+    "postbuild": "cp public/_redirects dist/clinicpix/",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
