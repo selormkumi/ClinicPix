@@ -12,39 +12,40 @@ app.set("trust proxy", true); // 👈 Important for accurate IPs when deployed
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ CORS for Angular frontend (local + deployed)
+// ✅ CORS Configuration
 app.use(
   cors({
     origin: [
-      "http://localhost:4200",
-      "https://clinicpix.onrender.com"
+      "http://localhost:4200",             // Local Angular dev
+      "https://clinicpix.onrender.com"     // Render frontend
     ],
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    credentials: true, // ✅ if you're using cookies or Authorization headers
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-// ✅ Import routes
+// ✅ Routes
 const authRoutes = require("./routes/authRoutes");
 const fileRoutes = require("./routes/fileRoutes");
 const providerRoutes = require("./routes/providerRoutes");
 const userRoutes = require("./routes/userRoutes");
-const auditRoutes = require("./routes/auditRoutes"); // ✅ New audit log routes
+const auditRoutes = require("./routes/auditRoutes"); // ✅ Audit log route
 
-// ✅ Register API routes
-app.use("/api/auth", authRoutes);           // ✅ Use this full path in Angular: /api/auth/login, /api/auth/signup, etc.
-app.use("/api", fileRoutes);                // File management routes
-app.use("/api/patients", providerRoutes);   // Provider-patient related routes
-app.use("/api/users", userRoutes);          // User profile routes
-app.use("/api", auditRoutes);               // ✅ Audit log route
+// ✅ Register API endpoints
+app.use("/api/auth", authRoutes);           // e.g., /api/auth/login, /signup
+app.use("/api", fileRoutes);                // File upload/view/delete
+app.use("/api/patients", providerRoutes);   // Provider ↔ patients
+app.use("/api/users", userRoutes);          // User profile
+app.use("/api", auditRoutes);               // Audit logs
 
-// ✅ Root test route
+// ✅ Root and health check
 app.get("/", (req, res) => {
   res.send("ClinicPix Backend is running...");
 });
 
-// ✅ Simple test endpoint
 app.get("/api/test", (req, res) => {
-  res.send("API is live!");
+  res.send("✅ API is live!");
 });
 
 // ✅ Start Server
