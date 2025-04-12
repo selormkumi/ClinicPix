@@ -71,7 +71,7 @@
 							<tr *ngFor="let image of uploadedImages">
 								<td>{{ image.name }}</td>
 								<td>{{ image.uploadedBy }} <span *ngIf="image.uploaderEmail">({{ image.uploaderEmail }})</span></td>
-								<td>{{ image.uploadedOn }}</td>
+								<td>{{ image.uploadedOn | date: 'MMM d, y, hh:mm:ss a':'America/New_York' }}</td>
 								<td>
 									<span *ngIf="image.tags.length > 0; else noTags">
 										<span *ngFor="let tag of image.tags" class="me-1">{{ tag }}</span>
@@ -79,7 +79,6 @@
 									<ng-template #noTags>No tags</ng-template>
 								</td>
 								<td>
-
 									<div class="d-flex justify-content-center align-items-center flex-wrap gap-1">
 										<button class="btn btn-primary btn-sm" style="font-size: 0.87rem; padding: 2px 8px;" (click)="viewImage(image.name)">
 											<i class="fas fa-eye"></i> View

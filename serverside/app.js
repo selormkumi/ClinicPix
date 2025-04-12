@@ -17,13 +17,23 @@ app.use(
   cors({
     origin: [
       "http://localhost:4200",             // Local Angular dev
-      "https://clinicpix.onrender.com"     // Render frontend
+      "https://clinicpix.onrender.com",    // Render frontend
+      "https://clinicpix.xyz"              // Custom domain
     ],
-    credentials: true, // ✅ if you're using cookies or Authorization headers
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// ✅ Ensure credentials header is passed to browser
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Credentials", "true");
+  next();
+});
+
+// ✅ Handle preflight requests for all routes
+app.options("*", cors());
 
 // ✅ Routes
 const authRoutes = require("./routes/authRoutes");

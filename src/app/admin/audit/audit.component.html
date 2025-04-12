@@ -40,7 +40,7 @@
 							<th style="white-space: nowrap;">User Name</th>
 							<th style="white-space: nowrap;">Email</th>
 							<th style="white-space: nowrap;">Role</th>
-							<th style="white-space: nowrap;">Date</th>
+							<th style="white-space: nowrap;">Timestamp</th>
 							<th style="min-width: 200px;">Details</th>
 						</tr>
 					</thead>
@@ -51,7 +51,7 @@
 							<td>{{ log.user_username || 'N/A' }}</td>
 							<td>{{ log.user_email || 'N/A' }}</td>
 							<td>{{ log.user_role || 'N/A' }}</td>
-							<td>{{ log.formattedTime || (log.created_at | date: 'medium') }}</td>
+							<td>{{ log.created_at | date: 'medium'}}</td>
 							<td style="white-space: normal; word-break: break-word;">{{ log.details }}</td>
 						</tr>
 					</tbody>

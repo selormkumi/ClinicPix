@@ -4,7 +4,7 @@ import { FormsModule } from "@angular/forms";
 import { Router, RouterModule } from "@angular/router";
 import { AuthenticationService } from "../../shared/services/authentication.service";
 import { HttpClient } from "@angular/common/http";
-import { environment } from "../../../environments/environment.prod"; // ✅ Import env
+import { environment } from "../../../environments/environment.prod";
 
 @Component({
   selector: "app-audit",
@@ -16,7 +16,7 @@ import { environment } from "../../../environments/environment.prod"; // ✅ Imp
 export class AuditComponent implements OnInit {
   searchTerm: string = "";
   auditLogs: any[] = [];
-  filteredLogs: any[] = [];  
+  filteredLogs: any[] = [];
   isLoading: boolean = false;
 
   constructor(
@@ -29,22 +29,14 @@ export class AuditComponent implements OnInit {
     this.fetchAuditLogs();
   }
 
-  // ✅ Fetch logs from backend
+  // ✅ Explicitly convert to Date object
   fetchAuditLogs() {
     this.isLoading = true;
     this.http.get<any[]>(`${environment.apiUrl}/audit-logs`).subscribe(
       (res) => {
         this.auditLogs = res.map((log) => ({
           ...log,
-          formattedTime: new Date(log.timestamp).toLocaleString(undefined, {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-            hour12: true,
-          }),
+          created_at: new Date(log.created_at)
         }));
         this.filteredLogs = [...this.auditLogs];
         this.isLoading = false;
@@ -56,7 +48,6 @@ export class AuditComponent implements OnInit {
     );
   }
 
-  // ✅ Filter logs (including username)
   onSearch() {
     const query = this.searchTerm.toLowerCase();
     this.filteredLogs = this.auditLogs.filter(
@@ -70,7 +61,6 @@ export class AuditComponent implements OnInit {
     );
   }
 
-  // ✅ Logout Function
   logout() {
     this.authService.logout();
     this.router.navigate(["/auth/login"]).then(() => {
