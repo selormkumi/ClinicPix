@@ -10,13 +10,12 @@ router.get("/audit-logs", async (req, res) => {
         u.email AS user_email,
         u.username AS user_username,
         u.id AS user_id,
-        u.role AS user_role,
-        al.created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/New_York' AS created_at_est
+        u.role AS user_role
       FROM audit_logs al
       LEFT JOIN users u ON al.user_id = u.id
       ORDER BY al.created_at DESC
     `);
-    res.json(result.rows);
+    res.json(result.rows); // ✅ Send raw UTC timestamps to be handled in frontend
   } catch (err) {
     console.error("❌ Failed to fetch audit logs:", err);
     res.status(500).json({ error: "Failed to fetch audit logs" });

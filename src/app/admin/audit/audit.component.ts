@@ -29,13 +29,14 @@ export class AuditComponent implements OnInit {
     this.fetchAuditLogs();
   }
 
-  // ✅ Explicitly convert to Date object
+  // ✅ Fetch logs from backend
   fetchAuditLogs() {
     this.isLoading = true;
     this.http.get<any[]>(`${environment.apiUrl}/audit-logs`).subscribe(
       (res) => {
         this.auditLogs = res.map((log) => ({
           ...log,
+          // Automatically adapts to user's local timezone
           created_at: new Date(log.created_at)
         }));
         this.filteredLogs = [...this.auditLogs];
@@ -46,8 +47,9 @@ export class AuditComponent implements OnInit {
         this.isLoading = false;
       }
     );
-  }
+  }  
 
+  // ✅ Filter logs
   onSearch() {
     const query = this.searchTerm.toLowerCase();
     this.filteredLogs = this.auditLogs.filter(
@@ -61,6 +63,7 @@ export class AuditComponent implements OnInit {
     );
   }
 
+  // ✅ Logout
   logout() {
     this.authService.logout();
     this.router.navigate(["/auth/login"]).then(() => {
