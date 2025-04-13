@@ -65,33 +65,35 @@ export class MyRecordsComponent implements OnInit {
 			(res) => {
 				console.log("✅ Shared Files Retrieved:", res);
 
-				this.sharedImages = (res.sharedFiles || []).map((file: any) => ({
+				this.sharedImages = (res.sharedFiles || [])
+				.sort((a: any, b: any) => new Date(b.shared_on).getTime() - new Date(a.shared_on).getTime())
+				.map((file: any) => ({
 					name: file.file_name,
 					sharedBy: file.shared_by || "Unknown",
 					sharedByEmail: file.shared_by_email || "N/A",
 					uploadedBy: file.uploaded_by || 0,
 					sharedOn: file.shared_on
-						? new Date(file.shared_on).toLocaleString("en-US", {
-								month: "short",
-								day: "2-digit",
-								year: "numeric",
-								hour: "2-digit",
-								minute: "2-digit",
-								second: "2-digit",
-								hour12: true,
-							})
-						: "N/A",
+					? new Date(file.shared_on).toLocaleString("en-US", {
+						month: "short",
+						day: "2-digit",
+						year: "numeric",
+						hour: "2-digit",
+						minute: "2-digit",
+						second: "2-digit",
+						hour12: true,
+						})
+					: "N/A",
 					expiresAt: file.expires_at
-						? new Date(file.expires_at).toLocaleString("en-US", {
-								month: "short",
-								day: "2-digit",
-								year: "numeric",
-								hour: "2-digit",
-								minute: "2-digit",
-								second: "2-digit",
-								hour12: true,
-							})
-						: "N/A",
+					? new Date(file.expires_at).toLocaleString("en-US", {
+						month: "short",
+						day: "2-digit",
+						year: "numeric",
+						hour: "2-digit",
+						minute: "2-digit",
+						second: "2-digit",
+						hour12: true,
+						})
+					: "N/A",
 					tags: file.tags ? file.tags.split(",") : [],
 				}));
 

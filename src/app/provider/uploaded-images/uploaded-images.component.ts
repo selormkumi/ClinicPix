@@ -53,28 +53,32 @@ export class UploadedImagesComponent implements OnInit {
 
   fetchUploadedImages() {
     this.isLoading = true;
-
+  
     this.s3Service.getUploadedFiles(this.currentUserId).subscribe(
       (res) => {
-        this.uploadedImages = res.files.map((file: any) => ({
-          name: file.fileName || "Unknown File",
-          uploadedBy: file.uploadedBy || "Unknown",
-          uploaderEmail: file.uploaderEmail || "",
-          uploadedOn: file.uploadedOn
-            ? new Date(file.uploadedOn).toLocaleString("en-US", {
-                timeZone: "America/New_York",
-                month: "short",
-                day: "2-digit",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-                hour12: true,
-              })
-            : "N/A",
-          tags: Array.isArray(file.tags) ? file.tags : [],
-          showDropdown: false,
-        }));
+        this.uploadedImages = res.files
+          .map((file: any) => ({
+            name: file.fileName || "Unknown File",
+            uploadedBy: file.uploadedBy || "Unknown",
+            uploaderEmail: file.uploaderEmail || "",
+            rawUploadedOn: file.uploadedOn, // used for sorting
+            uploadedOn: file.uploadedOn
+              ? new Date(file.uploadedOn).toLocaleString("en-US", {
+                  timeZone: "America/New_York",
+                  month: "short",
+                  day: "2-digit",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                  hour12: true,
+                })
+              : "N/A",
+            tags: Array.isArray(file.tags) ? file.tags : [],
+            showDropdown: false,
+          }))
+          .sort((a: any, b: any) => new Date(b.rawUploadedOn).getTime() - new Date(a.rawUploadedOn).getTime());
+  
         this.isLoading = false;
       },
       (error) => {
@@ -82,7 +86,7 @@ export class UploadedImagesComponent implements OnInit {
         this.isLoading = false;
       }
     );
-  }
+  }  
 
   loadAssignedPatients() {
     this.s3Service.getPatientsByProvider(this.currentUserId).subscribe(
