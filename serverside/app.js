@@ -13,26 +13,27 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ✅ CORS Configuration
-app.use(
-  cors({
-    origin: [
-      "http://localhost:4200",             // Local Angular dev
-      "https://clinicpix.onrender.com",    // Render frontend
-      "https://clinicpix.xyz"              // Custom domain
-    ],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+const allowedOrigins = [
+  "http://localhost:4200",             // Local Angular dev
+  "https://clinicpix.onrender.com",    // Render frontend
+  "https://clinicpix.xyz"              // Custom domain
+];
 
-// ✅ Ensure credentials header is passed to browser
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Credentials", "true");
-  next();
-});
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like curl/postman) or matching ones
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 
-// ✅ Handle preflight requests for all routes
+// ✅ Preflight requests support
 app.options("*", cors());
 
 // ✅ Routes
