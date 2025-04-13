@@ -18,7 +18,7 @@
 		</div>
 		<div class="profile-details">
 		  <p><strong>Email:</strong> {{ patient.email }}</p>
-		  <p><strong>Date of Birth:</strong> {{ patient.dobFormatted || 'Not set' }}</p>
+		  <p><strong>Date of Birth:</strong> {{ patient.dobFormatted | date: 'MMM d, y' }}</p>
 		  <p><strong>Country:</strong> {{ getCountryName(patient.country) || 'Not set' }}</p>
 		  <p><strong>State/City:</strong> {{ patient.state || 'Not set' }}</p>
 		  <p><strong>Age:</strong> {{ patient.age ? patient.age + ' Years' : 'Not set' }}</p>

@@ -19,7 +19,7 @@
 			</div>
 			<div class="profile-details">
 				<p><strong>Email:</strong> {{ provider.email }}</p>
-				<p><strong>Date of Birth:</strong> {{ provider.dobFormatted || 'Not set' }}</p>
+				<p><strong>Date of Birth:</strong> {{ provider.dobFormatted | date: 'MMM d y' }}</p>
 				<p><strong>Country:</strong> {{ getCountryName(provider.country) || 'Not set' }}</p>
 				<p><strong>State/City:</strong> {{ provider.state || 'Not set' }}</p>
 				<p><strong>Age:</strong> {{ provider.age ? provider.age + ' Years' : 'Not set' }}</p>

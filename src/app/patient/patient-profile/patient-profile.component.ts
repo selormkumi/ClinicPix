@@ -71,7 +71,6 @@ export class PatientProfileComponent implements OnInit {
     this.s3FileService.getUserById(this.currentUserId).subscribe(
       (res) => {
         const countryCode = res.country || "";
-        const date = res.dob ? new Date(res.dob) : null;
 
         const formattedPhone = res.phone
           ? {
@@ -88,14 +87,8 @@ export class PatientProfileComponent implements OnInit {
           ...this.patient,
           ...res,
           country: res.country,
-          dob: date ? date.toISOString().split("T")[0] : "",
-          dobFormatted: date
-            ? date.toLocaleDateString("en-US", {
-                month: "short",
-                day: "2-digit",
-                year: "numeric",
-              }).replace(",", "")
-            : "",
+          dob: res.dob || "",
+          dobFormatted: res.dob || "",
           phone: formattedPhone,
         };
 

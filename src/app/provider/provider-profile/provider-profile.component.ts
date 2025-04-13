@@ -71,7 +71,6 @@ export class ProfileComponent implements OnInit {
     this.s3FileService.getUserById(this.currentUserId).subscribe(
       (res) => {
         const countryCode = res.country || "";
-        const date = res.dob ? new Date(res.dob) : null;
 
         const formattedPhone = res.phone
           ? {
@@ -88,14 +87,8 @@ export class ProfileComponent implements OnInit {
           ...this.provider,
           ...res,
           country: res.country,
-          dob: date ? date.toISOString().split("T")[0] : "",
-          dobFormatted: date
-            ? date.toLocaleDateString("en-US", {
-                month: "short",
-                day: "2-digit",
-                year: "numeric",
-              }).replace(",", "")
-            : "",
+          dob: res.dob || "",
+          dobFormatted: res.dob || "",
           phone: formattedPhone,
         };
 
@@ -135,7 +128,7 @@ export class ProfileComponent implements OnInit {
 
   saveChanges() {
     const payload = { ...this.provider };
-  
+
     const countryObj = Country.getAllCountries().find(
       (c) =>
         c.isoCode.toLowerCase() === this.provider.country.toLowerCase() ||
@@ -143,7 +136,7 @@ export class ProfileComponent implements OnInit {
     );
     payload.country = countryObj?.isoCode || this.provider.country;
     payload.phone = this.provider.phone?.internationalNumber || "";
-  
+
     this.s3FileService.updateUserProfile(this.currentUserId, payload).subscribe(
       () => {
         console.log("✅ Profile saved");
@@ -156,7 +149,7 @@ export class ProfileComponent implements OnInit {
         this.snackBar.open("❌ Failed to update profile.", "Close", { duration: 3000 });
       }
     );
-  }  
+  }
 
   logout() {
     this.authService.logout();
