@@ -7,14 +7,15 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { CommonModule } from '@angular/common'; // ✅ Needed for *ngIf
+import { CommonModule } from '@angular/common';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-reset-password',
   standalone: true,
   templateUrl: './reset-password.component.html',
   styleUrls: ['./reset-password.component.scss'],
-  imports: [CommonModule, ReactiveFormsModule], // ✅ Add CommonModule and ReactiveFormsModule
+  imports: [CommonModule, ReactiveFormsModule],
 })
 export class ResetPasswordComponent implements OnInit {
   form: FormGroup;
@@ -49,7 +50,7 @@ export class ResetPasswordComponent implements OnInit {
     this.loading = true;
 
     this.http
-      .post('http://localhost:5001/api/auth/reset-password', {
+      .post(`${environment.apiUrl}/auth/reset-password`, {
         email: this.email,
         token: this.token,
         newPassword: this.form.value.newPassword,

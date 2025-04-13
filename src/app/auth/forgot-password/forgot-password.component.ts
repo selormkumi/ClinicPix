@@ -8,13 +8,14 @@ import {
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
   templateUrl: './forgot-password.component.html',
   styleUrls: ['./forgot-password.component.scss'],
-  imports: [CommonModule, ReactiveFormsModule, RouterModule], // ✅ Required for routing & forms
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
 })
 export class ForgotPasswordComponent {
   form: FormGroup;
@@ -38,7 +39,7 @@ export class ForgotPasswordComponent {
 
     this.loading = true;
     this.http
-      .post('http://localhost:5001/api/auth/request-password-reset', this.form.value)
+      .post(`${environment.apiUrl}/auth/request-password-reset`, this.form.value)
       .subscribe({
         next: () => {
           this.message = '✅ Password reset link has been sent.';
