@@ -39,8 +39,11 @@ export class ManageUsersComponent implements OnInit {
     this.isLoading = true;
     this.adminService.getAllUsers().subscribe(
       (res) => {
-        this.users = res;
-        this.filteredUsers = [...res];
+        this.users = res.map(user => ({
+          ...user,
+          date_created_local: new Date(user.date_created).toLocaleString()
+        }));
+        this.filteredUsers = [...this.users];
         this.isLoading = false;
       },
       (error) => {
@@ -48,7 +51,7 @@ export class ManageUsersComponent implements OnInit {
         this.isLoading = false;
       }
     );
-  }
+  }  
 
   // ✅ Filter users by search
   onSearch() {
