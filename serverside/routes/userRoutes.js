@@ -1,35 +1,34 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/dbConfig');
-const { logAudit } = require('../utils/auditLogger'); // ✅ For logging profile updates
+const { logAudit } = require('../utils/auditLogger');
+const moment = require('moment-timezone'); // ✅ Add this
 
 // ✅ GET all users - for admin
 router.get("/all", async (req, res) => {
-	try {
-		console.log("📌 Fetching all users...");
-		const result = await db.query(`
+  try {
+    console.log("📌 Fetching all users...");
+    const result = await db.query(`
       SELECT id, username, email, role, is_active, date_created
       FROM users
       ORDER BY id DESC
     `);    
 
-    // 🔧 Convert EST to proper UTC
+    // ✅ Convert EST to proper UTC using moment-timezone
     const usersWithUtc = result.rows.map(user => {
-      const estDate = new Date(user.date_created);
-      const utcDate = new Date(estDate.getTime() + estDate.getTimezoneOffset() * 60000);
-
+      const utcDate = moment.tz(user.date_created, 'America/New_York').utc().toISOString();
       return {
         ...user,
-        date_created: utcDate.toISOString()
+        date_created: utcDate
       };
     });
 
-		console.log("✅ Users found:", usersWithUtc);
-		res.json(usersWithUtc);
-	} catch (error) {
-		console.error("❌ Failed to fetch users:", error.stack);
-		res.status(500).json({ error: "Failed to fetch user data" });
-	}
+    console.log("✅ Users found:", usersWithUtc);
+    res.json(usersWithUtc);
+  } catch (error) {
+    console.error("❌ Failed to fetch users:", error.stack);
+    res.status(500).json({ error: "Failed to fetch user data" });
+  }
 });
 
 // ✅ Get full profile (email from users, others from user_profiles)
