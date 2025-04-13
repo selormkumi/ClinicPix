@@ -30,7 +30,7 @@
               "src/assets",
               {
                 "glob": "_redirects",
-                "input": "src",
+                "input": "public",
                 "output": ""
               }
             ],

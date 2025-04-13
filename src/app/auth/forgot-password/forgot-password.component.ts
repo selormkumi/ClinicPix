@@ -27,7 +27,7 @@ export class ForgotPasswordComponent {
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
-    private router: Router // ✅ Keep router injected in case you want to use it
+    private router: Router
   ) {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
