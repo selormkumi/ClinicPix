@@ -125,44 +125,58 @@ body {
 	font-size: 14px !important;
 }
 
-/* Modal Overlay */
 .modal-overlay {
 	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100vw;
-	height: 100vh;
-	background-color: rgba(0, 0, 0, 0.5);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	z-index: 1050;
-}
-
-/* Modal Content Box */
-.modal-content {
-	background-color: white;
-	border-radius: 8px;
-	padding: 25px 30px;
-	width: 100%;
-	max-width: 400px;
-	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-	text-align: center;
-}
-
-/* Modal Text */
-.modal-content p {
-	margin: 0;
-	font-size: 1rem;
-	line-height: 1.6;
-	word-break: break-word;
-}
-
-/* Modal Buttons */
-.modal-buttons {
+	top: 0; left: 0; right: 0; bottom: 0;
+	background-color: rgba(0, 0, 0, 0.4);
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	gap: 15px;
-	margin-top: 20px;
-}
+	z-index: 1000;
+  }
+  
+  .modal-box {
+	background: white;
+	padding: 2rem;
+	border-radius: 12px;
+	width: 90%;
+	max-width: 420px;
+	text-align: left;
+	box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  }
+  
+  .modal-title {
+	font-size: 1.25rem;
+	font-weight: 600;
+	margin-bottom: 1rem;
+  }
+  
+  .modal-message {
+	font-size: 0.95rem;
+	margin-bottom: 1.5rem;
+	color: #333;
+  }
+  
+  .modal-buttons {
+	display: flex;
+	justify-content: flex-end;
+	gap: 1rem;
+  }
+  
+  .modal-btn {
+	padding: 0.5rem 1.25rem;
+	font-size: 0.9rem;
+	border: none;
+	border-radius: 6px;
+	cursor: pointer;
+  }
+  
+  .modal-btn.cancel {
+	background-color: #6c757d;
+	color: white;
+  }
+  
+  .modal-btn.delete {
+	background-color: #d32f2f;
+	color: white;
+  }  

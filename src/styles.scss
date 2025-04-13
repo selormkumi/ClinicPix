@@ -105,3 +105,12 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     font-size: 14px !important;
     height: auto !important;
 }
+
+// Force Toastr to top-right
+#toast-container {
+	top: 1rem !important;
+	right: 1rem !important;
+	left: auto !important;
+	bottom: auto !important;
+  }
+  

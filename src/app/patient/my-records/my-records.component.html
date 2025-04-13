@@ -92,17 +92,18 @@
 
 			<!-- Download Disclaimer Modal -->
 			<div *ngIf="showDisclaimerModal" class="modal-overlay">
-				<div class="modal-content">
-					<h5 class="mb-3">Download Disclaimer</h5>
-					<p>
-						Please do not download sensitive medical images on public or shared computers. Proceed only if you are on a trusted device.
-					</p>
-					<div class="modal-buttons">
-						<button class="btn btn-secondary" (click)="cancelDownload()">Cancel</button>
-						<button class="btn btn-danger" (click)="confirmDownload()">Proceed to Download</button>
-					</div>
+				<div class="modal-box">
+				<h4 class="modal-title">Download Disclaimer</h4>
+				<p class="modal-message">
+					By downloading <strong>{{ downloadImagePending?.name }}</strong>, you acknowledge that this file may contain sensitive information. Do not download on public or shared devices. Proceed only on a trusted device.
+				</p>
+				<div class="modal-buttons">
+					<button class="modal-btn cancel" (click)="cancelDownload()">Cancel</button>
+					<button class="modal-btn delete" (click)="confirmDownload()">Download</button>
+				</div>
 				</div>
 			</div>
+  
 
 		</div>
 	</div>

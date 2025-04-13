@@ -5,6 +5,7 @@ import { Router, RouterModule } from "@angular/router";
 import { AuthenticationService } from "../../shared/services/authentication.service";
 import { S3FileService } from "../../shared/services/s3-file.service";
 import { ImageModalComponent } from "../../shared/image-modal/image-modal.component";
+import { MatSnackBar } from "@angular/material/snack-bar";
 import * as moment from 'moment-timezone';
 
 @Component({
@@ -20,11 +21,15 @@ export class SharedImagesComponent implements OnInit {
 	currentUserEmail: string | null = null;
 	selectedImage: any | null = null;
 	isLoading: boolean = false;
+	showRevokeModal: boolean = false;
+	imageToRevoke: any = null;
+
 
 	constructor(
 		private authService: AuthenticationService,
 		private router: Router,
-		private s3Service: S3FileService
+		private s3Service: S3FileService,
+		private snackBar: MatSnackBar
 	) {}
 
 	ngOnInit() {
@@ -94,7 +99,7 @@ export class SharedImagesComponent implements OnInit {
 		  },
 		  (error) => {
 			console.error("❌ ERROR: Failed to generate view URL", error);
-			alert("Unable to view image. Try again.");
+			this.snackBar.open("Unable to view image. Try again.");
 		  }
 		);
 	  }	  
@@ -104,32 +109,41 @@ export class SharedImagesComponent implements OnInit {
 		this.selectedImage = null;
 	}
 
-	// ✅ Revoke Access - ✅ FIXED
+	// ✅ Revoke Access
 	revokeAccess(image: any) {
-		if (!this.currentUserId) {
-			console.error("❌ ERROR: No provider ID found.");
+		this.imageToRevoke = image;
+		this.showRevokeModal = true;
+	}	
+
+	confirmRevoke() {
+		if (!this.imageToRevoke || !this.currentUserId) return;
+	
+		const sharedWithId: number = Number(this.imageToRevoke.sharedWith);
+		if (isNaN(sharedWithId)) {
+			console.error("❌ ERROR: Invalid patient ID (expected a number)");
 			return;
 		}
-
-		if (confirm(`Are you sure you want to revoke access to ${image.name}?`)) {
-			const sharedWithId: number = Number(image.sharedWith);
-			if (isNaN(sharedWithId)) {
-				console.error("❌ ERROR: Invalid patient ID (expected a number)");
-				return;
+	
+		this.s3Service.revokeSharedFile(this.imageToRevoke.name, this.currentUserId, sharedWithId).subscribe(
+			() => {
+				this.snackBar.open("✅ Access revoked successfully!");
+				this.fetchSharedFiles();
+			},
+			(error) => {
+				console.error("❌ ERROR: Failed to revoke access", error);
+				this.snackBar.open("❌ Failed to revoke access. Please try again.");
 			}
-
-			this.s3Service.revokeSharedFile(image.name, this.currentUserId, sharedWithId).subscribe(
-				() => {
-					alert("✅ Access revoked successfully!");
-					this.fetchSharedFiles(); // Refresh list after revocation
-				},
-				(error) => {
-					console.error("❌ ERROR: Failed to revoke access", error);
-					alert("❌ Failed to revoke access. Please try again.");
-				}
-			);
-		}
+		);
+	
+		this.showRevokeModal = false;
+		this.imageToRevoke = null;
 	}
+	
+	cancelRevoke() {
+		this.showRevokeModal = false;
+		this.imageToRevoke = null;
+	}
+	
 
 	// ✅ Logout Function
 	logout() {

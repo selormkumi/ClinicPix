@@ -29,13 +29,13 @@
 			<!-- Add Patient Form -->
 			<div class="add-patient-form mb-4 d-flex flex-wrap gap-2 align-items-center">
 				<select
-				class="form-select form-select-sm custom-select-width"
-				[(ngModel)]="selectedPatientEmail">
-				<option value="" disabled selected>Select a patient</option>
-				<option *ngFor="let patient of availablePatientEmails" [value]="patient.email">
-					{{ patient.username }} ({{ patient.email }})
-				</option>
-			</select>
+					class="form-select form-select-sm custom-select-width"
+					[(ngModel)]="selectedPatientEmail">
+					<option value="" disabled selected>Select a patient</option>
+					<option *ngFor="let patient of availablePatientEmails" [value]="patient.email">
+						{{ patient.username }} ({{ patient.email }})
+					</option>
+				</select>
 				<button class="btn btn-sm btn-primary" (click)="assignPatient()">+ Add Patient</button>
 			</div>
 
@@ -60,7 +60,7 @@
 									<button
 										class="btn btn-danger btn-sm"
 										style="font-size: 0.87rem; padding: 2px 10px;"
-										(click)="removePatient(patient.id)">
+										(click)="removePatient(patient)">
 										<i class="fas fa-trash me-1"></i> Remove
 									</button>
 								</div>
@@ -72,6 +72,23 @@
 					</tbody>
 				</table>
 			</div>
+
+			<!-- Remove Patient Confirmation Modal -->
+			<div *ngIf="showRemoveModal" class="modal-overlay">
+				<div class="modal-box">
+				<h4 class="modal-title">Remove Patient</h4>
+				<p class="modal-message">
+					Are you sure you want to remove
+					<strong>{{ patientToRemove?.username }}</strong>
+					(<span class="text-muted">{{ patientToRemove?.email }}</span>)?
+				</p>
+				<div class="modal-buttons">
+					<button class="modal-btn cancel" (click)="cancelRemove()">Cancel</button>
+					<button class="modal-btn delete" (click)="confirmRemove()">Remove</button>
+				</div>
+				</div>
+			</div>
+  
 		</div>
 	</div>
 </div>

@@ -5,6 +5,7 @@ import { ImageModalComponent } from "../../shared/image-modal/image-modal.compon
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { S3FileService } from "../../shared/services/s3-file.service";
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
 	selector: "app-my-records",
@@ -30,7 +31,8 @@ export class MyRecordsComponent implements OnInit {
 	constructor(
 		private authService: AuthenticationService,
 		private router: Router,
-		private s3Service: S3FileService
+		private s3Service: S3FileService,
+		private snackBar: MatSnackBar
 	) {}
 
 	ngOnInit() {
@@ -154,13 +156,16 @@ export class MyRecordsComponent implements OnInit {
 					document.body.appendChild(link);
 					link.click();
 					document.body.removeChild(link);
+
+					this.snackBar.open("✅ Download started", "Close");
+
 				} else {
-					alert("❌ Error: Download link is unavailable.");
+					this.snackBar.open("❌ Download link unavailable", "Close");
 				}
 			},
 			(error) => {
 				console.error("❌ ERROR: Failed to generate download link", error);
-				alert("Failed to download file. Please try again.");
+				this.snackBar.open("❌ Failed to download file", "Close", { duration: 3000 });
 			}
 		);
 		this.showDisclaimerModal = false;

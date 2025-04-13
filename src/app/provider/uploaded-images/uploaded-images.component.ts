@@ -5,6 +5,7 @@ import { FormsModule } from "@angular/forms";
 import { AuthenticationService } from "../../shared/services/authentication.service";
 import { ImageModalComponent } from "../../shared/image-modal/image-modal.component";
 import { S3FileService } from "../../shared/services/s3-file.service";
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: "app-uploaded-images",
@@ -27,16 +28,19 @@ export class UploadedImagesComponent implements OnInit {
   pendingFile: File | null = null;
   isDragging = false;
 
-  // 🔽 NEW: Assigned patients for dropdown sharing
   assignedPatients: any[] = [];
   selectedPatientEmail: string = "";
+
+  showDeleteModal: boolean = false;
+  imageToDelete: any = null;
 
   @ViewChild("fileInput") fileInput!: ElementRef<HTMLInputElement>;
 
   constructor(
     private authService: AuthenticationService,
     private router: Router,
-    private s3Service: S3FileService
+    private s3Service: S3FileService,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit() {
@@ -114,7 +118,7 @@ export class UploadedImagesComponent implements OnInit {
       },
       (error) => {
         console.error("❌ ERROR: Failed to generate view URL", error);
-        alert("Unable to view image. Try again.");
+        this.snackBar.open("Unable to view image. Try again.");
       }
     );
   }
@@ -129,27 +133,27 @@ export class UploadedImagesComponent implements OnInit {
   shareImageToPatient(image: any) {
     const selected = this.assignedPatients.find((p) => p.email === this.selectedPatientEmail);
     if (!selected) {
-      alert("Please select a valid patient.");
+      this.snackBar.open("Please select a valid patient.");
       return;
     }
 
     const expiresIn = 86400;
     this.s3Service.shareFile(image.name, this.currentUserId, selected.id, expiresIn).subscribe(
       () => {
-        alert("✅ Image shared successfully!");
+        this.snackBar.open("✅ Image shared successfully!");
         image.showDropdown = false;
         this.selectedPatientEmail = "";
       },
       (err) => {
         console.error("❌ Failed to share image", err);
-        alert("❌ Failed to share image.");
+        this.snackBar.open("❌ Failed to share image.");
       }
     );
   }
 
   shareImage(imageName: string, patientId: number) {
     if (!patientId || patientId === 0) {
-      alert("Invalid user ID for sharing.");
+      this.snackBar.open("Invalid user ID for sharing.");
       return;
     }
 
@@ -157,30 +161,20 @@ export class UploadedImagesComponent implements OnInit {
 
     this.s3Service.shareFile(imageName, this.currentUserId, patientId, expiresIn).subscribe(
       (res) => {
-        alert(`✅ Image shared successfully with User ID: ${patientId}`);
+        this.snackBar.open(`✅ Image shared successfully with User ID: ${patientId}`);
         console.log("Shared Link:", res.viewUrl);
       },
       (error) => {
         console.error("❌ ERROR: Failed to share image", error);
-        alert("Failed to share image. Please try again.");
+        this.snackBar.open("Failed to share image. Please try again.");
       }
     );
   }
 
-  deleteImage(imageName: string) {
-    if (confirm(`Are you sure you want to delete ${imageName}?`)) {
-      this.s3Service.deleteFile(imageName, this.currentUserId).subscribe(
-        () => {
-          alert("✅ File deleted successfully!");
-          this.fetchUploadedImages();
-        },
-        (error) => {
-          console.error("❌ ERROR: Failed to delete file", error);
-          alert("Failed to delete file. Please try again.");
-        }
-      );
-    }
-  }
+  deleteImage(image: any) {
+  this.imageToDelete = image;
+  this.showDeleteModal = true;
+}
 
   triggerFileInput() {
     this.fileInput.nativeElement.click();
@@ -194,14 +188,37 @@ export class UploadedImagesComponent implements OnInit {
     }
   }
 
+  confirmDelete() {
+    if (!this.imageToDelete) return;
+  
+    this.s3Service.deleteFile(this.imageToDelete.name, this.currentUserId).subscribe(
+      () => {
+        this.snackBar.open("✅ File deleted successfully!");
+        this.fetchUploadedImages();
+      },
+      (error) => {
+        console.error("❌ ERROR: Failed to delete file", error);
+        this.snackBar.open("Failed to delete file. Please try again.");
+      }
+    );
+  
+    this.showDeleteModal = false;
+    this.imageToDelete = null;
+  }
+  
+  cancelDelete() {
+    this.showDeleteModal = false;
+    this.imageToDelete = null;
+  }  
+
   confirmUpload() {
     if (!this.pendingFile) {
-      alert("Please select a file to upload.");
+      this.snackBar.open("Please select a file to upload.");
       return;
     }
 
     if (!this.currentUserId || this.currentUserId === 0) {
-      alert("You must be logged in to upload files.");
+      this.snackBar.open("You must be logged in to upload files.");
       return;
     }
 
@@ -218,19 +235,19 @@ export class UploadedImagesComponent implements OnInit {
             headers: { "Content-Type": fileType },
           })
             .then(() => {
-              alert("✅ File uploaded successfully!");
+              this.snackBar.open("✅ File uploaded successfully!");
               this.fetchUploadedImages();
               this.resetUploadForm();
             })
             .catch((err) => {
               console.error("❌ Upload error:", err);
-              alert("Upload failed. Please try again.");
+              this.snackBar.open("Upload failed. Please try again.");
             });
         }
       },
       (error) => {
         console.error("❌ ERROR: Failed to upload file", error);
-        alert("Failed to upload file. Please try again.");
+        this.snackBar.open("Failed to upload file. Please try again.");
       }
     );
   }

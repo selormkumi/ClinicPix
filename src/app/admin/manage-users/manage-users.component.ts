@@ -4,7 +4,7 @@ import { FormsModule } from "@angular/forms";
 import { Router, RouterModule } from "@angular/router";
 import { AuthenticationService } from "../../shared/services/authentication.service";
 import { AdminService } from "../../shared/services/admin.service";
-import { ToastrService } from 'ngx-toastr';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import * as moment from 'moment-timezone';
 
 @Component({
@@ -20,22 +20,22 @@ export class ManageUsersComponent implements OnInit {
   filteredUsers: any[] = [];
   isLoading: boolean = false;
 
-  // ✅ Modal State
   showResetModal: boolean = false;
+  showStatusModal: boolean = false;
   userToReset: any = null;
+  userToToggle: any = null;
 
   constructor(
     private authService: AuthenticationService,
     private router: Router,
     private adminService: AdminService,
-    private toastr: ToastrService
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit() {
     this.fetchUsers();
   }
 
-  // ✅ Fetch users from backend
   fetchUsers() {
     this.isLoading = true;
     this.adminService.getAllUsers().subscribe(
@@ -52,9 +52,8 @@ export class ManageUsersComponent implements OnInit {
         this.isLoading = false;
       }
     );
-  }  
+  }
 
-  // ✅ Filter users by search
   onSearch() {
     const query = this.searchTerm.toLowerCase();
     this.filteredUsers = this.users.filter(
@@ -64,42 +63,54 @@ export class ManageUsersComponent implements OnInit {
     );
   }
 
-  // ✅ Logout
   logout() {
     this.authService.logout();
     this.router.navigate(["/auth/login"]);
   }
 
-  // ✅ Toggle user active status
+  // ✅ Step 1: Show modal before toggling status
   toggleUserStatus(user: any) {
-    const action = user.is_active
+    this.userToToggle = user;
+    this.showStatusModal = true;
+  }
+
+  // ✅ Step 2: Confirm toggle
+  confirmToggleStatus() {
+    if (!this.userToToggle) return;
+
+    const action = this.userToToggle.is_active
       ? this.adminService.deactivateUser
       : this.adminService.activateUser;
 
-    action.call(this.adminService, user.id).subscribe({
+    action.call(this.adminService, this.userToToggle.id).subscribe({
       next: () => {
-        user.is_active = !user.is_active;
-        this.toastr.success(`User ${user.is_active ? 'activated' : 'deactivated'} successfully`);
+        this.userToToggle.is_active = !this.userToToggle.is_active;
+        this.snackBar.open(`✅ User ${this.userToToggle.is_active ? 'activated' : 'deactivated'} successfully`);
+        this.cancelToggle();
       },
       error: () => {
-        this.toastr.error("Action failed");
+        this.snackBar.open("❌ Action failed");
+        this.cancelToggle();
       },
     });
   }
 
-  // ✅ Open custom confirmation modal
+  cancelToggle() {
+    this.showStatusModal = false;
+    this.userToToggle = null;
+  }
+
   resetPassword(user: any) {
     this.userToReset = user;
     this.showResetModal = true;
   }
 
-  // ✅ Confirm password reset
   confirmResetPassword() {
     if (!this.userToReset) return;
 
     const token = localStorage.getItem("token");
     if (!token) {
-      this.toastr.error("Admin token missing. Please log in again.");
+      this.snackBar.open("Admin token missing. Please log in again.");
       return;
     }
 
@@ -111,18 +122,17 @@ export class ManageUsersComponent implements OnInit {
 
     this.adminService.adminResetPassword(this.userToReset.email, headers).subscribe({
       next: () => {
-        this.toastr.success(`✅ Password reset link sent to ${this.userToReset.email}`);
+        this.snackBar.open(`✅ Password reset link sent to ${this.userToReset.email}`);
         this.cancelReset();
       },
       error: (err) => {
         console.error("❌ Admin reset failed:", err);
-        this.toastr.error(err.error?.message || "Reset failed");
+        this.snackBar.open(err.error?.message || "❌ Reset failed");
         this.cancelReset();
       }
     });
   }
 
-  // ✅ Cancel modal
   cancelReset() {
     this.showResetModal = false;
     this.userToReset = null;

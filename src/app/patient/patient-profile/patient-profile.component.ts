@@ -4,6 +4,7 @@ import { CommonModule } from "@angular/common";
 import { Router, RouterModule } from "@angular/router";
 import { AuthenticationService } from "../../shared/services/authentication.service";
 import { S3FileService } from "../../shared/services/s3-file.service";
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Country, State, City } from "country-state-city";
 import {
   NgxIntlTelInputModule,
@@ -52,7 +53,8 @@ export class PatientProfileComponent implements OnInit {
   constructor(
     private authService: AuthenticationService,
     private router: Router,
-    private s3FileService: S3FileService
+    private s3FileService: S3FileService,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit() {
@@ -140,18 +142,18 @@ export class PatientProfileComponent implements OnInit {
         c.name.toLowerCase() === this.patient.country.toLowerCase()
     );
     payload.country = countryObj?.isoCode || this.patient.country;
-
     payload.phone = this.patient.phone?.internationalNumber || "";
 
     this.s3FileService.updateUserProfile(this.currentUserId, payload).subscribe(
       () => {
         console.log("✅ Profile saved");
-        alert("Profile updated!");
+        this.snackBar.open("✅ Profile updated!", "Close", { duration: 3000 });
         this.toggleEdit();
+        this.fetchProfile(); // ✅ Refresh profile with updated info
       },
       (err) => {
         console.error("❌ Failed to save profile:", err);
-        alert("Failed to update profile.");
+        this.snackBar.open("❌ Failed to update profile.", "Close", { duration: 3000 });
       }
     );
   }

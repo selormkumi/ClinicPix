@@ -4,6 +4,8 @@ import { FormsModule } from "@angular/forms";
 import { Router, RouterModule } from "@angular/router";
 import { AuthenticationService } from "../../shared/services/authentication.service";
 import { S3FileService } from "../../shared/services/s3-file.service";
+import { MatSnackBar } from "@angular/material/snack-bar";
+import { ImageModalComponent } from "../../shared/image-modal/image-modal.component";
 
 @Component({
 	selector: "app-patients",
@@ -20,11 +22,14 @@ export class PatientsComponent implements OnInit {
 	newPatientEmail: string = ""; // unused now, replaced with dropdown
 	selectedPatientEmail: string = "";
 	availablePatientEmails: any[] = [];
+	showRemoveModal: boolean = false;
+	patientToRemove: any = null;
 
 	constructor(
 		private authService: AuthenticationService,
 		private router: Router,
-		private s3FileService: S3FileService
+		private s3FileService: S3FileService,
+		private snackBar: MatSnackBar
 	) {}
 
 	ngOnInit() {
@@ -50,7 +55,7 @@ export class PatientsComponent implements OnInit {
 	// ✅ Assign Patient to Provider (Dropdown)
 	assignPatient() {
 		if (!this.selectedPatientEmail) {
-			alert("Please select a patient email.");
+			this.snackBar.open("Please select a patient email.");
 			return;
 		}
 	
@@ -58,20 +63,20 @@ export class PatientsComponent implements OnInit {
 		const providerId = currentUser.userId;
 	
 		if (!providerId) {
-			alert("No valid provider ID found.");
+			this.snackBar.open("No valid provider ID found.");
 			return;
 		}
 	
 		this.s3FileService.assignPatient(providerId, this.selectedPatientEmail).subscribe(
 			() => {
-				alert("✅ Patient assigned!");
+				this.snackBar.open("✅ Patient assigned!");
 				this.selectedPatientEmail = "";
 				this.loadPatients();              // Refresh table
 				this.fetchAvailablePatientEmails(); // ✅ Refresh dropdown
 			},
 			(error: any) => {
 				console.error("❌ ERROR assigning patient", error);
-				alert(error?.error?.error || "Failed to assign patient.");
+				this.snackBar.open(error?.error?.error || "Failed to assign patient.");
 			}
 		);
 	}
@@ -114,24 +119,38 @@ export class PatientsComponent implements OnInit {
 		);
 	}
 
-	removePatient(patientId: number) {
+	removePatient(patient: any) {
+		this.patientToRemove = patient;
+		this.showRemoveModal = true;
+	  }
+	
+	  confirmRemove() {
 		const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 		const providerId = currentUser.userId;
-
-		if (confirm("Are you sure you want to remove this patient?")) {
-			this.s3FileService.unassignPatient(providerId, patientId).subscribe(
-				() => {
-					alert("✅ Patient removed.");
-					this.loadPatients(); // Refresh table
-					this.fetchAvailablePatientEmails(); // Update dropdown
-				},
-				(error) => {
-					console.error("❌ ERROR unassigning patient", error);
-					alert("Failed to remove patient.");
-				}
-			);
-		}
-	}
+	  
+		if (!this.patientToRemove || !providerId) return;
+	  
+		this.s3FileService.unassignPatient(providerId, this.patientToRemove.id).subscribe(
+		  () => {
+			this.snackBar.open("✅ Patient removed.");
+			this.loadPatients();
+			this.fetchAvailablePatientEmails();
+		  },
+		  (error) => {
+			console.error("❌ ERROR unassigning patient", error);
+			this.snackBar.open("Failed to remove patient.");
+		  }
+		);
+	  
+		this.showRemoveModal = false;
+		this.patientToRemove = null;
+	  }
+	  
+	  cancelRemove() {
+		this.showRemoveModal = false;
+		this.patientToRemove = null;
+	  }
+	  
 
 	// ✅ Logout
 	logout() {

@@ -5,6 +5,7 @@ import { Router, RouterModule } from "@angular/router";
 import { AuthenticationService } from "../../shared/services/authentication.service";
 import { S3FileService } from "../../shared/services/s3-file.service";
 import { Country, State, City } from "country-state-city";
+import { MatSnackBar } from "@angular/material/snack-bar";
 import {
   NgxIntlTelInputModule,
   SearchCountryField,
@@ -52,7 +53,8 @@ export class ProfileComponent implements OnInit {
   constructor(
     private authService: AuthenticationService,
     private router: Router,
-    private s3FileService: S3FileService
+    private s3FileService: S3FileService,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit() {
@@ -133,28 +135,28 @@ export class ProfileComponent implements OnInit {
 
   saveChanges() {
     const payload = { ...this.provider };
-
+  
     const countryObj = Country.getAllCountries().find(
       (c) =>
         c.isoCode.toLowerCase() === this.provider.country.toLowerCase() ||
         c.name.toLowerCase() === this.provider.country.toLowerCase()
     );
     payload.country = countryObj?.isoCode || this.provider.country;
-
     payload.phone = this.provider.phone?.internationalNumber || "";
-
+  
     this.s3FileService.updateUserProfile(this.currentUserId, payload).subscribe(
       () => {
         console.log("✅ Profile saved");
-        alert("Profile updated!");
+        this.snackBar.open("✅ Profile updated!", "Close", { duration: 3000 });
         this.toggleEdit();
+        this.fetchProfile(); // ✅ Re-fetch the profile to reflect updated info
       },
       (err) => {
         console.error("❌ Failed to save profile:", err);
-        alert("Failed to update profile.");
+        this.snackBar.open("❌ Failed to update profile.", "Close", { duration: 3000 });
       }
     );
-  }
+  }  
 
   logout() {
     this.authService.logout();

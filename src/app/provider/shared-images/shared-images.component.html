@@ -67,6 +67,22 @@
 					[isEditing]="false"
 					(closeModal)="closeModal()">
 				</app-image-modal>
+
+				<!-- Revoke Access Confirmation Modal -->
+<div *ngIf="showRevokeModal" class="modal-overlay">
+	<div class="modal-box">
+		<h4 class="modal-title">Revoke Access</h4>
+		<p class="modal-message">
+			Are you sure you want to revoke access to <strong>{{ imageToRevoke?.name }}</strong>
+			from <strong>{{ imageToRevoke?.sharedWithName }}</strong> (<span class="text-muted">{{ imageToRevoke?.sharedWithEmail }}</span>)?
+		</p>
+		<div class="modal-buttons">
+			<button class="modal-btn cancel" (click)="cancelRevoke()">Cancel</button>
+			<button class="modal-btn delete" (click)="confirmRevoke()">Revoke</button>
+		</div>
+	</div>
+</div>
+
 			</div>
 		</div>
 	</div>

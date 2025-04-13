@@ -81,17 +81,34 @@
 	</div>
   </div>
   
-  <!-- Reset Password Confirmation Modal -->
-  <div class="modal-backdrop" *ngIf="showResetModal">
-	<div class="modal-content">
-	  <h5 class="modal-title">Reset Password</h5>
-	  <p>
-		Please confirm that you want to send a password reset link to:<br>
+<!-- Reset Password Confirmation Modal -->
+<div class="modal-overlay" *ngIf="showResetModal">
+	<div class="modal-box">
+	  <h4 class="modal-title">Reset Password</h4>
+	  <p class="modal-message">
+		Please confirm you want to send a password reset link to:<br />
 		<strong>{{ userToReset?.email }}</strong>
 	  </p>
-	  <div class="modal-actions mt-3 d-flex justify-content-center gap-3">
-		<button class="btn btn-secondary" (click)="cancelReset()">Cancel</button>
-		<button class="btn btn-danger" (click)="confirmResetPassword()">Confirm</button>
+	  <div class="modal-buttons">
+		<button class="modal-btn cancel" (click)="cancelReset()">Cancel</button>
+		<button class="modal-btn delete" (click)="confirmResetPassword()">Confirm</button>
 	  </div>
 	</div>
-  </div>  
+  </div>
+  
+  <!-- Confirm Status Toggle Modal -->
+  <div class="modal-overlay" *ngIf="showStatusModal">
+	<div class="modal-box">
+	  <h4 class="modal-title">Confirm Action</h4>
+	  <p class="modal-message">
+		Are you sure you want to
+		<strong>{{ userToToggle?.is_active ? 'deactivate' : 'activate' }}</strong>
+		the user <strong>{{ userToToggle?.email }}</strong>?
+	  </p>
+	  <div class="modal-buttons">
+		<button class="modal-btn cancel" (click)="cancelToggle()">Cancel</button>
+		<button class="modal-btn delete" (click)="confirmToggleStatus()">Confirm</button>
+	  </div>
+	</div>
+  </div>
+	
