@@ -39,4 +39,10 @@ export class AdminService {
       options
     );
   }
+
+  // ✅ Fetch audit logs
+  getAuditLogs(): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.apiUrl}/audit-logs`);
+  }
+
 }

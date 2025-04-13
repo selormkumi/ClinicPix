@@ -5,6 +5,7 @@ import { Router, RouterModule } from "@angular/router";
 import { AuthenticationService } from "../../shared/services/authentication.service";
 import { S3FileService } from "../../shared/services/s3-file.service";
 import { ImageModalComponent } from "../../shared/image-modal/image-modal.component";
+import * as moment from 'moment-timezone';
 
 @Component({
 	selector: "app-shared-images",
@@ -65,29 +66,12 @@ export class SharedImagesComponent implements OnInit {
 					sharedWithName: file.shared_with_name,
 					sharedWithEmail: file.shared_with_email,
 					sharedOn: file.shared_on
-					  ? new Date(file.shared_on).toLocaleString("en-US", {
-						  timeZone: "America/New_York",
-						  month: "short",
-						  day: "2-digit",
-						  year: "numeric",
-						  hour: "2-digit",
-						  minute: "2-digit",
-						  second: "2-digit",
-						  hour12: true,
-						})
-					  : "N/A",
+					? moment.utc(file.shared_on).local().format("MMM D YYYY, hh:mm:ss A")
+					: "N/A",
 					expiresAt: file.expires_at
-					  ? new Date(file.expires_at).toLocaleString("en-US", {
-						  timeZone: "America/New_York",
-						  month: "short",
-						  day: "2-digit",
-						  year: "numeric",
-						  hour: "2-digit",
-						  minute: "2-digit",
-						  second: "2-digit",
-						  hour12: true,
-						})
-					  : "N/A"
+					? moment.utc(file.expires_at).local().format("MMM D YYYY, hh:mm:ss A")
+					: "N/A",
+
 				  }));
 				  
 

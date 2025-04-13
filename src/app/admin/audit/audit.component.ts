@@ -4,7 +4,7 @@ import { FormsModule } from "@angular/forms";
 import { Router, RouterModule } from "@angular/router";
 import { AuthenticationService } from "../../shared/services/authentication.service";
 import { HttpClient } from "@angular/common/http";
-import { environment } from "../../../environments/environment.prod";
+import { environment } from "../../../environments/environment";
 import * as moment from 'moment-timezone';
 
 @Component({
@@ -33,35 +33,35 @@ export class AuditComponent implements OnInit {
   // ✅ Fetch logs from backend
   fetchAuditLogs() {
     this.isLoading = true;
-    this.http.get<any[]>(`${environment.apiUrl}/audit-logs`).subscribe(
-      (res) => {
+
+    this.http.get<any[]>(`${environment.apiUrl}/audit-logs`).subscribe({
+      next: (res) => {
         this.auditLogs = res.map((log) => ({
           ...log,
           // ✅ Convert raw UTC to local time using moment-timezone
-          created_at_local: moment.utc(log.created_at).local().format("YYYY-MM-DD hh:mm A")
+          created_at_local: moment.utc(log.created_at).local().format("MMM D YYYY, hh:mm:ss A")
         }));
 
         this.filteredLogs = [...this.auditLogs];
         this.isLoading = false;
       },
-      (error) => {
+      error: (error) => {
         console.error("❌ Failed to load audit logs", error);
         this.isLoading = false;
       }
-    );
+    });
   }
 
   // ✅ Filter logs
   onSearch() {
     const query = this.searchTerm.toLowerCase();
-    this.filteredLogs = this.auditLogs.filter(
-      (log) =>
-        log.action.toLowerCase().includes(query) ||
-        log.details.toLowerCase().includes(query) ||
-        (log.user_email && log.user_email.toLowerCase().includes(query)) ||
-        (log.user_role && log.user_role.toLowerCase().includes(query)) ||
-        (log.user_username && log.user_username.toLowerCase().includes(query)) ||
-        String(log.user_id).includes(query)
+    this.filteredLogs = this.auditLogs.filter((log) =>
+      log.action.toLowerCase().includes(query) ||
+      log.details.toLowerCase().includes(query) ||
+      (log.user_email && log.user_email.toLowerCase().includes(query)) ||
+      (log.user_role && log.user_role.toLowerCase().includes(query)) ||
+      (log.user_username && log.user_username.toLowerCase().includes(query)) ||
+      String(log.user_id).includes(query)
     );
   }
 

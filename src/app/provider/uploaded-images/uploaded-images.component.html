@@ -71,7 +71,7 @@
 							<tr *ngFor="let image of uploadedImages">
 								<td>{{ image.name }}</td>
 								<td>{{ image.uploadedBy }} <span *ngIf="image.uploaderEmail">({{ image.uploaderEmail }})</span></td>
-								<td>{{ image.uploadedOn | date: 'MMM d, y, hh:mm:ss a':'America/New_York' }}</td>
+								<td>{{ image.uploadedOn | date: 'MMM d y, hh:mm:ss a':'America/New_York' }}</td>
 								<td>
 									<span *ngIf="image.tags.length > 0; else noTags">
 										<span *ngFor="let tag of image.tags" class="me-1">{{ tag }}</span>

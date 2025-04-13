@@ -5,6 +5,7 @@ import { Router, RouterModule } from "@angular/router";
 import { AuthenticationService } from "../../shared/services/authentication.service";
 import { AdminService } from "../../shared/services/admin.service";
 import { ToastrService } from 'ngx-toastr';
+import * as moment from 'moment-timezone';
 
 @Component({
   selector: "app-manage-users",
@@ -41,7 +42,7 @@ export class ManageUsersComponent implements OnInit {
       (res) => {
         this.users = res.map(user => ({
           ...user,
-          date_created_local: new Date(user.date_created).toLocaleString()
+          date_created_local: moment.utc(user.date_created).local().format("MMM D YYYY, hh:mm:ss A")
         }));
         this.filteredUsers = [...this.users];
         this.isLoading = false;
