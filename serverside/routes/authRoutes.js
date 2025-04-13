@@ -5,13 +5,13 @@ const authController = require("../controllers/authController"); // ✅ Centrali
 const { authenticateAdmin } = require("../middleware/authMiddleware"); // ✅ Import admin auth middleware
 
 const {
-  signup,
-  login,
-  verifyOTP,
-  protectedRoute,
-  logout,
-  resetPassword,
-  requestPasswordReset,
+	signup,
+	login,
+	verifyOTP,
+	protectedRoute,
+	logout,
+	resetPassword,
+	requestPasswordReset,
 } = authController;
 
 // ✅ Register a new user
@@ -33,9 +33,13 @@ router.post("/logout", logout);
 router.post("/request-password-reset", requestPasswordReset);
 
 // ✅ Perform password reset using token
-router.post("/reset-password", resetPassword);
+router.post("auth/reset-password", resetPassword);
 
 // ✅ Admin password reset for users using token
-router.post("/admin-reset-password", authenticateAdmin, authController.adminResetPassword);
+router.post(
+	"/admin-reset-password",
+	authenticateAdmin,
+	authController.adminResetPassword
+);
 
 module.exports = router;
