@@ -295,7 +295,7 @@ exports.requestPasswordReset = async (req, res) => {
 	  );
   
 	  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:4200";
-	  const resetLink = `${frontendUrl}/reset-password?token=${rawToken}&email=${email}`;
+	  const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${rawToken}&email=${targetEmail}`;
 		
 	  const transporter = require("nodemailer").createTransport({
 		host: process.env.SMTP_HOST,
@@ -396,8 +396,8 @@ exports.requestPasswordReset = async (req, res) => {
 		[hashedToken, expiresAt, userId]
 	  );
   
-	  const resetLink = `http://localhost:4200/reset-password?token=${rawToken}&email=${targetEmail}`;
-  
+	  const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${rawToken}&email=${targetEmail}`;
+
 	  const transporter = require("nodemailer").createTransport({
 		host: process.env.SMTP_HOST,
 		port: process.env.SMTP_PORT,

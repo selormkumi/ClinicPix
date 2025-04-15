@@ -61,7 +61,8 @@ export class ResetPasswordComponent implements OnInit {
 					this.loading = false;
 					setTimeout(() => {
 						window.location.href = "https://clinicpix.onrender.com/auth/login";
-					  }, 2500);									  },
+					  }, 2500);									  
+					},
 				error: (err) => {
 					this.error = err.error?.message || "Reset failed.";
 					this.loading = false;
