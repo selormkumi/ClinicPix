@@ -1,105 +1,113 @@
 <!-- Header -->
 <div class="header text-center">
 	<h1>ClinicPix</h1>
-  </div>
-  
-  <!-- Login Section -->
-  <div class="container">
+</div>
+
+<!-- Login Section -->
+<div class="container">
 	<div class="card login-card">
-	  <h2 class="text-center">Login</h2>
-  
-	  <!-- 🔴 Error Message -->
-	  <div *ngIf="loginErrorMessage" class="alert alert-danger">
-		{{ loginErrorMessage }}
-	  </div>
-  
-	  <!-- ✅ Step 1: Email & Password Login -->
-	  <form [formGroup]="loginForm" *ngIf="!isOtpSent" (ngSubmit)="submitForm()">
-		<!-- Email -->
-		<div class="form-group">
-		  <label for="email">Email</label>
-		  <input
-			type="email"
-			id="email"
-			formControlName="email"
-			placeholder="Enter your email"
-			class="form-control"
-			required />
-		  <p class="error" *ngIf="isFieldInvalid('email')">
-			Enter a valid email address.
-		  </p>
+
+		<!-- 🔲 Always shown Login heading -->
+		<h2 class="text-center">Login</h2>
+
+		<!-- 🔴 Login Error Message -->
+		<div *ngIf="loginErrorMessage && !isOtpSent" class="alert alert-danger">
+			{{ loginErrorMessage }}
 		</div>
-  
-		<!-- Password -->
-		<div class="form-group password-field">
-		  <label for="password">Password</label>
-		  <div class="password-container">
-			<input
-			  [type]="showPassword ? 'text' : 'password'"
-			  id="password"
-			  formControlName="password"
-			  placeholder="Enter your password"
-			  class="form-control"
-			  required />
-			<img
-			  [src]="eyeIcon"
-			  alt="Toggle Password Visibility"
-			  class="toggle-password-icon"
-			  (click)="togglePasswordVisibility()" />
-		  </div>
-		  <p class="error" *ngIf="isFieldInvalid('password')">
-			Password must be at least 6 characters long.
-		  </p>
+
+		<!-- 🔴 OTP Error Message -->
+		<div *ngIf="otpErrorMessage && isOtpSent" class="alert alert-danger text-center">
+			{{ otpErrorMessage }}
 		</div>
-  
-		<!-- Submit Button -->
-		<button type="submit" [disabled]="loginForm.invalid" class="btn btn-primary w-100 mt-3">
-		  Login
-		</button>
-  
-		<!-- 🔐 Forgot Password -->
-		<div class="text-center mt-2">
-		  <a routerLink="/auth/forgot-password" class="link">Forgot Password?</a>
+
+		<!-- ✅ Step 1: Email & Password Login -->
+		<form [formGroup]="loginForm" *ngIf="!isOtpSent" (ngSubmit)="submitForm()">
+			<!-- Email -->
+			<div class="form-group">
+				<label for="email">Email</label>
+				<input
+					type="email"
+					id="email"
+					formControlName="email"
+					placeholder="Enter your email"
+					class="form-control"
+					required />
+				<p class="error" *ngIf="isFieldInvalid('email')">
+					Enter a valid email address.
+				</p>
+			</div>
+
+			<!-- Password -->
+			<div class="form-group password-field">
+				<label for="password">Password</label>
+				<div class="password-container">
+					<input
+						[type]="showPassword ? 'text' : 'password'"
+						id="password"
+						formControlName="password"
+						placeholder="Enter your password"
+						class="form-control"
+						required />
+					<img
+						[src]="eyeIcon"
+						alt="Toggle Password Visibility"
+						class="toggle-password-icon"
+						(click)="togglePasswordVisibility()" />
+				</div>
+				<p class="error" *ngIf="isFieldInvalid('password')">
+					Password must be at least 6 characters long.
+				</p>
+			</div>
+
+			<!-- Submit Button -->
+			<button type="submit" [disabled]="loginForm.invalid" class="btn btn-primary w-100 mt-3">
+				Login
+			</button>
+
+			<!-- 🔐 Forgot Password -->
+			<div class="text-center mt-2">
+				<a routerLink="/auth/forgot-password" class="link">Forgot Password?</a>
+			</div>
+		</form>
+
+		<!-- ✅ Step 2: OTP Verification -->
+		<form [formGroup]="otpForm" *ngIf="isOtpSent" (ngSubmit)="verifyOtp()" class="mt-3">
+
+			<h5 class="text-center">Enter OTP</h5>
+			<p class="info-text text-center">A 6-digit OTP has been sent to your email.</p>
+
+			<!-- OTP Input -->
+			<div class="form-group">
+				<label for="otp">One-Time Password (OTP)</label>
+				<input
+					type="text"
+					id="otp"
+					formControlName="otp"
+					class="form-control"
+					placeholder="Enter OTP"
+					required
+					maxlength="6" />
+				<p class="error" *ngIf="otpForm.controls['otp'].invalid && otpForm.controls['otp'].touched">
+					OTP must be 6 digits.
+				</p>
+			</div>
+
+			<!-- OTP Submit Button -->
+			<button type="submit" [disabled]="otpForm.invalid" class="btn btn-success w-100 mt-2">
+				Verify OTP
+			</button>
+		</form>
+
+		<!-- Signup -->
+		<div class="text-center mt-4" *ngIf="!isOtpSent">
+			<p>Don't have an account?
+				<a routerLink="/auth/signup" class="link">Sign Up</a>
+			</p>
 		</div>
-	  </form>
-  
-	  <!-- ✅ Step 2: OTP Verification -->
-	  <form [formGroup]="otpForm" *ngIf="isOtpSent" (ngSubmit)="verifyOtp()" class="mt-3">
-		<h4 class="text-center">Enter OTP</h4>
-		<p class="info-text text-center">A 6-digit OTP has been sent to your email.</p>
-  
-		<!-- OTP Input -->
-		<div class="form-group">
-		  <label for="otp">One-Time Password (OTP)</label>
-		  <input
-			type="text"
-			id="otp"
-			formControlName="otp"
-			class="form-control"
-			placeholder="Enter OTP"
-			required
-			maxlength="6" />
-		  <p class="error" *ngIf="otpForm.controls['otp'].invalid && otpForm.controls['otp'].touched">
-			OTP must be 6 digits.
-		  </p>
-		</div>
-  
-		<!-- OTP Submit Button -->
-		<button type="submit" [disabled]="otpForm.invalid" class="btn btn-success w-100 mt-2">
-		  Verify OTP
-		</button>
-	  </form>
-  
-	  <!-- Signup -->
-	  <div class="text-center mt-4" *ngIf="!isOtpSent">
-		<p>Don't have an account?
-		  <a routerLink="/auth/signup" class="link">Sign Up</a>
-		</p>
-	  </div>
 	</div>
-  </div>
-  
-  <!-- Footer -->
-  <div class="footer text-center mt-4">
+</div>
+
+<!-- Footer -->
+<div class="footer text-center mt-4">
 	<p>&copy; 2025 Secure Medical Image Sharing Platform</p>
-  </div>  
+</div>

@@ -8,6 +8,7 @@ import {
     ReactiveFormsModule,
 } from "@angular/forms";
 import { CommonModule } from "@angular/common";
+import { MatSnackBar } from "@angular/material/snack-bar";
 
 @Component({
     selector: "app-login",
@@ -25,11 +26,13 @@ export class LoginComponent {
 
     // ✅ Add property to store error message
     loginErrorMessage: string = "";
+    otpErrorMessage: string = "";
 
     constructor(
         private router: Router,
         private fb: FormBuilder,
-        private authService: AuthenticationService
+        private authService: AuthenticationService,
+        private snackBar: MatSnackBar
     ) {
         this.loginForm = this.fb.group({
             email: ["", [Validators.required, Validators.email]],
@@ -91,23 +94,25 @@ export class LoginComponent {
      */
     verifyOtp() {
         if (this.otpForm.valid) {
+            this.otpErrorMessage = ""; // ✅ Clear previous error
+    
             const otpData = {
                 email: this.email,
                 otp: this.otpForm.controls["otp"].value,
             };
-
+    
             this.authService.verifyOtp(otpData).subscribe(
                 (response: any) => {
                     console.log("✅ OTP Verified:", response);
-
+    
                     this.authService.storeToken(response.token);
-
+    
                     if (!response.user || !response.user.role) {
                         console.error("❌ Role is missing in the response:", response);
-                        alert("Login failed. Missing user role.");
+                        this.otpErrorMessage = "Login failed. Missing user role.";
                         return;
                     }
-
+    
                     localStorage.setItem(
                         "user",
                         JSON.stringify({
@@ -117,18 +122,31 @@ export class LoginComponent {
                             userId: response.user.id || null,
                         })
                     );
-
+    
                     this.redirectBasedOnRole(response.user.role);
                 },
                 (error: any) => {
                     console.error("❌ OTP Verification Error:", error);
-                    alert(error.error?.message || "Invalid OTP. Please try again.");
+    
+                    let errorMessage = "❌ Invalid OTP. Please try again.";
+    
+                    if (error.status === 400) {
+                        errorMessage = "Invalid OTP. Please try again.";
+                    } else if (error.status === 403) {
+                        errorMessage = "Your OTP session has expired. Please log in again.";
+                    } else if (error.status === 0) {
+                        errorMessage = "Network error. Check your internet connection.";
+                    } else if (error.status === 500) {
+                        errorMessage = "Server error. Please try again later.";
+                    }
+    
+                    this.otpErrorMessage = errorMessage;
                 }
             );
         } else {
             console.log("⚠️ Enter a valid OTP.");
         }
-    }
+    }    
 
     /**
      * Redirect user based on role after OTP is verified.
@@ -144,7 +162,7 @@ export class LoginComponent {
         if (redirectRoute) {
             this.router.navigate([redirectRoute]);
         } else {
-            alert("Your role does not have an assigned dashboard.");
+            this.snackBar.open("Your role does not have an assigned dashboard.");
         }
     }
 

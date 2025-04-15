@@ -24,7 +24,6 @@ router.get("/audit-logs", async (req, res) => {
 
     const logs = result.rows.map((log) => ({
       ...log,
-      // ✅ Format to ISO UTC string (frontend will localize it)
       created_at: new Date(log.created_at).toISOString()
     }));
 

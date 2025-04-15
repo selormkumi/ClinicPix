@@ -1,6 +1,8 @@
 const fileModel = require("../models/fileModel");
 const db = require("../config/dbConfig");
-const { logAudit } = require("../utils/auditLogger"); // Make sure this is at the top
+const { logAudit } = require("../utils/auditLogger");
+const crypto = require("crypto");
+const bcrypt = require("bcryptjs");
 
 // ✅ Get all files with uploader's username
 const getFiles = async (req, res) => {
@@ -190,53 +192,47 @@ const deleteFile = async (req, res) => {
 
 // ✅ Share a file with a patient using user IDs
 const shareFile = async (req, res) => {
-    const { fileName, uploadedBy, sharedWith, expiresIn } = req.body;
-    
-    if (!fileName || !uploadedBy || !sharedWith || !expiresIn) {
-        return res.status(400).json({ error: "Missing required fields" });
-    }
+	const { fileName, uploadedBy, sharedWith, expiresIn } = req.body;
 
-    try {
-        // Convert `sharedWith` to a number
-        const sharedWithId = Number(sharedWith);
+	if (!fileName || !uploadedBy || !sharedWith || !expiresIn) {
+		return res.status(400).json({ error: "Missing required fields" });
+	}
 
-        // Check if sharedWith user exists
-        const userResult = await db.query(`SELECT id FROM users WHERE id = $1`, [sharedWithId]);
+	try {
+		const sharedWithId = Number(sharedWith);
 
-        if (userResult.rowCount === 0) {
-            return res.status(404).json({ error: "User not found" });
-        }
+		const userResult = await db.query(`SELECT id FROM users WHERE id = $1`, [sharedWithId]);
+		if (userResult.rowCount === 0) return res.status(404).json({ error: "User not found" });
 
-        // Get file ID
-        const fileResult = await db.query(`SELECT id FROM files WHERE file_name = $1`, [fileName]);
+		const fileResult = await db.query(`SELECT id FROM files WHERE file_name = $1`, [fileName]);
+		if (fileResult.rowCount === 0) return res.status(404).json({ error: "File not found" });
 
-        if (fileResult.rowCount === 0) {
-            return res.status(404).json({ error: "File not found" });
-        }
+		const fileId = fileResult.rows[0].id;
 
-        const fileId = fileResult.rows[0].id;
+		// ✅ Generate and hash a shared token
+		const rawToken = crypto.randomBytes(32).toString("hex");
+		const hashedToken = await bcrypt.hash(rawToken, 10);
 
-        // Store shared record
-        await db.query(
-            `INSERT INTO shared_files (file_id, uploaded_by, shared_with, shared_on, expires_at) 
-             VALUES ($1, $2, $3, NOW(), NOW() + INTERVAL '1 second' * $4)`,
-            [fileId, uploadedBy, sharedWithId, expiresIn]
-        );
+		await db.query(
+			`INSERT INTO shared_files (file_id, uploaded_by, shared_with, shared_on, expires_at, shared_token_hash)
+			 VALUES ($1, $2, $3, NOW(), NOW() + INTERVAL '1 second' * $4, $5)`,
+			[fileId, uploadedBy, sharedWithId, expiresIn, hashedToken]
+		);
 
-        // ✅ Audit log
-        await logAudit({
-            userId: uploadedBy,
-            action: "share_image",
-            details: `Shared image ${fileName} with user ID ${sharedWithId}`,
-            req,
-        });
+		await logAudit({
+			userId: uploadedBy,
+			action: "share_image",
+			details: `Shared image ${fileName} with user ID ${sharedWithId}`,
+			req,
+		});
 
-        res.json({ message: "File shared successfully" });
+		// ✅ Return raw token to frontend for inclusion in URL
+		res.json({ message: "File shared successfully", sharedToken: rawToken });
 
-    } catch (error) {
-        console.error("❌ ERROR: Failed to share file", error);
-        res.status(500).json({ error: error.message });
-    }
+	} catch (error) {
+		console.error("❌ ERROR: Failed to share file", error);
+		res.status(500).json({ error: error.message });
+	}
 };
 
 // ✅ Retrieve shared files for a patient using user ID
