@@ -33,7 +33,7 @@ router.post("/logout", logout);
 router.post("/request-password-reset", requestPasswordReset);
 
 // ✅ Perform password reset using token
-router.post("auth/reset-password", resetPassword);
+router.post("/reset-password", resetPassword);
 
 // ✅ Admin password reset for users using token
 router.post(

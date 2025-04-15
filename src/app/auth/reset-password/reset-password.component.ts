@@ -59,8 +59,9 @@ export class ResetPasswordComponent implements OnInit {
 				next: () => {
 					this.message = "✅ Your password has been reset. You may now log in.";
 					this.loading = false;
-					setTimeout(() => this.router.navigate(["/auth/login"]), 2500);
-				},
+					setTimeout(() => {
+						window.location.href = "https://clinicpix.onrender.com/auth/login";
+					  }, 2500);									  },
 				error: (err) => {
 					this.error = err.error?.message || "Reset failed.";
 					this.loading = false;
