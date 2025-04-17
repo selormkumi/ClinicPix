@@ -231,9 +231,15 @@ export class UploadedImagesComponent implements OnInit {
         if (res.uploadUrl) {
           fetch(res.uploadUrl, {
             method: "PUT",
-            body: this.pendingFile,
-            headers: { "Content-Type": fileType },
+            mode: "cors",
+            headers: new Headers({
+              "Content-Type": fileType,
+              "x-amz-server-side-encryption": "aws:kms",
+              "x-amz-server-side-encryption-aws-kms-key-id": "arn:aws:kms:us-east-2:135808935445:key/a507c38c-1440-434c-8ef0-db8f40ad7018"
+            }),
+            body: this.pendingFile
           })
+                  
             .then(() => {
               this.snackBar.open("✅ File uploaded successfully!");
               this.fetchUploadedImages();
