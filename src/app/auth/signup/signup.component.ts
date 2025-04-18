@@ -13,25 +13,12 @@ import { AuthenticationService } from "../../shared/services/authentication.serv
 })
 export class SignupComponent {
 	signupForm: FormGroup;
-	showPassword = false; // Tracks password visibility
+	showPassword = false;
+	roleTouched = false;
+	showPolicyModal = false;
 
-	// Links to the eye icons (external images)
-	eyeOpenIcon = "https://cdn-icons-png.flaticon.com/512/159/159604.png"; // Open eye
-	eyeClosedIcon = "https://cdn-icons-png.flaticon.com/512/565/565655.png"; // Closed eye
-
-	// Getter for eye icon
-	get eyeIcon() {
-		return this.showPassword ? this.eyeOpenIcon : this.eyeClosedIcon;
-	}
-
-	/**
-	 * Toggles password visibility
-	 */
-	togglePasswordVisibility() {
-		this.showPassword = !this.showPassword;
-	}
-
-	roleTouched = false; // Tracks if user tried to fill other fields without selecting a role
+	eyeOpenIcon = "https://cdn-icons-png.flaticon.com/512/159/159604.png";
+	eyeClosedIcon = "https://cdn-icons-png.flaticon.com/512/565/565655.png";
 
 	constructor(private fb: FormBuilder, private router: Router, private authService: AuthenticationService) {
 		this.signupForm = this.fb.group({
@@ -39,48 +26,55 @@ export class SignupComponent {
 			userName: ["", [Validators.required, Validators.minLength(3)]],
 			email: ["", [Validators.required, Validators.email]],
 			password: ["", [Validators.required, Validators.minLength(6)]],
+			consentGiven: [false, Validators.requiredTrue],
 		});
 	}
 
-	/**
-	 * Checks if a form field is invalid
-	 * @param field - The name of the form field
-	 */
+	get eyeIcon() {
+		return this.showPassword ? this.eyeOpenIcon : this.eyeClosedIcon;
+	}
+
+	togglePasswordVisibility() {
+		this.showPassword = !this.showPassword;
+	}
+
 	isFieldInvalid(field: string): boolean {
 		const control = this.signupForm.get(field);
 		return control ? control.invalid && (control.dirty || control.touched) : false;
 	}
 
-	/**
-	 * Handles signup by calling the backend API (No Auto-Login)
-	 */
+	onFieldFocus() {
+		if (!this.signupForm.controls["role"].value) {
+			this.roleTouched = true;
+		}
+	}
+
+	openPolicyModal() {
+		this.showPolicyModal = true;
+	}
+
+	closePolicyModal() {
+		this.showPolicyModal = false;
+	}
+
 	submitForm() {
 		if (this.signupForm.valid) {
 			const formData = this.signupForm.value;
 
-			// ✅ Call Backend Signup API
 			this.authService.signup(formData).subscribe(
 				(response) => {
 					alert("✅ Signup successful! Please log in to continue.");
-					this.router.navigate(["/auth/login"]); // ✅ Redirect user to login page
+					this.router.navigate(["/auth/login"]);
 				},
 				(error) => {
 					alert("❌ Signup failed: " + (error.error.message || "Please try again."));
 				}
 			);
 		} else {
-			// Mark all fields as touched to show validation error
+			// Mark all fields as touched
 			Object.values(this.signupForm.controls).forEach((control) => control.markAsTouched());
-			console.log("⚠️ Form is incomplete. Please fill all required fields.");
-		}
-	}
-
-	/**
-	 * Checks if role is selected when another field is focused
-	 */
-	onFieldFocus() {
-		if (!this.signupForm.controls["role"].value) {
-			this.roleTouched = true; // Show error message under role
+			this.roleTouched = !this.signupForm.get("role")?.value;
+			console.log("⚠️ Form is incomplete. Please fill all required fields and agree to the policy.");
 		}
 	}
 }

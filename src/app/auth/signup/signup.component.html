@@ -1,96 +1,193 @@
 <!-- Header -->
 <div class="header text-center">
 	<h1>ClinicPix</h1>
-  </div>
-  
-  <!-- Signup Section -->
-  <div class="container">
+</div>
+
+<!-- Signup Section -->
+<div class="container">
 	<div class="card login-card">
-	  <h2 class="text-center">Sign Up</h2>
-  
-	  <form [formGroup]="signupForm" (ngSubmit)="submitForm()">
-		<!-- Role Selection -->
-		<div class="form-group">
-		  <label for="role">Role</label>
-		  <select id="role" formControlName="role" class="form-control" required>
-			<option value="">Select your role</option>
-			<option value="patient">Patient</option>
-			<option value="provider">Healthcare Provider</option>
-		  </select>
-		  <p class="error" *ngIf="roleTouched">⚠️ Please select a role.</p>
+		<h2 class="text-center">Sign Up</h2>
+
+		<form [formGroup]="signupForm" (ngSubmit)="submitForm()" ngModelOptions="{ standalone: true }">
+			<!-- Role Selection -->
+			<div class="form-group">
+				<label for="role">Role</label>
+				<select id="role" formControlName="role" class="form-control" required>
+					<option value="">Select your role</option>
+					<option value="patient">Patient</option>
+					<option value="provider">Healthcare Provider</option>
+				</select>
+				<p class="error" *ngIf="roleTouched">⚠️ Please select a role.</p>
+			</div>
+
+			<!-- Full Name -->
+			<div class="form-group mt-2">
+				<label for="userName">User Name</label>
+				<input type="text" id="userName" formControlName="userName" placeholder="Enter your user name" class="form-control" (focus)="onFieldFocus()" required />
+				<p class="error" *ngIf="isFieldInvalid('userName')">⚠️ Full name is required.</p>
+			</div>
+
+			<!-- Email -->
+			<div class="form-group mt-2">
+				<label for="email">Email</label>
+				<input type="email" id="email" formControlName="email" placeholder="Enter your email" class="form-control" (focus)="onFieldFocus()" required />
+				<p class="error" *ngIf="isFieldInvalid('email')">⚠️ Enter a valid email address.</p>
+			</div>
+
+			<!-- Password -->
+			<div class="form-group password-field mt-2">
+				<label for="password">Password</label>
+				<div class="password-container">
+					<input [type]="showPassword ? 'text' : 'password'" id="password" formControlName="password" class="form-control" placeholder="Create a strong password" (focus)="onFieldFocus()" required />
+					<img [src]="eyeIcon" alt="Toggle Password Visibility" class="toggle-password-icon" (click)="togglePasswordVisibility()" />
+				</div>
+				<p class="error" *ngIf="isFieldInvalid('password')">⚠️ Password is required (at least 6 characters).</p>
+			</div>
+
+			<!-- Privacy Policy Consent -->
+			<div class="form-check mt-3">
+				<input
+				  type="checkbox"
+				  id="consentCheckbox"
+				  class="form-check-input"
+				  formControlName="consentGiven"
+				  required />
+			  
+				<label class="form-check-label" for="consentCheckbox">
+				  I agree to the
+				  <a href="#" (click)="openPolicyModal(); $event.preventDefault()">ClinicPix Privacy and Data Use Policy</a>.
+				</label>
+			  
+				<p class="error" *ngIf="signupForm.get('consentGiven')?.touched && !signupForm.get('consentGiven')?.value">
+				  ⚠️ You must agree to the Privacy Policy to continue.
+				</p>
+			  </div>			  
+
+			<!-- Submit Button -->
+			<button
+			type="submit"
+			[disabled]="signupForm.invalid"
+			class="btn btn-primary w-100 mt-3">
+			Sign Up
+		  </button>
+				  </form>
+
+		<!-- Already have an account -->
+		<div class="text-center mt-4">
+			<p>Already have an account? <a routerLink="/auth/login" class="link">Login</a></p>
 		</div>
-  
-		<!-- Full Name -->
-		<div class="form-group mt-2">
-		  <label for="userName">User Name</label>
-		  <input
-			type="text"
-			id="userName"
-			formControlName="userName"
-			placeholder="Enter your user name"
-			class="form-control"
-			(focus)="onFieldFocus()"
-			required />
-		  <p class="error" *ngIf="isFieldInvalid('userName')">
-			⚠️ Full name is required.
-		  </p>
-		</div>
-  
-		<!-- Email -->
-		<div class="form-group mt-2">
-		  <label for="email">Email</label>
-		  <input
-			type="email"
-			id="email"
-			formControlName="email"
-			placeholder="Enter your email"
-			class="form-control"
-			(focus)="onFieldFocus()"
-			required />
-		  <p class="error" *ngIf="isFieldInvalid('email')">
-			⚠️ Enter a valid email address.
-		  </p>
-		</div>
-  
-		<!-- Password -->
-		<div class="form-group password-field mt-2">
-		  <label for="password">Password</label>
-		  <div class="password-container">
-			<input
-			  [type]="showPassword ? 'text' : 'password'"
-			  id="password"
-			  formControlName="password"
-			  class="form-control"
-			  placeholder="Create a strong password"
-			  (focus)="onFieldFocus()"
-			  required />
-			<img
-			  [src]="eyeIcon"
-			  alt="Toggle Password Visibility"
-			  class="toggle-password-icon"
-			  (click)="togglePasswordVisibility()" />
-		  </div>
-		  <p class="error" *ngIf="isFieldInvalid('password')">
-			⚠️ Password is required (at least 6 characters).
-		  </p>
-		</div>
-  
-		<!-- Submit Button -->
-		<button type="submit" [disabled]="signupForm.invalid" class="btn btn-primary w-100 mt-3">
-		  Sign Up
-		</button>
-	  </form>
-  
-	  <!-- Already have an account -->
-	  <div class="text-center mt-4">
-		<p>Already have an account?
-		  <a routerLink="/auth/login" class="link">Login</a>
-		</p>
-	  </div>
 	</div>
-  </div>
-  
-  <!-- Footer -->
-  <div class="footer text-center mt-4">
+</div>
+
+<!-- Privacy Policy Modal (using image-modal layout style) -->
+<div class="modal-overlay" *ngIf="showPolicyModal">
+	<div class="modal-content">
+		<h2>ClinicPix Privacy and Data Use Policy</h2>
+
+		<div class="modal-body" style="max-height: 500px; overflow-y: auto; font-size: 14px; line-height: 1.6;">
+			<p><strong>Effective Date:</strong> 18 April 2025</p>
+	
+			<p><strong>1. Overview</strong><br>
+			ClinicPix is a secure medical image-sharing platform designed to facilitate safe communication between healthcare providers and patients. This Policy outlines how we collect, use, store, and protect sensitive health information, in accordance with HIPAA and other applicable privacy laws.</p>
+	
+			<p><strong>2. Data Collection and Use</strong><br>
+			ClinicPix collects and processes the following categories of data:</p>
+			<ul>
+			  <li>Patient Information: Name, email, phone number, date of birth, and medical image access history</li>
+			  <li>Provider Information: Name, email, role, associated patient assignments</li>
+			  <li>Medical Images: X-rays, scans, or other health-related imagery uploaded by authorized providers</li>
+			  <li>Audit Logs: Timestamps of access, uploads, deletions, profile updates, and sharing activity</li>
+			</ul>
+			<p>This data is used strictly to support clinical collaboration and patient care.</p>
+	
+			<p><strong>3. Patient Consent and Authorization</strong><br>
+			By creating an account on ClinicPix, patients acknowledge and agree that their assigned healthcare providers may share medical images with them through the platform for clinical and treatment purposes.</p>
+			<ul>
+			  <li>This consent is inferred at the time of signup by accepting this Policy.</li>
+			  <li>Patients may view and download only the images explicitly shared with them by their assigned provider.</li>
+			  <li>Patients may revoke access or request account deletion at any time by contacting the ClinicPix Privacy Officer.</li>
+			</ul>
+	
+			<p><strong>4. Provider-Specific Responsibilities</strong><br>
+			Healthcare providers using ClinicPix are additionally responsible for:</p>
+			<ul>
+			  <li>Handling patient information with discretion, especially in shared environments or on mobile devices</li>
+			  <li>Not downloading or storing PHI locally unless required for immediate care and properly secured</li>
+			  <li>Avoiding sharing screenshots or printed copies of patient data unless explicitly authorized by the patient</li>
+			  <li>Ensuring devices used to access ClinicPix are secured with passcodes and up-to-date security software</li>
+			  <li>Not reassigning or unassigning patients without proper documentation or patient awareness</li>
+			</ul>
+			<p>Failure to adhere to these responsibilities may result in suspension or removal from the platform.</p>
+	
+			<p><strong>5. Access Control</strong><br>
+			Role-based access control (RBAC) is strictly enforced:</p>
+			<ul>
+			  <li>Providers may only access the information and images of their assigned patients</li>
+			  <li>Patients may only view/download their own shared images</li>
+			  <li>Admins can manage user accounts but do not have access to patient health data or images</li>
+			</ul>
+	
+			<p><strong>6. Data Security</strong><br>
+			ClinicPix implements the following security measures:</p>
+			<ul>
+			  <li><strong>Encryption in Transit and at Rest:</strong> HTTPS is enforced for all data transmission; AWS S3 objects are encrypted using SSE-KMS</li>
+			  <li><strong>IAM Roles:</strong> EC2 instances run with strict IAM role permissions; root AWS access is disabled for production systems</li>
+			  <li><strong>Authentication:</strong> Passwords are hashed using bcrypt; multi-factor OTP login is required for account access</li>
+			  <li><strong>Secure Communication:</strong> PHI is transmitted only over secure HTTPS; no email-based image sharing unless HIPAA-compliant</li>
+			</ul>
+	
+			<p><strong>7. Device and Physical Security</strong></p>
+			<ul>
+			  <li>Devices should be password-protected or biometrically secured</li>
+			  <li>Users must avoid storing patient information locally unless encrypted and required for immediate care</li>
+			  <li>Public/shared devices should only be used through secure, time-limited sessions</li>
+			  <li>Users must log out after use on shared machines</li>
+			</ul>
+	
+			<p><strong>8. Audit Trails</strong><br>
+			ClinicPix logs all critical activity, including:</p>
+			<ul>
+			  <li>Login attempts and OTP verification</li>
+			  <li>File uploads, deletions, sharing, and views</li>
+			  <li>Profile and password changes</li>
+			  <li>Patient assignments</li>
+			</ul>
+			<p>Audit logs are stored securely and retained for forensic and compliance purposes.</p>
+	
+			<p><strong>9. Data Retention and Disposal</strong><br>
+			Medical image and audit log data is retained for six years, in compliance with HIPAA. Upon account deletion or expiration, all PHI is securely deleted from AWS storage and backups.</p>
+	
+			<p><strong>10. Hosting Infrastructure and BAA Coverage</strong></p>
+			<ul>
+			  <li>Amazon Web Services (AWS): Backend, EC2, S3, and database hosting. A formal BAA with AWS will be executed if ClinicPix moves into production.</li>
+			  <li>Render: Only used for static frontend hosting. Render does not process or store PHI.</li>
+			</ul>
+	
+			<p><strong>11. De-identification for Research Use</strong><br>
+			All PII is removed from metadata and filenames before images are used for research or demonstration. De-identified images are not linked to patient profiles.</p>
+	
+			<p><strong>12. User Responsibilities</strong></p>
+			<ul>
+			  <li>Use ClinicPix only for lawful and authorized purposes</li>
+			  <li>Do not attempt to access data beyond your role</li>
+			  <li>Report any suspected breach or misuse immediately</li>
+			</ul>
+	
+			<p><strong>13. Policy Updates</strong><br>
+			ClinicPix may update this Policy periodically. Users will be notified of material changes, and continued use indicates acceptance.</p>
+	
+			<p><strong>14. Contact</strong><br>
+			ClinicPix Privacy Officer<br>
+			Email: clinicpix.system&#64;gmail.com</p>
+		  </div>  
+
+		<div class="modal-buttons" style="text-align: right; margin-top: 1rem;">
+			<button class="btn btn-secondary" (click)="closePolicyModal()">Close</button>
+		</div>
+	</div>
+</div>
+
+<!-- Footer -->
+<div class="footer text-center mt-4">
 	<p>&copy; 2025 Secure Medical Image Sharing Platform</p>
-  </div>  
+</div>
