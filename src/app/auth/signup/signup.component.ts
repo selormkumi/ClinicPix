@@ -25,7 +25,17 @@ export class SignupComponent {
 			role: ["", Validators.required],
 			userName: ["", [Validators.required, Validators.minLength(3)]],
 			email: ["", [Validators.required, Validators.email]],
-			password: ["", [Validators.required, Validators.minLength(6)]],
+			password: [
+				"",
+				[
+				  Validators.required,
+				  Validators.minLength(8),
+				  Validators.pattern(
+					/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]).{8,}$/
+				  ),
+				],
+			  ],
+			  
 			consentGiven: [false, Validators.requiredTrue],
 		});
 	}

@@ -41,7 +41,7 @@
 					<input [type]="showPassword ? 'text' : 'password'" id="password" formControlName="password" class="form-control" placeholder="Create a strong password" (focus)="onFieldFocus()" required />
 					<img [src]="eyeIcon" alt="Toggle Password Visibility" class="toggle-password-icon" (click)="togglePasswordVisibility()" />
 				</div>
-				<p class="error" *ngIf="isFieldInvalid('password')">⚠️ Password is required (at least 6 characters).</p>
+				<p class="error" *ngIf="isFieldInvalid('password')">⚠️ Password must be at least 8 characters and include uppercase, lowercase, number, and special character.</p>
 			</div>
 
 			<!-- Privacy Policy Consent -->
@@ -53,7 +53,7 @@
 				  formControlName="consentGiven"
 				  required />
 			  
-				<label class="form-check-label" for="consentCheckbox">
+				<label class="form-check-label small" for="consentCheckbox">
 				  I agree to the
 				  <a href="#" (click)="openPolicyModal(); $event.preventDefault()">ClinicPix Privacy and Data Use Policy</a>.
 				</label>
@@ -112,7 +112,7 @@
 			Healthcare providers using ClinicPix are additionally responsible for:</p>
 			<ul>
 			  <li>Handling patient information with discretion, especially in shared environments or on mobile devices</li>
-			  <li>Not downloading or storing PHI locally unless required for immediate care and properly secured</li>
+			  <li>Not downloading or storing protected health information (PHI) locally unless required for immediate care and properly secured</li>
 			  <li>Avoiding sharing screenshots or printed copies of patient data unless explicitly authorized by the patient</li>
 			  <li>Ensuring devices used to access ClinicPix are secured with passcodes and up-to-date security software</li>
 			  <li>Not reassigning or unassigning patients without proper documentation or patient awareness</li>
@@ -144,15 +144,16 @@
 			  <li>Users must log out after use on shared machines</li>
 			</ul>
 	
-			<p><strong>8. Audit Trails</strong><br>
-			ClinicPix logs all critical activity, including:</p>
-			<ul>
-			  <li>Login attempts and OTP verification</li>
-			  <li>File uploads, deletions, sharing, and views</li>
-			  <li>Profile and password changes</li>
-			  <li>Patient assignments</li>
-			</ul>
-			<p>Audit logs are stored securely and retained for forensic and compliance purposes.</p>
+			<p><strong>8. Audit Trails and Data Masking</strong><br>
+				ClinicPix implements role-based masking of personally identifiable information (PII) and PHI to reduce unnecessary exposure:</p>
+				<ul>
+				  <li>Only administrators can access audit logs and user management features.</li>
+				  <li>Audit logs contain full user identifiers (e.g., email, name, user ID) for traceability and compliance purposes.</li>
+				  <li>This information is securely stored and not exposed to unauthorized users.</li>
+				  <li>Patient and provider data are masked or minimized in all views unless required for operational or security-related reasons.</li>
+				  <li>Audit log access is role-restricted, logged, and retained for a period of six (6) years in compliance with HIPAA.
+				</li>
+				</ul>
 	
 			<p><strong>9. Data Retention and Disposal</strong><br>
 			Medical image and audit log data is retained for six years, in compliance with HIPAA. Upon account deletion or expiration, all PHI is securely deleted from AWS storage and backups.</p>

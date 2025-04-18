@@ -25,6 +25,19 @@ export class ResetPasswordComponent implements OnInit {
 	message = "";
 	error = "";
 
+	// 👁️ Password visibility state and icons
+	showPassword = false;
+	eyeOpenIcon = "https://cdn-icons-png.flaticon.com/512/159/159604.png";
+	eyeClosedIcon = "https://cdn-icons-png.flaticon.com/512/565/565655.png";
+
+	get eyeIcon() {
+		return this.showPassword ? this.eyeOpenIcon : this.eyeClosedIcon;
+	}
+
+	togglePasswordVisibility() {
+		this.showPassword = !this.showPassword;
+	}
+
 	constructor(
 		private route: ActivatedRoute,
 		private fb: FormBuilder,
@@ -32,7 +45,16 @@ export class ResetPasswordComponent implements OnInit {
 		private router: Router
 	) {
 		this.form = this.fb.group({
-			newPassword: ["", [Validators.required, Validators.minLength(6)]],
+			newPassword: [
+				"",
+				[
+					Validators.required,
+					Validators.minLength(8),
+					Validators.pattern(
+						/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]).{8,}$/
+					),
+				],
+			],
 		});
 	}
 
@@ -61,8 +83,8 @@ export class ResetPasswordComponent implements OnInit {
 					this.loading = false;
 					setTimeout(() => {
 						window.location.href = "https://clinicpix.onrender.com/auth/login";
-					  }, 2500);									  
-					},
+					}, 2500);
+				},
 				error: (err) => {
 					this.error = err.error?.message || "Reset failed.";
 					this.loading = false;

@@ -25,6 +25,9 @@ export class ManageUsersComponent implements OnInit {
   userToReset: any = null;
   userToToggle: any = null;
 
+  // 👁️ Track which email rows are visible
+  visibleEmailRows: Set<number> = new Set<number>();
+
   constructor(
     private authService: AuthenticationService,
     private router: Router,
@@ -68,13 +71,13 @@ export class ManageUsersComponent implements OnInit {
     this.router.navigate(["/auth/login"]);
   }
 
-  // ✅ Step 1: Show modal before toggling status
+  // ✅ Show confirm modal before toggling active status
   toggleUserStatus(user: any) {
     this.userToToggle = user;
     this.showStatusModal = true;
   }
 
-  // ✅ Step 2: Confirm toggle
+  // ✅ Confirm toggle status
   confirmToggleStatus() {
     if (!this.userToToggle) return;
 
@@ -136,5 +139,24 @@ export class ManageUsersComponent implements OnInit {
   cancelReset() {
     this.showResetModal = false;
     this.userToReset = null;
+  }
+
+  // ✅ Per-row email masking
+  toggleEmailVisibility(userId: number): void {
+    if (this.visibleEmailRows.has(userId)) {
+      this.visibleEmailRows.delete(userId);
+    } else {
+      this.visibleEmailRows.add(userId);
+    }
+  }
+
+  isEmailVisible(userId: number): boolean {
+    return this.visibleEmailRows.has(userId);
+  }
+
+  maskEmail(email: string): string {
+    if (!email) return "N/A";
+    const [user, domain] = email.split("@");
+    return user[0] + "***@" + domain;
   }
 }

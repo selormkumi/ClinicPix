@@ -83,7 +83,7 @@ exports.login = async (req, res) => {
 			await logAudit({
 			  userId: user.id,
 			  action: "login_blocked",
-			  details: `Login attempt blocked for deactivated user ${email}`,
+			  details: `Login attempt blocked for deactivated user ID ${user.id}`,
 			  req,
 			});
 		  
@@ -126,7 +126,7 @@ exports.login = async (req, res) => {
 		await logAudit({
 			userId: user.id,
 			action: "login_attempt",
-			details: `OTP sent to ${email}`,
+			details: `OTP sent to user ID ${user.id}`,
 			req: req,
 		});
 
@@ -167,7 +167,7 @@ exports.verifyOTP = async (req, res) => {
 			await logAudit({
 				userId: id,
 				action: "OTP_FAILURE",
-				details: `Invalid OTP attempt for ${email}`,
+				details: `Invalid OTP attempt for user ID ${id}`,
 				req,
 			});
 			return res.status(400).json({ message: "Invalid OTP. Please try again." });
@@ -177,7 +177,7 @@ exports.verifyOTP = async (req, res) => {
 			await logAudit({
 				userId: id,
 				action: "OTP_EXPIRED",
-				details: `Expired OTP for ${email}`,
+				details: `Expired OTP for user ID ${id}`,
 				req,
 			});
 			return res.status(400).json({ message: "OTP expired. Request a new one." });
@@ -200,14 +200,14 @@ exports.verifyOTP = async (req, res) => {
 		await logAudit({
 		  userId: id,
 		  action: "otp_verified",
-		  details: `OTP verified for ${email}`,
+		  details: `OTP verified for user ID ${id}`,
 		  req,
 		});
 		
 		await logAudit({
 			userId: id,
 			action: "login_success",
-			details: `Login successful for ${email}`,
+			details: `Login successful for user ID ${id}`,
 			req,
 		});
 
@@ -262,7 +262,7 @@ exports.logout = async (req, res) => {
 		await logAudit({
 			userId,
 			action: "logout_success",
-			details: `Logout successful for ${email || "unknown"}`,
+			details: `Logout successful for user ID ${userId || "unknown"}`,
 			req,
 		});
 
@@ -316,7 +316,7 @@ exports.requestPasswordReset = async (req, res) => {
 	  await logAudit({
 		userId,
 		action: "reset_request_sent",
-		details: `Reset email sent to ${email}`,
+		details: `Reset email sent to user ID ${userId}`,
 		req,
 	  });
   
@@ -364,7 +364,7 @@ exports.requestPasswordReset = async (req, res) => {
 	  await logAudit({
 		userId: user.id,
 		action: "password_reset_success",
-		details: `Password reset for ${email}`,
+		details: `Password reset for user ID ${user.id}`,
 		req,
 	  });
   
@@ -417,7 +417,7 @@ exports.requestPasswordReset = async (req, res) => {
 	  await logAudit({
 		userId,
 		action: "admin_reset_initiated",
-		details: `Admin triggered password reset for ${targetEmail}`,
+		details: `Admin triggered password reset for user ID ${userId}`,
 		req,
 	  });
   

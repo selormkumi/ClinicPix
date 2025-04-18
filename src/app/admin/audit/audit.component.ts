@@ -20,6 +20,9 @@ export class AuditComponent implements OnInit {
   filteredLogs: any[] = [];
   isLoading: boolean = false;
 
+  // 👁️ Track which user emails are visible (per-row masking)
+  visibleEmailRows: Set<number> = new Set<number>();
+
   constructor(
     private authService: AuthenticationService,
     private router: Router,
@@ -38,7 +41,6 @@ export class AuditComponent implements OnInit {
       next: (res) => {
         this.auditLogs = res.map((log) => ({
           ...log,
-          // ✅ Convert raw UTC to local time using moment-timezone
           created_at_local: moment.utc(log.created_at).local().format("MMM D YYYY, hh:mm:ss A")
         }));
 
@@ -63,6 +65,25 @@ export class AuditComponent implements OnInit {
       (log.user_username && log.user_username.toLowerCase().includes(query)) ||
       String(log.user_id).includes(query)
     );
+  }
+
+  // ✅ Toggle email visibility per user row
+  toggleEmailVisibility(userId: number): void {
+    if (this.visibleEmailRows.has(userId)) {
+      this.visibleEmailRows.delete(userId);
+    } else {
+      this.visibleEmailRows.add(userId);
+    }
+  }
+
+  isEmailVisible(userId: number): boolean {
+    return this.visibleEmailRows.has(userId);
+  }
+
+  maskEmail(email: string): string {
+    if (!email) return "N/A";
+    const [user, domain] = email.split("@");
+    return user[0] + "***@" + domain;
   }
 
   // ✅ Logout

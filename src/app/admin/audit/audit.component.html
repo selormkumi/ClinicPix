@@ -49,7 +49,17 @@
 							<td>{{ log.action }}</td>
 							<td>{{ log.user_id || 'N/A' }}</td>
 							<td>{{ log.user_username || 'N/A' }}</td>
-							<td>{{ log.user_email || 'N/A' }}</td>
+							<td>
+								<span>
+									{{ isEmailVisible(log.user_id) ? log.user_email : maskEmail(log.user_email) }}
+								</span>
+								<button
+									type="button"
+									class="btn btn-sm btn-link p-0 ms-2"
+									(click)="toggleEmailVisibility(log.user_id)">
+									{{ isEmailVisible(log.user_id) ? 'Hide' : 'Show' }}
+								</button>
+							</td>
 							<td>{{ log.user_role || 'N/A' }}</td>
 							<td>{{ log.created_at_local }}</td>
 							<td style="white-space: normal; word-break: break-word;">{{ log.details }}</td>
