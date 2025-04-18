@@ -28,6 +28,7 @@
     "aws-amplify": "^6.13.4",
     "aws-sdk": "^2.1692.0",
     "bcryptjs": "^3.0.2",
+    "bootstrap": "^5.3.5",
     "cors": "^2.8.5",
     "country-state-city": "^3.2.1",
     "dotenv": "^16.4.7",
