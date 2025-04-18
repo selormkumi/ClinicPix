@@ -1,6 +1,13 @@
-import { Component, ViewChild, ElementRef, OnInit } from "@angular/core";
+import {
+	Component,
+	ViewChild,
+	ElementRef,
+	OnInit,
+	Inject,
+	PLATFORM_ID,
+} from "@angular/core";
 import { Router, RouterModule } from "@angular/router";
-import { CommonModule } from "@angular/common";
+import { CommonModule, isPlatformBrowser } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { AuthenticationService } from "../../shared/services/authentication.service";
 import { ImageModalComponent } from "../../shared/image-modal/image-modal.component";
@@ -48,11 +55,7 @@ export class UploadedImagesComponent implements OnInit {
 		private s3Service: S3FileService,
 		private snackBar: MatSnackBar,
 		@Inject(PLATFORM_ID) private platformId: Object
-	) {
-		this.form = this.fb.group({
-			image: [null],
-		});
-	}
+	) {}
 
 	ngOnInit() {
 		const currentUser = localStorage.getItem("user");
@@ -64,7 +67,7 @@ export class UploadedImagesComponent implements OnInit {
 
 		this.fetchUploadedImages();
 		this.loadAssignedPatients();
-		this.tensorflow();
+		this.tensorflow(); // Load the TensorFlow model
 	}
 
 	async tensorflow() {
@@ -246,25 +249,51 @@ export class UploadedImagesComponent implements OnInit {
 		this.imageToDelete = null;
 	}
 
-	verifyUpload() {
-		const fileType = this.pendingFile.value;
+	async verifyUpload() {
+		const file = this.pendingFile;
+
 		if (!file || !this.model) return;
 
-		const imageElement = await this.loadImage(file);
-		const processedImage = this.preprocessImage(imageElement);
+		this.isLoading = true;
 
-		const predictions = await this.model.predict(processedImage);
-		console.log(predictions);
-		if (predictions instanceof tf.Tensor) {
-			const predictionData = await predictions.data();
-			// const classIndex = predictions.argMax(1).dataSync()[0];
-			// console.log('Predicted class index:', classIndex);
-			this.predictions = Array.from(predictionData);
-		} else {
-			console.error("Prediction result is not a Tensor.");
+		try {
+			const imageElement = await this.loadImage(file);
+			const processedImage = this.preprocessImage(imageElement);
+
+			const predictions = (await this.model.predict(
+				processedImage
+			)) as tf.Tensor;
+
+			if (predictions instanceof tf.Tensor) {
+				const predictionData = await predictions.data();
+				this.predictions = Array.from(predictionData);
+				// console.log("Predictions:", this.predictions);
+
+				// Binary classification result interpretation
+				const predictionValue = this.predictions[0]; // assuming 1 output node
+				const resultMessage = predictionValue > 0.5 ? "No" : "Yes";
+				// console.log(
+				// 	"Prediction Value:",
+				// 	predictionValue,
+				// 	"→ Result:",
+				// 	resultMessage
+				// );
+
+				this.snackBar.open(`Is this a Medical Image?: ${resultMessage}`);
+				// console.log("Predictions:", this.predictions[0]);
+				// this.snackBar.open("✅ Verification complete.");
+			} else {
+				// console.error("Prediction result is not a Tensor.");
+				this.snackBar.open("❌ Invalid prediction result.");
+			}
+		} catch (error) {
+			// console.error("❌ Error during verification:", error);
+			this.snackBar.open("Verification failed. Try again.");
+		} finally {
+			this.isLoading = false;
 		}
-		console.log(this.predictions);
 	}
+
 	loadImage(file: File): Promise<HTMLImageElement> {
 		return new Promise((resolve, reject) => {
 			const reader = new FileReader();
