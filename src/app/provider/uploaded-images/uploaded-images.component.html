@@ -19,39 +19,55 @@
 				<!-- Drag & Drop Zone -->
 				<div
 					class="drop-zone border p-4 mb-4 rounded text-center"
-					[ngClass]="{ 'dragging': isDragging }"
+					[ngClass]="{ dragging: isDragging }"
 					(dragover)="handleDragOver($event)"
 					(dragleave)="handleDragLeave()"
 					(drop)="handleDrop($event)">
-					
 					<i class="fas fa-cloud-upload-alt fa-2x text-primary mb-2"></i>
-					<p *ngIf="!pendingFile" class="mb-2"><strong>Drag & drop an image file here</strong></p>
-					<p *ngIf="pendingFile" class="mb-2"><strong>Selected: {{ pendingFile.name }}</strong></p>
-					
-					<button class="btn btn-success btn-sm mt-2" (click)="triggerFileInput()">Select File</button>
-					<input type="file"
+					<p *ngIf="!pendingFile" class="mb-2">
+						<strong>Drag & drop an image file here</strong>
+					</p>
+					<p *ngIf="pendingFile" class="mb-2">
+						<strong>Selected: {{ pendingFile.name }}</strong>
+					</p>
+
+					<button
+						class="btn btn-success btn-sm mt-2"
+						(click)="triggerFileInput()">
+						Select File
+					</button>
+					<input
+						type="file"
 						#fileInput
 						accept=".jpeg,.jpg,.png,.pdf"
 						(change)="uploadImage($event)"
-						style="display: none"
-					/>
+						style="display: none" />
 				</div>
 
 				<!-- Upload Controls -->
-				<div class="upload-controls d-flex align-items-center gap-3 mb-4 flex-wrap">
-					<span class="me-2"><strong>File Name:</strong> {{ pendingFile?.name || "No file selected" }}</span>
+				<div
+					class="upload-controls d-flex align-items-center gap-3 mb-4 flex-wrap">
+					<span class="me-2"
+						><strong>File Name:</strong>
+						{{ pendingFile?.name || "No file selected" }}</span
+					>
 					<input
 						type="text"
 						[(ngModel)]="newFileTags"
 						placeholder="Enter tag(s)"
 						class="form-control form-control-sm w-auto"
-						style="min-width: 200px"
-					/>
+						style="min-width: 200px" />
 					<button
 						class="btn btn-primary btn-sm"
 						(click)="confirmUpload()"
 						[disabled]="!pendingFile">
 						<i class="fas fa-upload"></i> Upload
+					</button>
+					<button
+						class="btn btn-primary btn-sm"
+						(click)="verifyUpload()"
+						[disabled]="!pendingFile">
+						<i class="fas fa-check-circle"></i> Verify Upload
 					</button>
 				</div>
 
@@ -70,49 +86,83 @@
 						<tbody>
 							<tr *ngFor="let image of uploadedImages">
 								<td>{{ image.name }}</td>
-								<td>{{ image.uploadedBy }} <span *ngIf="image.uploaderEmail">({{ image.uploaderEmail }})</span></td>
-								<td>{{ image.uploadedOn | date: 'MMM d y, hh:mm:ss a':'America/New_York' }}</td>
+								<td>
+									{{ image.uploadedBy }}
+									<span *ngIf="image.uploaderEmail"
+										>({{ image.uploaderEmail }})</span
+									>
+								</td>
+								<td>
+									{{
+										image.uploadedOn
+											| date : "MMM d y, hh:mm:ss a" : "America/New_York"
+									}}
+								</td>
 								<td>
 									<span *ngIf="image.tags.length > 0; else noTags">
-										<span *ngFor="let tag of image.tags" class="me-1">{{ tag }}</span>
+										<span *ngFor="let tag of image.tags" class="me-1">{{
+											tag
+										}}</span>
 									</span>
 									<ng-template #noTags>No tags</ng-template>
 								</td>
 								<td>
-									<div class="d-flex justify-content-center align-items-center flex-wrap gap-1">
-										<button class="btn btn-primary btn-sm" style="font-size: 0.87rem; padding: 2px 8px;" (click)="viewImage(image.name)">
+									<div
+										class="d-flex justify-content-center align-items-center flex-wrap gap-1">
+										<button
+											class="btn btn-primary btn-sm"
+											style="font-size: 0.87rem; padding: 2px 8px"
+											(click)="viewImage(image.name)">
 											<i class="fas fa-eye"></i> View
 										</button>
-										<button class="btn btn-warning btn-sm" style="font-size: 0.87rem; padding: 2px 8px;" (click)="toggleShareDropdown(image)">
+										<button
+											class="btn btn-warning btn-sm"
+											style="font-size: 0.87rem; padding: 2px 8px"
+											(click)="toggleShareDropdown(image)">
 											<i class="fas fa-share-alt"></i> Share
 										</button>
-										<button class="btn btn-danger btn-sm" style="font-size: 0.87rem; padding: 2px 8px;" (click)="deleteImage(image)">
+										<button
+											class="btn btn-danger btn-sm"
+											style="font-size: 0.87rem; padding: 2px 8px"
+											(click)="deleteImage(image)">
 											<i class="fas fa-trash"></i> Delete
 										</button>
 									</div>
 
 									<!-- Share Dropdown -->
-									<div *ngIf="image.showDropdown" class="d-flex flex-wrap gap-2 mt-2">
+									<div
+										*ngIf="image.showDropdown"
+										class="d-flex flex-wrap gap-2 mt-2">
 										<select
 											class="form-select form-select-sm"
 											style="min-width: 200px"
 											[(ngModel)]="selectedPatientEmail">
-											<option value="" disabled selected>Select patient email</option>
-											<option *ngFor="let p of assignedPatients" [value]="p.email">
+											<option value="" disabled selected>
+												Select patient email
+											</option>
+											<option
+												*ngFor="let p of assignedPatients"
+												[value]="p.email">
 												{{ p.username }} ({{ p.email }})
 											</option>
 										</select>
-										<button class="btn btn-success btn-sm" (click)="shareImageToPatient(image)">
+										<button
+											class="btn btn-success btn-sm"
+											(click)="shareImageToPatient(image)">
 											<i class="fas fa-paper-plane"></i> Share
 										</button>
-										<button class="btn btn-secondary btn-sm" (click)="image.showDropdown = false">
+										<button
+											class="btn btn-secondary btn-sm"
+											(click)="image.showDropdown = false">
 											Cancel
 										</button>
 									</div>
 								</td>
 							</tr>
 							<tr *ngIf="uploadedImages.length === 0">
-								<td colspan="5" class="text-center text-muted">No uploaded images found.</td>
+								<td colspan="5" class="text-center text-muted">
+									No uploaded images found.
+								</td>
 							</tr>
 						</tbody>
 					</table>
@@ -129,18 +179,22 @@
 				<!-- Delete Confirmation Modal -->
 				<div *ngIf="showDeleteModal" class="modal-overlay">
 					<div class="modal-box">
-					<h4 class="modal-title">Delete File</h4>
-					<p class="modal-message">
-						Are you sure you want to delete <strong>{{ imageToDelete?.name }}</strong>?
-					</p>
-					<div class="modal-buttons">
-						<button class="modal-btn cancel" (click)="cancelDelete()">Cancel</button>
-						<button class="modal-btn delete" (click)="confirmDelete()">Delete</button>
-					</div>
+						<h4 class="modal-title">Delete File</h4>
+						<p class="modal-message">
+							Are you sure you want to delete
+							<strong>{{ imageToDelete?.name }}</strong
+							>?
+						</p>
+						<div class="modal-buttons">
+							<button class="modal-btn cancel" (click)="cancelDelete()">
+								Cancel
+							</button>
+							<button class="modal-btn delete" (click)="confirmDelete()">
+								Delete
+							</button>
+						</div>
 					</div>
 				</div>
-  
-
 			</div>
 		</div>
 	</div>
